@@ -371,7 +371,7 @@ Unit name2unit(std::string unit_name) {
   if (unit_name == "halfyear") return Unit::HALFYEAR;
   if (unit_name == "year") return Unit::YEAR;
   if (unit_name == "week") return Unit::WEEK;
-  Rf_error("Invalid unit_name (%s)", unit_name);
+  Rf_error("Invalid unit_name (%s)", unit_name.c_str());
 }
 
 template<typename T>

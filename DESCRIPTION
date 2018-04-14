@@ -8,7 +8,7 @@ Description: A collection of fast routines for manipulation of date-time
    month, day etc.), time-zone changes, rounding and period arithmetic. Parts of
    the 'CCTZ' source code, released under the Apache 2.0 License, are included
    in this package. See <https://github.com/google/cctz> for more details.
-Depends: R (>= 3.4)
+Depends: R (>= 3.3)
 License: GPL-3
 Encoding: UTF-8
 Imports:
