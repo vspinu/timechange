@@ -1,0 +1,9 @@
+dist: trusty
+sudo: false
+language: R
+cache: packages
+
+r:
+- oldrel
+- release
+- devel
