@@ -5,6 +5,35 @@
 
 using namespace Rcpp;
 
+// C_time_ceiling
+newDatetimeVector C_time_ceiling(const NumericVector dt, const std::string unit_name, const double nunits, const int week_start, const bool change_on_boundary);
+RcppExport SEXP _timechange_C_time_ceiling(SEXP dtSEXP, SEXP unit_nameSEXP, SEXP nunitsSEXP, SEXP week_startSEXP, SEXP change_on_boundarySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type dt(dtSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type unit_name(unit_nameSEXP);
+    Rcpp::traits::input_parameter< const double >::type nunits(nunitsSEXP);
+    Rcpp::traits::input_parameter< const int >::type week_start(week_startSEXP);
+    Rcpp::traits::input_parameter< const bool >::type change_on_boundary(change_on_boundarySEXP);
+    rcpp_result_gen = Rcpp::wrap(C_time_ceiling(dt, unit_name, nunits, week_start, change_on_boundary));
+    return rcpp_result_gen;
+END_RCPP
+}
+// C_time_floor
+newDatetimeVector C_time_floor(const NumericVector dt, const std::string unit_name, const double nunits, const int week_start);
+RcppExport SEXP _timechange_C_time_floor(SEXP dtSEXP, SEXP unit_nameSEXP, SEXP nunitsSEXP, SEXP week_startSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector >::type dt(dtSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type unit_name(unit_nameSEXP);
+    Rcpp::traits::input_parameter< const double >::type nunits(nunitsSEXP);
+    Rcpp::traits::input_parameter< const int >::type week_start(week_startSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_time_floor(dt, unit_name, nunits, week_start));
+    return rcpp_result_gen;
+END_RCPP
+}
 // C_local_tz
 Rcpp::CharacterVector C_local_tz();
 RcppExport SEXP _timechange_C_local_tz() {
@@ -80,47 +109,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// C_time_ceiling
-newDatetimeVector C_time_ceiling(const NumericVector dt, const std::string unit_name, const double nunits, const int week_start, const bool change_on_boundary);
-RcppExport SEXP _timechange_C_time_ceiling(SEXP dtSEXP, SEXP unit_nameSEXP, SEXP nunitsSEXP, SEXP week_startSEXP, SEXP change_on_boundarySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector >::type dt(dtSEXP);
-    Rcpp::traits::input_parameter< const std::string >::type unit_name(unit_nameSEXP);
-    Rcpp::traits::input_parameter< const double >::type nunits(nunitsSEXP);
-    Rcpp::traits::input_parameter< const int >::type week_start(week_startSEXP);
-    Rcpp::traits::input_parameter< const bool >::type change_on_boundary(change_on_boundarySEXP);
-    rcpp_result_gen = Rcpp::wrap(C_time_ceiling(dt, unit_name, nunits, week_start, change_on_boundary));
-    return rcpp_result_gen;
-END_RCPP
-}
-// C_time_floor
-newDatetimeVector C_time_floor(const NumericVector dt, const std::string unit_name, const double nunits, const int week_start);
-RcppExport SEXP _timechange_C_time_floor(SEXP dtSEXP, SEXP unit_nameSEXP, SEXP nunitsSEXP, SEXP week_startSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector >::type dt(dtSEXP);
-    Rcpp::traits::input_parameter< const std::string >::type unit_name(unit_nameSEXP);
-    Rcpp::traits::input_parameter< const double >::type nunits(nunitsSEXP);
-    Rcpp::traits::input_parameter< const int >::type week_start(week_startSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_time_floor(dt, unit_name, nunits, week_start));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 RcppExport SEXP C_parse_period(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_timechange_C_time_ceiling", (DL_FUNC) &_timechange_C_time_ceiling, 5},
+    {"_timechange_C_time_floor", (DL_FUNC) &_timechange_C_time_floor, 4},
     {"_timechange_C_local_tz", (DL_FUNC) &_timechange_C_local_tz, 0},
     {"_timechange_C_valid_tz", (DL_FUNC) &_timechange_C_valid_tz, 1},
     {"_timechange_C_time_update", (DL_FUNC) &_timechange_C_time_update, 5},
     {"_timechange_C_force_tz", (DL_FUNC) &_timechange_C_force_tz, 3},
     {"_timechange_C_force_tzs", (DL_FUNC) &_timechange_C_force_tzs, 4},
     {"_timechange_C_local_clock", (DL_FUNC) &_timechange_C_local_clock, 2},
-    {"_timechange_C_time_ceiling", (DL_FUNC) &_timechange_C_time_ceiling, 5},
-    {"_timechange_C_time_floor", (DL_FUNC) &_timechange_C_time_floor, 4},
     {"C_parse_period", (DL_FUNC) &C_parse_period, 1},
     {NULL, NULL, 0}
 };
