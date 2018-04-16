@@ -1,4 +1,4 @@
-#' Round, floor and ceiling methods for date-time objects
+#' Round, floor and ceiling for date-time objects
 #'
 #' @description \pkg{timechange} provides rounding to the nearest unit or
 #'   multiple of a unit. Units can be specified flexibly as strings; all common
@@ -55,7 +55,8 @@
 #' @param unit a character string specifying a time unit or a multiple of a
 #'   unit. Valid base units are `second`, `minute`, `hour`, `day`, `week`,
 #'   `month`, `bimonth`, `quarter`, `season`, `halfyear` and `year`. Arbitrary
-#'   unique English abbreviations constructor are allowed.
+#'   unique English abbreviations constructor are allowed. With one letter
+#'   abreviations "m" stands for month and "M" stands for minute.
 #' @param change_on_boundary If NULL (the default) don't change instants on the
 #'   boundary (`time_ceiling(ymd_hms('2000-01-01 00:00:00'))` is `2000-01-01
 #'   00:00:00`), but round up `Date` objects to the next boundary
@@ -84,6 +85,7 @@
 #' time_round(x, "5M") # "M" for minute "m" for month
 #' time_round(x, "hour")
 #' time_round(x, "2 hours")
+#' time_round(x, "2h")
 #' time_round(x, "day")
 #' time_round(x, "week")
 #' time_round(x, "month")
@@ -96,9 +98,11 @@
 #' time_floor(x, ".1s")
 #' time_floor(x, "second")
 #' time_floor(x, "minute")
+#' time_floor(x, "M")
 #' time_floor(x, "hour")
 #' time_floor(x, "day")
 #' time_floor(x, "week")
+#' time_floor(x, "m")
 #' time_floor(x, "month")
 #' time_floor(x, "bimonth")
 #' time_floor(x, "quarter")
@@ -197,7 +201,7 @@ time_ceiling <- function(time, unit = "seconds",
 
 
 
-## INTERNAL ROUNDING UTILS
+## UTILS
 
 base_units <- list(second = "secs", minute = "mins", hour = "hours", day = "days")
 

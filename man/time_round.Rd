@@ -6,7 +6,7 @@
 \alias{time_floor}
 \alias{time_round}
 \alias{time_ceiling}
-\title{Round, floor and ceiling methods for date-time objects}
+\title{Round, floor and ceiling for date-time objects}
 \usage{
 time_round(time, unit = "second", week_start = getOption("week_start", 1))
 
@@ -21,7 +21,8 @@ time_ceiling(time, unit = "seconds", change_on_boundary = inherits(time,
 \item{unit}{a character string specifying a time unit or a multiple of a
 unit. Valid base units are \code{second}, \code{minute}, \code{hour}, \code{day}, \code{week},
 \code{month}, \code{bimonth}, \code{quarter}, \code{season}, \code{halfyear} and \code{year}. Arbitrary
-unique English abbreviations constructor are allowed.}
+unique English abbreviations constructor are allowed. With one letter
+abreviations "m" stands for month and "M" stands for minute.}
 
 \item{week_start}{when unit is \code{weeks} specify the reference day; 7 being
 Sunday.}
@@ -112,6 +113,7 @@ time_round(x, "5 mins")
 time_round(x, "5M") # "M" for minute "m" for month
 time_round(x, "hour")
 time_round(x, "2 hours")
+time_round(x, "2h")
 time_round(x, "day")
 time_round(x, "week")
 time_round(x, "month")
@@ -124,9 +126,11 @@ x <- as.POSIXct("2009-08-03 12:01:59.23")
 time_floor(x, ".1s")
 time_floor(x, "second")
 time_floor(x, "minute")
+time_floor(x, "M")
 time_floor(x, "hour")
 time_floor(x, "day")
 time_floor(x, "week")
+time_floor(x, "m")
 time_floor(x, "month")
 time_floor(x, "bimonth")
 time_floor(x, "quarter")

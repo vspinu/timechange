@@ -16,3 +16,42 @@ int_fast64_t floor_to_int64(double x) {
   }
   return static_cast<int_fast64_t>(x);
 }
+
+
+// Helper for conversion functions. Get seconds from civil_lookup, but relies on
+// original time pre/post time if cl_new falls in repeated interval.
+double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new lookup
+                             const cctz::time_zone& tz_orig,              // original time zone
+                             const time_point& tp_orig,                   // original time point
+                             const cctz::civil_second& cs_orig,           // original time in secs
+                             bool roll, double remainder) {
+
+  time_point tp_new;
+
+  if (cl_new.kind == cctz::time_zone::civil_lookup::UNIQUE) {
+    // UNIQUE
+    tp_new = cl_new.pre;
+  } else if (cl_new.kind == cctz::time_zone::civil_lookup::SKIPPED) {
+    // SKIPPED
+    if (roll)
+      tp_new = cl_new.trans;
+    else {
+      return NA_REAL;
+    }
+  } else {
+    // REPEATED
+    // match pre or post time of original time
+    const cctz::time_zone::civil_lookup cl_old = tz_orig.lookup(cs_orig);
+    if (tp_orig >= cl_old.trans){
+      tp_new = cl_new.post;
+    } else {
+      tp_new = cl_new.pre;
+    }
+    /* Rcpp::Rcout << cctz::format("tp:%Y-%m-%d %H:%M:%S %z", tp1, tz1) << std::endl; */
+    /* Rcpp::Rcout << cctz::format("pre:%Y-%m-%d %H:%M:%S %z", cl1.pre, tz1) << std::endl; */
+    /* Rcpp::Rcout << cctz::format("trans:%Y-%m-%d %H:%M:%S %z", cl1.trans, tz1) << std::endl; */
+    /* Rcpp::Rcout << cctz::format("post:%Y-%m-%d %H:%M:%S %z", cl1.post, tz1) << std::endl; */
+  }
+
+  return tp_new.time_since_epoch().count() + remainder;
+}

@@ -14,50 +14,12 @@
 // https://github.com/SurajGupta/r-source/blob/master/src/extra/tzone/registryTZ.c
 
 
-// Helper for conversion functions. Get seconds from civil_lookup, but relies on
-// use original time pre/post time if cl_new falls in repeated interval.
-double get_secs_from_civil_lookup(const cctz::time_zone::civil_lookup& cl_new, // new lookup
-                                  const cctz::time_zone& tz_orig,              // original time zone
-                                  const time_point& tp_orig,                   // original time point
-                                  const cctz::civil_second& cs_orig,           // original time in secs
-                                  bool roll, double remainder = 0.0) {
-
-  time_point tp_new;
-
-  if (cl_new.kind == cctz::time_zone::civil_lookup::UNIQUE) {
-    // UNIQUE
-    tp_new = cl_new.pre;
-  } else if (cl_new.kind == cctz::time_zone::civil_lookup::SKIPPED) {
-    // SKIPPED
-    if (roll)
-      tp_new = cl_new.trans;
-    else {
-      return NA_REAL;
-    }
-  } else {
-    // REPEATED
-    // match pre or post time of original time
-    const cctz::time_zone::civil_lookup cl_old = tz_orig.lookup(cs_orig);
-    if (tp_orig >= cl_old.trans){
-      tp_new = cl_new.post;
-    } else {
-      tp_new = cl_new.pre;
-    }
-    /* Rcpp::Rcout << cctz::format("tp:%Y-%m-%d %H:%M:%S %z", tp1, tz1) << std::endl; */
-    /* Rcpp::Rcout << cctz::format("pre:%Y-%m-%d %H:%M:%S %z", cl1.pre, tz1) << std::endl; */
-    /* Rcpp::Rcout << cctz::format("trans:%Y-%m-%d %H:%M:%S %z", cl1.trans, tz1) << std::endl; */
-    /* Rcpp::Rcout << cctz::format("post:%Y-%m-%d %H:%M:%S %z", cl1.post, tz1) << std::endl; */
-  }
-
-  return tp_new.time_since_epoch().count() + remainder;
-}
-
 // [[Rcpp::export]]
 Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
                                       const Rcpp::List& updates,
                                       const SEXP tz = R_NilValue,
                                       const bool roll = false,
-                                      const int week_start = 7) {
+                                      const int week_start = 1) {
 
   bool do_year = !Rf_isNull(updates["year"]), do_month = !Rf_isNull(updates["month"]),
     do_yday = !Rf_isNull(updates["yday"]), do_mday = !Rf_isNull(updates["mday"]),
@@ -129,7 +91,7 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
         continue;
       }
 
-      double rem = 0.0;
+      double rem = dti - secs;
       sys_seconds ss(secs);
       time_point tp1(ss);
       cctz::civil_second ct1 = cctz::convert(tp1, tzone1);
@@ -159,14 +121,11 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
         if (M == NA_INT32) {out[i] = NA_REAL; continue; }
       }
       if (do_second) {
-        if (loop_second) {
-          S = floor_to_int64(second[i]);
-          rem = second[i] - S;
-        } else {
-          S = floor_to_int64(second[0]);
-          rem = second[0] - S;
-        }
-        if (S == NA_INT64) {out[i] = NA_REAL; continue; }
+        double s = loop_second ? second[i] : second[0];
+        if (ISNAN(s)) { out[i] = NA_REAL; continue; }
+        S = floor_to_int64(s);
+        if (S == NA_INT64) { out[i] = NA_REAL; continue; }
+        rem += s - S;
       }
 
       if (do_yday) {
@@ -185,11 +144,188 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
       const cctz::civil_second cs2(y, m, d, H, M, S);
       const cctz::time_zone::civil_lookup cl2 = tzone2.lookup(cs2);
 
-      out[i] = get_secs_from_civil_lookup(cl2, tzone1, tp1, ct1, roll, rem);
+      out[i] = civil_lookup_to_posix(cl2, tzone1, tp1, ct1, roll, rem);
 
     }
 
   return newDatetimeVector(out, tzto.c_str());
+}
+
+enum class MonthAdjust { NONE, BOUNDARY, FIRSTDAY, LASTDAY, NA };
+
+MonthAdjust month_adjust_type(std::string roll_type) {
+  if (roll_type == "none") return MonthAdjust::NONE;
+  if (roll_type == "boundary") return MonthAdjust::BOUNDARY;
+  if (roll_type == "firstday") return MonthAdjust::FIRSTDAY;
+  if (roll_type == "lastday") return MonthAdjust::LASTDAY;
+  if (roll_type == "NA") return MonthAdjust::NA;
+  Rf_error("Invalid roll_month type (%s)", roll_type.c_str());
+}
+
+// [[Rcpp::export]]
+Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
+                                   const Rcpp::List& periods,
+                                   const std::string adjust_month,
+                                   const bool roll_dst) {
+
+  MonthAdjust madjust = month_adjust_type(adjust_month);
+
+  bool do_year = periods.containsElementNamed("years"),
+    do_month = periods.containsElementNamed("months"),
+    do_day = periods.containsElementNamed("days"),
+    do_week = periods.containsElementNamed("weeks"),
+    do_hour = periods.containsElementNamed("hours"),
+    do_minute = periods.containsElementNamed("minutes"),
+    do_second = periods.containsElementNamed("seconds");
+
+  const IntegerVector& year = do_year ? periods["years"] : IntegerVector::create(0);
+  const IntegerVector& month = do_month ? periods["months"] : IntegerVector::create(0);
+  const IntegerVector& week = do_week ? periods["weeks"] : IntegerVector::create(0);
+  const IntegerVector& day = do_day ? periods["days"] : IntegerVector::create(0);
+  const IntegerVector& hour = do_hour ? periods["hours"] : IntegerVector::create(0);
+  const IntegerVector& minute = do_minute ? periods["minutes"] : IntegerVector::create(0);
+  const NumericVector& second = do_second ? periods["seconds"] : NumericVector::create(0);
+
+  if (dt.size() == 0) return(newDatetimeVector(dt));
+
+  std::vector<R_xlen_t> sizes {
+    year.size(), month.size(), week.size(), day.size(),
+    hour.size(), minute.size(), second.size()
+  };
+
+  // tz is always there, so the output is at least length 1
+  R_xlen_t N = std::max(*std::max_element(sizes.begin(), sizes.end()), dt.size());
+
+  bool loop_year = year.size() == N, loop_month = month.size() == N,
+    loop_week = week.size() == N, loop_day = day.size() == N,
+    loop_hour = hour.size() == N, loop_minute = minute.size() == N,
+    loop_second = second.size() == N, loop_dt = dt.size() == N;
+
+  if (year.size() > 1 && !loop_year) stop("C_update_dt: Invalid size of 'year' vector");
+  if (month.size() > 1 && !loop_month) stop("C_update_dt: Invalid size of 'month' vector");
+  if (week.size() > 1 && !loop_week) stop("C_update_dt: Invalid size of 'week' vector");
+  if (day.size() > 1 && !loop_day) stop("C_update_dt: Invalid size of 'day' vector");
+  if (hour.size() > 1 && !loop_hour) stop("C_update_dt: Invalid size of 'hour' vector");
+  if (minute.size() > 1 && !loop_minute) stop("C_update_dt: Invalid size of 'minute' vector");
+  if (second.size() > 1 && !loop_second) stop("C_update_dt: Invalid size of 'second' vector");
+
+  if (dt.size() > 1 && !loop_dt)
+    stop("C_update_dt: length of dt vector must be 1 or match the length of updating vectors");
+
+  std::string tz_name = tz_from_tzone_attr(dt);
+  cctz::time_zone tz;
+  load_tz_or_fail(tz_name, tz, "CCTZ: Invalid timezone of the input vector: \"%s\"");
+
+  NumericVector out(N);
+
+  int y = 0, m = 0, w = 0, d = 0, H = 0, M = 0;
+  double s = 0.0;
+  int_fast64_t S = 0;
+
+  cctz::civil_year cy;
+  cctz::civil_month cm;
+  cctz::civil_day cd;
+  cctz::civil_hour cH;
+  cctz::civil_minute cM;
+  cctz::civil_second cS;
+
+
+  // all vectors are either size N or 1
+  for (R_xlen_t i = 0; i < N; i++)
+    {
+      double dti = loop_dt ? dt[i] : dt[0];
+      int_fast64_t secs = floor_to_int64(dti);
+
+      if (ISNAN(dti) || secs == NA_INT64) {
+        out[i] = NA_REAL;
+        continue;
+      }
+
+      bool add_my_hms = true;
+      double rem = dti - secs;
+      sys_seconds ss(secs);
+      time_point tp(ss);
+      cctz::civil_second cs = cctz::convert(tp, tz);
+
+      int_fast64_t
+        ty = cs.year(), tm = cs.month(), td = cs.day(),
+        tH = cs.hour(), tM = cs.minute(), tS = cs.second();
+
+      cy = cctz::civil_year(ty);
+
+      if (do_year) {
+        y = loop_year ? year[i] : year[0];
+        if (y == NA_INT32) { out[i] = NA_REAL; continue; }
+        cy += y;
+      }
+      cm = cctz::civil_month(cy) + (tm -1);
+      if (do_month) {
+        m = loop_month ? month[i] : month[0];
+        if (m == NA_INT32) { out[i] = NA_REAL; continue; }
+        cm += m;
+      }
+      cd = cctz::civil_day(cm) + (td - 1);
+      if (cd.day() != td) {
+        // month rolling kicks in
+        switch(madjust) {
+         case MonthAdjust::NONE: break;
+         case MonthAdjust::BOUNDARY:
+           cd = cctz::civil_day(cctz::civil_month(cd));
+           add_my_hms = false;
+           break;
+         case MonthAdjust::FIRSTDAY:
+           cd = cctz::civil_day(cctz::civil_month(cd));
+           break;
+         case MonthAdjust::LASTDAY:
+           cd = cctz::civil_day(cctz::civil_month(cd)) - 1;
+           break;
+         case MonthAdjust::NA:
+           out[i] = NA_REAL;
+           continue;
+        }
+      }
+      if (do_week) {
+        w = loop_week ? week[i] : week[0];
+        if (w == NA_INT32) { out[i] = NA_REAL; continue; }
+        cd += w * 7;
+      }
+      if (do_day) {
+        d = loop_day ? day[i] : day[0];
+        if (d == NA_INT32) { out[i] = NA_REAL; continue; }
+        /* Rprintf("tm:%d m:%d cd.month():%d cd.day():%d td:%d d:%d\n", tm, m, cd.month(), cd.day(), td, d); */
+        cd += d;
+      }
+      cH = cctz::civil_hour(cd);
+      if (add_my_hms) cH += tH;
+      if (do_hour) {
+        H = loop_hour ? hour[i] : hour[0];
+        if (H == NA_INT32) { out[i] = NA_REAL; continue; }
+        cH += H;
+      }
+      cM = cctz::civil_minute(cH);
+      if (add_my_hms) cM += tM;
+      if (do_minute) {
+        M = loop_minute ? minute[i] : minute[0];
+        if (M == NA_INT32) { out[i] = NA_REAL; continue; }
+        cM += tM;
+      }
+      cS = cctz::civil_second(cM);
+      if (add_my_hms) cS += tS;
+      if (do_second) {
+        s = loop_second ? second[i] : second[0];
+        if (ISNAN(s)) { out[i] = NA_REAL; continue; }
+        S = floor_to_int64(s);
+        if (S == NA_INT64) { out[i] = NA_REAL; continue; }
+        rem += s - S;
+        cS += S;
+      }
+
+      s = civil_time_to_posix(cS, tz, roll_dst);
+      out[i] = s + rem;
+
+    }
+
+  return newDatetimeVector(out, tz_name.c_str());
 }
 
 // [[Rcpp::export]]
@@ -224,7 +360,7 @@ newDatetimeVector C_force_tz(const NumericVector dt,
       time_point tp1(d1);
       cctz::civil_second ct1 = cctz::convert(tp1, tzfrom);
       const cctz::time_zone::civil_lookup cl2 = tzto.lookup(ct1);
-      out[i] = get_secs_from_civil_lookup(cl2, tzfrom, tp1, ct1, roll, rem);
+      out[i] = civil_lookup_to_posix(cl2, tzfrom, tp1, ct1, roll, rem);
     }
 
   return newDatetimeVector(out, tzto_name.c_str());
@@ -272,7 +408,7 @@ newDatetimeVector C_force_tzs(const NumericVector dt,
       cctz::civil_second csfrom = cctz::convert(tpfrom, tzfrom);
 
       const cctz::time_zone::civil_lookup clto = tzto.lookup(csfrom);
-      out[i] = get_secs_from_civil_lookup(clto, tzfrom, tpfrom, csfrom, roll, rem);
+      out[i] = civil_lookup_to_posix(clto, tzfrom, tpfrom, csfrom, roll, rem);
 
     }
 

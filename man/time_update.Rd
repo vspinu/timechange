@@ -4,9 +4,9 @@
 \alias{time_update}
 \title{Update components of a date-time object}
 \usage{
-time_update(time, year = NULL, month = NULL, day = NULL, mday = NULL,
-  yday = NULL, wday = NULL, hour = NULL, minute = NULL, second = NULL,
-  tz = NULL, roll = FALSE, week_start = getOption("week_start", 1))
+time_update(time, year = NULL, month = NULL, yday = NULL, mday = NULL,
+  wday = NULL, hour = NULL, minute = NULL, second = NULL, tz = NULL,
+  roll = FALSE, week_start = getOption("week_start", 1))
 }
 \arguments{
 \item{time}{a date-time object}

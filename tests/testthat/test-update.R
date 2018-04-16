@@ -108,6 +108,19 @@ test_that("update.POSIXt performs simple operation as expected", {
   expect_match(tz(time_update(posct, tz = "UTC")), "UTC")
 })
 
+
+test_that("update works with fractional second", {
+  poslt <- as.POSIXlt("2010-02-03 13:45:59.234", tz = "UTC")
+  posct <- as.POSIXct("2010-02-03 13:45:59.323", tz = "UTC")
+  expect_equal(time_update(poslt, year = 2002, minute = 3), as.POSIXlt("2002-02-03 13:03:59.234", tz = "UTC"))
+  expect_equal(time_update(poslt, day = 1, minute = 1, hour = 3), as.POSIXlt("2010-02-01 03:01:59.234", tz = "UTC"))
+})
+
+## test_that("update works with non-existent dates", {
+##   ct <- as.POSIXct("2010-01-31 13:45:59.234", tz = "UTC")
+##   time_update(ct, month = 2)
+## })
+
 test_that("update.POSIXt works on wdays", {
   date <- ymd("2017-05-07") ## sunday
   ct <- as.POSIXct("2010-02-03 13:45:59", tz = "America/New_York", format = "%Y-%m-%d %H:%M:%S") ## Wednesday

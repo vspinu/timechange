@@ -70,6 +70,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// C_time_add
+Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt, const Rcpp::List& periods, const std::string adjust_month, const bool roll_dst);
+RcppExport SEXP _timechange_C_time_add(SEXP dtSEXP, SEXP periodsSEXP, SEXP adjust_monthSEXP, SEXP roll_dstSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type dt(dtSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type periods(periodsSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type adjust_month(adjust_monthSEXP);
+    Rcpp::traits::input_parameter< const bool >::type roll_dst(roll_dstSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_time_add(dt, periods, adjust_month, roll_dst));
+    return rcpp_result_gen;
+END_RCPP
+}
 // C_force_tz
 newDatetimeVector C_force_tz(const NumericVector dt, const CharacterVector tz, const bool roll);
 RcppExport SEXP _timechange_C_force_tz(SEXP dtSEXP, SEXP tzSEXP, SEXP rollSEXP) {
@@ -118,6 +132,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_timechange_C_local_tz", (DL_FUNC) &_timechange_C_local_tz, 0},
     {"_timechange_C_valid_tz", (DL_FUNC) &_timechange_C_valid_tz, 1},
     {"_timechange_C_time_update", (DL_FUNC) &_timechange_C_time_update, 5},
+    {"_timechange_C_time_add", (DL_FUNC) &_timechange_C_time_add, 4},
     {"_timechange_C_force_tz", (DL_FUNC) &_timechange_C_force_tz, 3},
     {"_timechange_C_force_tzs", (DL_FUNC) &_timechange_C_force_tzs, 4},
     {"_timechange_C_local_clock", (DL_FUNC) &_timechange_C_local_clock, 2},

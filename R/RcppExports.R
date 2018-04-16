@@ -17,8 +17,12 @@ C_valid_tz <- function(tz_name) {
     .Call(`_timechange_C_valid_tz`, tz_name)
 }
 
-C_time_update <- function(dt, updates, tz = NULL, roll = FALSE, week_start = 7L) {
+C_time_update <- function(dt, updates, tz = NULL, roll = FALSE, week_start = 1L) {
     .Call(`_timechange_C_time_update`, dt, updates, tz, roll, week_start)
+}
+
+C_time_add <- function(dt, periods, adjust_month, roll_dst) {
+    .Call(`_timechange_C_time_add`, dt, periods, adjust_month, roll_dst)
 }
 
 C_force_tz <- function(dt, tz, roll = FALSE) {
