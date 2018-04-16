@@ -7,7 +7,8 @@
 #' @name time_update
 #' @param time a date-time object
 #' @param year,month,yday,wday,mday,day,hour,minute,second components of the
-#'   date-time to be updated. All except `second` will be converted to integer.
+#'   date-time to be updated. `day` is equivalent to `mday`. All except `second`
+#'   will be converted to integer.
 #' @param tz time zone component (a singleton character vector)
 #' @param roll logical. If `TRUE`, and the resulting date-time lands on a
 #'   non-existent civil time instant (DST gap, 29th February, etc.) roll the
@@ -27,12 +28,17 @@
 #' time_update(date, minute = 10, second = 3, tz = "America/New_York")
 #' @export
 time_update <- function(time, year = NULL, month = NULL,
-                        yday = NULL, mday = NULL, wday = NULL,
+                        yday = NULL, day = NULL, mday = NULL, wday = NULL,
                         hour = NULL, minute = NULL, second = NULL,
                         tz = NULL, roll = FALSE, week_start = getOption("week_start", 1)) {
 
   if (length(time) == 0L)
     return(time)
+
+  if (!is.null(day)) {
+    if (!is.null(mday)) stop("both `mday` and `day` suplied")
+    mday <- day
+  }
 
   updates <- list(year = year, month = month,
                   yday = yday, mday = mday, wday = wday,

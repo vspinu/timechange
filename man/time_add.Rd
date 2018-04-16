@@ -12,7 +12,7 @@ time_add(time, periods = NULL, years = NULL, months = NULL,
 
 time_subtract(time, periods = NULL, years = NULL, months = NULL,
   weeks = NULL, days = NULL, hours = NULL, minutes = NULL,
-  seconds = NULL, adjust_month = c("firstday", "lastday", "boundary",
+  seconds = NULL, adjust_month = c("lastday", "firstday", "boundary",
   "none", "NA"), roll_dst = TRUE)
 }
 \arguments{
@@ -63,10 +63,12 @@ date, the date is adjusted to the boundary between the months. Thus,
 \code{2000-01-31 01:02:03 + month = 2000-03-01 00:00:00}. Adding 3 days results
 in \code{2000-03-03 00:00:00}.
 \item \code{firstday} - is like \code{boundary} but preserves the sub-day units. Thus,
-\code{2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03}.
+\code{2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03}. This is the default
+for \code{time_add}.
 \item \code{lastday} - is like \code{firstday} but instead of rolling forward to the first
 day of the month, it rolls back to the last valid day of the previous
-month. Thus, \code{2000-01-31 01:02:03 + month = 2000-02-28 01:02:03}.
+month. Thus, \code{2000-01-31 01:02:03 + month = 2000-02-28 01:02:03}. This is
+the default for \code{time_subtract}.
 }
 
 For the purpose of the month adjustment simultaneous addition of \code{y} years
@@ -88,16 +90,18 @@ time_add(x, months = 1, days = 3,  adjust_month = "boundary")
 time_add(x, months = 1, days = 3,  adjust_month = "none")
 time_add(x, months = 1, days = 3,  adjust_month = "NA")
 
-x <- as.POSIXct("2000-03-1 01:02:03", tz = "America/Chicago")
+
+x <- as.POSIXct("2000-03-31 01:02:03", tz = "America/Chicago")
 time_subtract(x, months = 1, adjust_month = "firstday")
 time_subtract(x, months = 1, adjust_month = "lastday")
 time_subtract(x, months = 1, adjust_month = "boundary")
 time_subtract(x, months = 1, adjust_month = "none")
 time_subtract(x, months = 1, adjust_month = "NA")
 
-time_add(x, months = 1, days = 3,  adjust_month = "firstday")
-time_add(x, months = 1, days = 3,  adjust_month = "lastday")
-time_add(x, months = 1, days = 3,  adjust_month = "boundary")
-time_add(x, months = 1, days = 3,  adjust_month = "none")
-time_add(x, months = 1, days = 3,  adjust_month = "NA")
+time_subtract(x, months = 1, days = 3,  adjust_month = "firstday")
+time_subtract(x, months = 1, days = 3,  adjust_month = "lastday")
+time_subtract(x, months = 1, days = 3,  adjust_month = "boundary")
+time_subtract(x, months = 1, days = 3,  adjust_month = "none")
+time_subtract(x, months = 1, days = 3,  adjust_month = "NA")
+
 }

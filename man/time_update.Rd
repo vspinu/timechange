@@ -4,15 +4,16 @@
 \alias{time_update}
 \title{Update components of a date-time object}
 \usage{
-time_update(time, year = NULL, month = NULL, yday = NULL, mday = NULL,
-  wday = NULL, hour = NULL, minute = NULL, second = NULL, tz = NULL,
-  roll = FALSE, week_start = getOption("week_start", 1))
+time_update(time, year = NULL, month = NULL, yday = NULL, day = NULL,
+  mday = NULL, wday = NULL, hour = NULL, minute = NULL, second = NULL,
+  tz = NULL, roll = FALSE, week_start = getOption("week_start", 1))
 }
 \arguments{
 \item{time}{a date-time object}
 
 \item{year, month, yday, wday, mday, day, hour, minute, second}{components of the
-date-time to be updated. All except \code{second} will be converted to integer.}
+date-time to be updated. \code{day} is equivalent to \code{mday}. All except \code{second}
+will be converted to integer.}
 
 \item{tz}{time zone component (a singleton character vector)}
 
