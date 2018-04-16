@@ -55,10 +55,21 @@ from_posixct <- function(ct, time, force_date = FALSE) {
   }
 }
 
+normalize_units_length <- function(units) {
+  maxlen <- max(unlist(lapply(units, length)))
+  if (maxlen > 1) {
+    for (nm in names(units)) {
+      len <- length(units[[nm]])
+      ## len == 1 is treated at C_level
+      if (len != maxlen && len > 1)
+        units[[nm]] <- rep_len(units[[nm]], maxlen)
+    }
+  }
+  units
+}
 
 
 ## utilities copied from lubridate
-
 
 standardise_unit_name <- function(x) {
   dates <- c("second", "minute", "hour", "day", "week", "month", "year",

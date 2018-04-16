@@ -27,31 +27,19 @@
 #' time_update(date, minute = 10, second = 3, tz = "America/New_York")
 #' @export
 time_update <- function(time, year = NULL, month = NULL,
-                        day = NULL, mday = NULL, yday = NULL, wday = NULL,
-                        hour = NULL, minute = NULL, second = NULL, tz = NULL,
-                        roll = FALSE, week_start = getOption("week_start", 1)) {
+                        yday = NULL, mday = NULL, wday = NULL,
+                        hour = NULL, minute = NULL, second = NULL,
+                        tz = NULL, roll = FALSE, week_start = getOption("week_start", 1)) {
 
-  if (!length(time))
+  if (length(time) == 0L)
     return(time)
-
-  if (length(day) > 0)
-    mday <- day
 
   updates <- list(year = year, month = month,
                   yday = yday, mday = mday, wday = wday,
                   hour = hour, minute = minute,
                   second = second)
 
-  maxlen <- max(unlist(lapply(updates, length)))
-
-  if (maxlen > 1) {
-    for (nm in names(updates)) {
-      len <- length(updates[[nm]])
-      ## len == 1 is treated at C_level
-      if (len != maxlen && len > 1)
-        updates[[nm]] <- rep_len(updates[[nm]], maxlen)
-    }
-  }
+  updates <- normalize_units_length(updates)
 
   if (is.POSIXct(time)) {
     C_time_update(time, updates, tz, roll, week_start)
