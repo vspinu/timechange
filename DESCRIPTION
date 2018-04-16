@@ -1,13 +1,13 @@
 Package: timechange
-Title: Efficient Updating of Date-Times
+Title: Efficient Changing of Date-Times
 Version: 0.0.1
 Authors@R: person("Vitalie", "Spinu", email = "spinuvit@gmail.com", role = c("aut", "cre"))
-Description: A collection of fast routines for manipulation of date-time
-   objects while correctly accounting for time-zones and daylight saving
-   times. Provided utilities include updating of date-time components (year,
-   month, day etc.), time-zone changes, rounding and period arithmetic. Parts of
-   the 'CCTZ' source code, released under the Apache 2.0 License, are included
-   in this package. See <https://github.com/google/cctz> for more details.
+Description: Efficient routines for manipulation of date-time objects with
+   correct accounting for time-zones and daylight saving times. Include
+   utilities for updating of date-time components (year, month, day etc.),
+   altering time-zones, rounding and period arithmetic. Parts of the 'CCTZ'
+   source code, released under the Apache 2.0 License, are included in this
+   package. See <https://github.com/google/cctz> for more details.
 Depends: R (>= 3.3)
 License: GPL-3
 Encoding: UTF-8
