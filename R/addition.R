@@ -48,7 +48,7 @@
 ##'
 ##' @param time date-time object
 ##' @param periods string or list (currently unimplemented)
-##' @param years years,months,weeks,days,hours,minutes,seconds Units to be added
+##' @param years,months,weeks,days,hours,minutes,seconds Units to be added
 ##'   to `time`. Each unit except for seconds must be expressed as integer
 ##'   values.
 ##' @param adjust_month controls how addition of months and years behaves when

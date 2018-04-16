@@ -20,7 +20,7 @@ time_subtract(time, periods = NULL, years = NULL, months = NULL,
 
 \item{periods}{string or list (currently unimplemented)}
 
-\item{years}{years,months,weeks,days,hours,minutes,seconds Units to be added
+\item{years, months, weeks, days, hours, minutes, seconds}{Units to be added
 to \code{time}. Each unit except for seconds must be expressed as integer
 values.}
 
