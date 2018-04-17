@@ -21,8 +21,8 @@ C_time_update <- function(dt, updates, tz = NULL, roll = FALSE, week_start = 1L)
     .Call(`_timechange_C_time_update`, dt, updates, tz, roll, week_start)
 }
 
-C_time_add <- function(dt, periods, adjust_month, roll_dst) {
-    .Call(`_timechange_C_time_add`, dt, periods, adjust_month, roll_dst)
+C_time_add <- function(dt, periods, roll_month, roll_dst) {
+    .Call(`_timechange_C_time_add`, dt, periods, roll_month, roll_dst)
 }
 
 C_force_tz <- function(dt, tz, roll = FALSE) {

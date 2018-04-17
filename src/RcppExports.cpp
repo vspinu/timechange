@@ -71,16 +71,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_time_add
-Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt, const Rcpp::List& periods, const std::string adjust_month, const bool roll_dst);
-RcppExport SEXP _timechange_C_time_add(SEXP dtSEXP, SEXP periodsSEXP, SEXP adjust_monthSEXP, SEXP roll_dstSEXP) {
+Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt, const Rcpp::List& periods, const std::string roll_month, const std::string roll_dst);
+RcppExport SEXP _timechange_C_time_add(SEXP dtSEXP, SEXP periodsSEXP, SEXP roll_monthSEXP, SEXP roll_dstSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type dt(dtSEXP);
     Rcpp::traits::input_parameter< const Rcpp::List& >::type periods(periodsSEXP);
-    Rcpp::traits::input_parameter< const std::string >::type adjust_month(adjust_monthSEXP);
-    Rcpp::traits::input_parameter< const bool >::type roll_dst(roll_dstSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_time_add(dt, periods, adjust_month, roll_dst));
+    Rcpp::traits::input_parameter< const std::string >::type roll_month(roll_monthSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type roll_dst(roll_dstSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_time_add(dt, periods, roll_month, roll_dst));
     return rcpp_result_gen;
 END_RCPP
 }

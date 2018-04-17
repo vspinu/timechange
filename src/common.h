@@ -20,6 +20,7 @@ extern double fINT64_MIN;
 
 int_fast64_t floor_to_int64(double x);
 
+enum class Roll { SKIP, BOUNDARY, NEXT, PREV, NA };
 
 // Helper for conversion functions. Get seconds from civil_lookup, but relies on
 // original time pre/post time if cl_new falls in repeated interval.
@@ -30,14 +31,17 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
                              bool roll, double remainder = 0.0) ;
 
 template<typename T>
-inline double civil_time_to_posix(T ct, cctz::time_zone tz, bool roll_dst) noexcept {
+inline double civil_time_to_posix(T ct, cctz::time_zone tz, Roll roll_dst) noexcept {
   cctz::time_zone::civil_lookup cl = tz.lookup(ct);
   time_point tp;
   if (cl.kind == cctz::time_zone::civil_lookup::SKIPPED) {
-    if (roll_dst)
-      tp = cl.trans;
-    else
-      return NA_REAL;
+    switch (roll_dst) {
+     case Roll::BOUNDARY: tp = cl.trans; break;
+     case Roll::SKIP:
+     case Roll::NEXT: tp = cl.pre; break;
+     case Roll::PREV: tp = cl.post; break;
+     case Roll::NA: return NA_REAL;
+    }
   } else {
     tp = cl.pre;
   }

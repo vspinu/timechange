@@ -21,10 +21,14 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
                                       const bool roll = false,
                                       const int week_start = 1) {
 
-  bool do_year = !Rf_isNull(updates["year"]), do_month = !Rf_isNull(updates["month"]),
-    do_yday = !Rf_isNull(updates["yday"]), do_mday = !Rf_isNull(updates["mday"]),
-    do_wday = !Rf_isNull(updates["wday"]), do_hour = !Rf_isNull(updates["hour"]),
-    do_minute = !Rf_isNull(updates["minute"]), do_second = !Rf_isNull(updates["second"]);
+  bool do_year = updates.containsElementNamed("year"),
+    do_month = updates.containsElementNamed("month"),
+    do_yday = updates.containsElementNamed("yday"),
+    do_mday = updates.containsElementNamed("mday"),
+    do_wday = updates.containsElementNamed("wday"),
+    do_hour = updates.containsElementNamed("hour"),
+    do_minute = updates.containsElementNamed("minute"),
+    do_second = updates.containsElementNamed("second");
 
   const IntegerVector& year = do_year ? updates["year"] : IntegerVector::create(0);
   const IntegerVector& month = do_month ? updates["month"] : IntegerVector::create(0);
@@ -151,24 +155,24 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
   return newDatetimeVector(out, tzto.c_str());
 }
 
-enum class MonthAdjust { NONE, BOUNDARY, FIRSTDAY, LASTDAY, NA };
 
-MonthAdjust month_adjust_type(std::string roll_type) {
-  if (roll_type == "none") return MonthAdjust::NONE;
-  if (roll_type == "boundary") return MonthAdjust::BOUNDARY;
-  if (roll_type == "firstday") return MonthAdjust::FIRSTDAY;
-  if (roll_type == "lastday") return MonthAdjust::LASTDAY;
-  if (roll_type == "NA") return MonthAdjust::NA;
+Roll roll_type(std::string roll_type) {
+  if (roll_type == "skip") return Roll::SKIP;
+  if (roll_type == "boundary") return Roll::BOUNDARY;
+  if (roll_type == "next") return Roll::NEXT;
+  if (roll_type == "prev") return Roll::PREV;
+  if (roll_type == "NA") return Roll::NA;
   Rf_error("Invalid roll_month type (%s)", roll_type.c_str());
 }
 
 // [[Rcpp::export]]
 Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
                                    const Rcpp::List& periods,
-                                   const std::string adjust_month,
-                                   const bool roll_dst) {
+                                   const std::string roll_month,
+                                   const std::string roll_dst) {
 
-  MonthAdjust madjust = month_adjust_type(adjust_month);
+  Roll rmonth = roll_type(roll_month);
+  Roll rdst = roll_type(roll_dst);
 
   bool do_year = periods.containsElementNamed("years"),
     do_month = periods.containsElementNamed("months"),
@@ -267,19 +271,19 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
       cd = cctz::civil_day(cm) + (td - 1);
       if (cd.day() != td) {
         // month rolling kicks in
-        switch(madjust) {
-         case MonthAdjust::NONE: break;
-         case MonthAdjust::BOUNDARY:
+        switch(rmonth) {
+         case Roll::SKIP: break;
+         case Roll::BOUNDARY:
            cd = cctz::civil_day(cctz::civil_month(cd));
            add_my_hms = false;
            break;
-         case MonthAdjust::FIRSTDAY:
+         case Roll::NEXT:
            cd = cctz::civil_day(cctz::civil_month(cd));
            break;
-         case MonthAdjust::LASTDAY:
+         case Roll::PREV:
            cd = cctz::civil_day(cctz::civil_month(cd)) - 1;
            break;
-         case MonthAdjust::NA:
+         case Roll::NA:
            out[i] = NA_REAL;
            continue;
         }
@@ -307,7 +311,7 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
       if (do_minute) {
         M = loop_minute ? minute[i] : minute[0];
         if (M == NA_INT32) { out[i] = NA_REAL; continue; }
-        cM += tM;
+        cM += M;
       }
       cS = cctz::civil_second(cM);
       if (add_my_hms) cS += tS;
@@ -320,7 +324,7 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
         cS += S;
       }
 
-      s = civil_time_to_posix(cS, tz, roll_dst);
+      s = civil_time_to_posix(cS, tz, rdst);
       out[i] = s + rem;
 
     }

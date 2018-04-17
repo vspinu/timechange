@@ -147,37 +147,37 @@ newDatetimeVector C_time_floor(const NumericVector dt,
      }
      case Unit::MINUTE : {
        cctz::civil_minute ct = cctz::civil_minute(cctz::civil_hour(cs)) + FLOOR(cs.minute(), N);
-       out[i] = civil_time_to_posix(ct, tz, true); break;
+       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
      }
      case Unit::HOUR : {
        cctz::civil_hour ct = cctz::civil_hour(cctz::civil_day(cs)) + FLOOR(cs.hour(), N);
-       out[i] = civil_time_to_posix(ct, tz, true); break;
+       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
      }
      case Unit::DAY : {
        cctz::civil_day ct = cctz::civil_day(cctz::civil_month(cs)) + FLOOR1(cs.day(), N);
-       out[i] = civil_time_to_posix(ct, tz, true); break;
+       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
      }
      case Unit::WEEK : {
        if (N != 1)
          Rf_warning("Multi-unit week rounding is not supported; ignoring");
        // get the previous `wday` if `cs` is not already on `wday`
        cctz::civil_day ct = cctz::next_weekday(cctz::civil_day(cs), wday) - 7;
-       out[i] = civil_time_to_posix(ct, tz, true); break;
+       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
      }
      case Unit::SEASON : {
        cctz::civil_month ct = cctz::civil_month(cctz::civil_year(cs)) + FLOOR(cs.month(), N) - 1;
-       out[i] = civil_time_to_posix(ct, tz, true); break;
+       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
      }
      case Unit::HALFYEAR :
      case Unit::QUARTER :
      case Unit::BIMONTH :
      case Unit::MONTH : {
        cctz::civil_month ct = cctz::civil_month(cctz::civil_year(cs)) + FLOOR1(cs.month(), N);
-       out[i] = civil_time_to_posix(ct, tz, true); break;
+       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
      }
      case Unit::YEAR : {
        cctz::civil_year ct = cctz::civil_year(FLOOR(cs.year(), N));
-       out[i] = civil_time_to_posix(ct, tz, true); break;
+       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
      }
     }
   }
