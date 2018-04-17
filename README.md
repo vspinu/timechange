@@ -2,14 +2,14 @@
 
 ## timechange
 
-Utilities for efficient manipulation of date-time objects while accounting for time-zones and day-light saving times. Supported date time classes are `Date`, `POSIXct`, `POSIXlt` and [`nanosecond`](https://cran.rstudio.com/web/packages/nanotime/index.html) (planned).
+Utilities for efficient manipulation of date-time objects while accounting for time-zones and day-light saving times. Supported date time classes are `Date`, `POSIXct`, `POSIXlt` ([`nanosecond`](https://cran.rstudio.com/web/packages/nanotime/index.html) is [planned](#1)).
 
 Currently implemented:
 
  - __`time_update`__: update date-time objects
  - __`time_round`__, __`time_ceiling`__ and __`time_floor`__: round methods for date-time objects
  - __`time_force_tz`__, __`time_at_tz`__ and __`time_clock_at_tz`__: utilities for time zone change and time/clock extraction at different time-zones
- - __`time_add`__,__`time_subtract`__: fast period arithmetic with refined control of what happens in ambiguous situations
+ - __`time_add`__,__`time_subtract`__: fast period arithmetic with refined control over what happens in ambiguous situations
 
 
 ### Stability
