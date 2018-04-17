@@ -21,14 +21,10 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
                                       const bool roll = false,
                                       const int week_start = 1) {
 
-  bool do_year = updates.containsElementNamed("year"),
-    do_month = updates.containsElementNamed("month"),
-    do_yday = updates.containsElementNamed("yday"),
-    do_mday = updates.containsElementNamed("mday"),
-    do_wday = updates.containsElementNamed("wday"),
-    do_hour = updates.containsElementNamed("hour"),
-    do_minute = updates.containsElementNamed("minute"),
-    do_second = updates.containsElementNamed("second");
+  bool do_year = !Rf_isNull(updates["year"]), do_month = !Rf_isNull(updates["month"]),
+    do_yday = !Rf_isNull(updates["yday"]), do_mday = !Rf_isNull(updates["mday"]),
+    do_wday = !Rf_isNull(updates["wday"]), do_hour = !Rf_isNull(updates["hour"]),
+    do_minute = !Rf_isNull(updates["minute"]), do_second = !Rf_isNull(updates["second"]);
 
   const IntegerVector& year = do_year ? updates["year"] : IntegerVector::create(0);
   const IntegerVector& month = do_month ? updates["month"] : IntegerVector::create(0);

@@ -7,13 +7,11 @@
 \usage{
 time_add(time, periods = NULL, years = NULL, months = NULL,
   weeks = NULL, days = NULL, hours = NULL, minutes = NULL,
-  seconds = NULL, adjust_month = c("firstday", "lastday", "boundary",
-  "none", "NA"), roll_dst = TRUE)
+  seconds = NULL, roll_month = "prev", roll_dst = "next")
 
 time_subtract(time, periods = NULL, years = NULL, months = NULL,
   weeks = NULL, days = NULL, hours = NULL, minutes = NULL,
-  seconds = NULL, adjust_month = c("lastday", "firstday", "boundary",
-  "none", "NA"), roll_dst = TRUE)
+  seconds = NULL, roll_month = "prev", roll_dst = "prev")
 }
 \arguments{
 \item{time}{date-time object}
@@ -24,7 +22,7 @@ time_subtract(time, periods = NULL, years = NULL, months = NULL,
 to \code{time}. Each unit except for seconds must be expressed as integer
 values.}
 
-\item{adjust_month}{controls how addition of months and years behaves when
+\item{roll_month}{controls how addition of months and years behaves when
 standard arithmetic rules exceed limits of the resulting date's month. See
 Details for the description of possible values.}
 
@@ -50,58 +48,68 @@ for a refined control of what happens when an addition of irregular periods
 Let's start with an example. What happens when you add "1 month 3 days" to
 "2000-01-31 01:02:03"? \pkg{`timechange`} operates by applying larger
 periods first. First months are added\code{1 + 1 = February} which results in
-non-existent time of \code{2000-02-31 01:02:03}. Here the \code{adjust_month}
+non-existent time of \code{2000-02-31 01:02:03}. Here the \code{roll_month}
 adjustment kicks in:
 \itemize{
-\item \code{none} - no adjustment is done to the simple arithmetic operations. Days
-are simply rolled over the calendar. Thus, \code{2000-01-31 01:02:03 + 1 month + 3 days}
-is equivalent to \code{2000-02-01 01:02:03 + 34 days} resulting in \code{2000-03-05 01:02:03}.
+\item \code{skip} - no adjustment is done to the simple arithmetic operations (the
+gap is skipped as if it's not there. Thus, \code{2000-01-31 01:02:03 + 1 month + 3 days} is equivalent to \code{2000-01-01 01:02:03 + 1 month + 31 days + 3 days}
+resulting in \code{2000-03-05 01:02:03}.
 \item \code{NA} - if any of the intermediate additions result in non-existent dates
-\code{NA} is produced. This is the how arithmetic in \code{lubridate} operates.
-\item \code{boundary} - if an intermediate computation results in a non-existent
-date, the date is adjusted to the boundary between the months. Thus,
-\code{2000-01-31 01:02:03 + month = 2000-03-01 00:00:00}. Adding 3 days results
-in \code{2000-03-03 00:00:00}.
-\item \code{firstday} - is like \code{boundary} but preserves the sub-day units. Thus,
-\code{2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03}. This is the default
-for \code{time_add}.
-\item \code{lastday} - is like \code{firstday} but instead of rolling forward to the first
-day of the month, it rolls back to the last valid day of the previous
-month. Thus, \code{2000-01-31 01:02:03 + month = 2000-02-28 01:02:03}. This is
-the default for \code{time_subtract}.
+\code{NA} is produced. This is how arithmetic in \code{lubridate} operates.
+\item \code{boundary} - if an intermediate computation falls in a gap, the date is
+adjusted to the next valid time. Thus, \code{2000-01-31 01:02:03 + month = 2000-03-01 00:00:00}.
+\item \code{next} - is like \code{boundary} but preserves the smaller units. Thus,
+\code{2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03}.
+\item \code{prev} - is like \code{next} but instead of rolling forward to the first day of
+the month, it rolls back to the last valid day of the previous month. Thus,
+\code{2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03}. This is the default.
 }
-
-For the purpose of the month adjustment simultaneous addition of \code{y} years
-and \code{m} months is equivalent to adding \code{12*y + m} months. Thus \code{2000-02-29 + year + month} is equivalent to \code{2000-02-29 + 13 months} and results in a
-valid date \code{2001-03-29}.
 }
 \examples{
 
+# Addition
+
+## Month gap
 x <- as.POSIXct("2000-01-31 01:02:03", tz = "America/Chicago")
-time_add(x, months = 1, adjust_month = "firstday")
-time_add(x, months = 1, adjust_month = "lastday")
-time_add(x, months = 1, adjust_month = "boundary")
-time_add(x, months = 1, adjust_month = "none")
-time_add(x, months = 1, adjust_month = "NA")
+time_add(x, months = 1, roll_month = "next")
+time_add(x, months = 1, roll_month = "prev")
+time_add(x, months = 1, roll_month = "boundary")
+time_add(x, months = 1, roll_month = "skip")
+time_add(x, months = 1, roll_month = "NA")
+time_add(x, months = 1, days = 3,  roll_month = "next")
+time_add(x, months = 1, days = 3,  roll_month = "prev")
+time_add(x, months = 1, days = 3,  roll_month = "boundary")
+time_add(x, months = 1, days = 3,  roll_month = "skip")
+time_add(x, months = 1, days = 3,  roll_month = "NA")
 
-time_add(x, months = 1, days = 3,  adjust_month = "firstday")
-time_add(x, months = 1, days = 3,  adjust_month = "lastday")
-time_add(x, months = 1, days = 3,  adjust_month = "boundary")
-time_add(x, months = 1, days = 3,  adjust_month = "none")
-time_add(x, months = 1, days = 3,  adjust_month = "NA")
+## DST gap
+x <- as.POSIXlt("2010-03-14 01:02:03", tz = "America/Chicago")
+time_add(x, hours = 1, minutes = 50, roll_dst = "next")
+time_add(x, hours = 1, minutes = 50, roll_dst = "prev")
+time_add(x, hours = 1, minutes = 50, roll_dst = "boundary")
+time_add(x, hours = 1, minutes = 50, roll_dst = "skip")
+time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
 
+# SUBTRACTION
 
+## Month gap
 x <- as.POSIXct("2000-03-31 01:02:03", tz = "America/Chicago")
-time_subtract(x, months = 1, adjust_month = "firstday")
-time_subtract(x, months = 1, adjust_month = "lastday")
-time_subtract(x, months = 1, adjust_month = "boundary")
-time_subtract(x, months = 1, adjust_month = "none")
-time_subtract(x, months = 1, adjust_month = "NA")
+time_subtract(x, months = 1, roll_month = "next")
+time_subtract(x, months = 1, roll_month = "prev")
+time_subtract(x, months = 1, roll_month = "boundary")
+time_subtract(x, months = 1, roll_month = "skip")
+time_subtract(x, months = 1, roll_month = "NA")
+time_subtract(x, months = 1, days = 3,  roll_month = "next")
+time_subtract(x, months = 1, days = 3,  roll_month = "prev")
+time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
+time_subtract(x, months = 1, days = 3,  roll_month = "skip")
+time_subtract(x, months = 1, days = 3,  roll_month = "NA")
 
-time_subtract(x, months = 1, days = 3,  adjust_month = "firstday")
-time_subtract(x, months = 1, days = 3,  adjust_month = "lastday")
-time_subtract(x, months = 1, days = 3,  adjust_month = "boundary")
-time_subtract(x, months = 1, days = 3,  adjust_month = "none")
-time_subtract(x, months = 1, days = 3,  adjust_month = "NA")
-
+## DST gap
+y <- as.POSIXlt("2010-03-15 01:02:03", tz = "America/Chicago")
+time_subtract(y, hours = 22, minutes = 50, roll_dst = "next")
+time_subtract(y, hours = 22, minutes = 50, roll_dst = "prev")
+time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary")
+time_subtract(y, hours = 22, minutes = 50, roll_dst = "skip")
+time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA")
 }

@@ -20,32 +20,24 @@
 ##' non-existent time of `2000-02-31 01:02:03`. Here the `roll_month`
 ##' adjustment kicks in:
 ##'
-##' * `skip` - no adjustment is done to the simple arithmetic operations; the
-##' gap is skipped as non-existent. Days are simply rolled over the
-##' calendar. Thus, `2000-01-31 01:02:03 + 1 month + 3 days` is equivalent to
-##' `2000-02-01 01:02:03 + 34 days` resulting in `2000-03-05 01:02:03`.
+##' * `skip` - no adjustment is done to the simple arithmetic operations (the
+##' gap is skipped as if it's not there. Thus, `2000-01-31 01:02:03 + 1 month +
+##' 3 days` is equivalent to `2000-01-01 01:02:03 + 1 month + 31 days + 3 days`
+##' resulting in `2000-03-05 01:02:03`.
 ##'
 ##' * `NA` - if any of the intermediate additions result in non-existent dates
-##' `NA` is produced. This is the how arithmetic in `lubridate` operates.
+##' `NA` is produced. This is how arithmetic in `lubridate` operates.
 ##'
-##' * `boundary` - if an intermediate computation results in a non-existent
-##' date, the date is adjusted to the boundary between the months. Thus,
-##' `2000-01-31 01:02:03 + month = 2000-03-01 00:00:00`. Adding 3 days results
-##' in `2000-03-03 00:00:00`.
+##' * `boundary` - if an intermediate computation falls in a gap, the date is
+##' adjusted to the next valid time. Thus, `2000-01-31 01:02:03 + month =
+##' 2000-03-01 00:00:00`.
 ##'
-##' * `next` - is like `boundary` but preserves the sub-day units. Thus,
-##' `2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03`. This is the default
-##' for `time_add`.
+##' * `next` - is like `boundary` but preserves the smaller units. Thus,
+##' `2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03`.
 ##'
-##' * `prev` - is like `next` but instead of rolling forward to the first
-##' day of the month, it rolls back to the last valid day of the previous
-##' month. Thus, `2000-01-31 01:02:03 + month = 2000-02-28 01:02:03`. This is
-##' the default for `time_subtract`.
-##'
-##' For the purpose of the month adjustment simultaneous addition of `y` years
-##' and `m` months is equivalent to adding `12*y + m` months. Thus `2000-02-29 +
-##' year + month` is equivalent to `2000-02-29 + 13 months` and results in a
-##' valid date `2001-03-29`.
+##' * `prev` - is like `next` but instead of rolling forward to the first day of
+##' the month, it rolls back to the last valid day of the previous month. Thus,
+##' `2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03`. This is the default.
 ##'
 ##' @param time date-time object
 ##' @param periods string or list (currently unimplemented)
@@ -58,22 +50,54 @@
 ##' @param roll_dst if `TRUE` and the resulting date-time falls within the DST
 ##'   gap, the time is rolled forward to the closest valid civil time. If FALSE,
 ##'   NA is returned.
-##' @export
 ##' @examples
 ##'
+##' # Addition
+##'
+##' ## Month gap
 ##' x <- as.POSIXct("2000-01-31 01:02:03", tz = "America/Chicago")
 ##' time_add(x, months = 1, roll_month = "next")
 ##' time_add(x, months = 1, roll_month = "prev")
 ##' time_add(x, months = 1, roll_month = "boundary")
-##' time_add(x, months = 1, roll_month = "none")
+##' time_add(x, months = 1, roll_month = "skip")
 ##' time_add(x, months = 1, roll_month = "NA")
-##'
 ##' time_add(x, months = 1, days = 3,  roll_month = "next")
 ##' time_add(x, months = 1, days = 3,  roll_month = "prev")
 ##' time_add(x, months = 1, days = 3,  roll_month = "boundary")
-##' time_add(x, months = 1, days = 3,  roll_month = "none")
+##' time_add(x, months = 1, days = 3,  roll_month = "skip")
 ##' time_add(x, months = 1, days = 3,  roll_month = "NA")
 ##'
+##' ## DST gap
+##' x <- as.POSIXlt("2010-03-14 01:02:03", tz = "America/Chicago")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "next")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "prev")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "boundary")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "skip")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
+##'
+##' # SUBTRACTION
+##'
+##' ## Month gap
+##' x <- as.POSIXct("2000-03-31 01:02:03", tz = "America/Chicago")
+##' time_subtract(x, months = 1, roll_month = "next")
+##' time_subtract(x, months = 1, roll_month = "prev")
+##' time_subtract(x, months = 1, roll_month = "boundary")
+##' time_subtract(x, months = 1, roll_month = "skip")
+##' time_subtract(x, months = 1, roll_month = "NA")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "next")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "prev")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "skip")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "NA")
+##'
+##' ## DST gap
+##' y <- as.POSIXlt("2010-03-15 01:02:03", tz = "America/Chicago")
+##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "next")
+##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "prev")
+##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary")
+##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "skip")
+##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA")
+##' @export
 time_add <- function(time, periods = NULL,
                      years = NULL, months = NULL, weeks = NULL, days = NULL,
                      hours = NULL, minutes = NULL, seconds = NULL,
@@ -122,21 +146,6 @@ time_add <- function(time, periods = NULL,
 }
 
 ##' @rdname time_add
-##' @examples
-##'
-##' x <- as.POSIXct("2000-03-31 01:02:03", tz = "America/Chicago")
-##' time_subtract(x, months = 1, roll_month = "next")
-##' time_subtract(x, months = 1, roll_month = "prev")
-##' time_subtract(x, months = 1, roll_month = "boundary")
-##' time_subtract(x, months = 1, roll_month = "none")
-##' time_subtract(x, months = 1, roll_month = "NA")
-##'
-##' time_subtract(x, months = 1, days = 3,  roll_month = "next")
-##' time_subtract(x, months = 1, days = 3,  roll_month = "prev")
-##' time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
-##' time_subtract(x, months = 1, days = 3,  roll_month = "none")
-##' time_subtract(x, months = 1, days = 3,  roll_month = "NA")
-##'
 ##' @export
 time_subtract <- function(time, periods = NULL,
                           years = NULL, months = NULL, weeks = NULL, days = NULL,
