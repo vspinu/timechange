@@ -108,6 +108,20 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
         m = loop_month ? month[i] : month[0];
         if (m == NA_INT32) {out[i] = NA_REAL; continue; }
       }
+
+      if (do_yday) {
+        // yday and d are 1 based
+        d = d - cctz::get_yearday(cctz::civil_day(ct1));
+        if (loop_yday) d += yday[i]; else d += yday[0];
+      }
+
+      if (do_wday) {
+        // wday is 1 based and starts on week_start
+        int cur_wday = (static_cast<int>(cctz::get_weekday(cctz::civil_day(ct1))) + 8 - week_start) % 7;
+        d = d - cur_wday - 1;
+        if (loop_wday) d += wday[i]; else d += wday[0];
+      }
+
       if (do_mday) {
         d = loop_mday ? mday[i] : mday[0];
         if (d == NA_INT32) {out[i] = NA_REAL; continue; }
@@ -126,19 +140,6 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
         S = floor_to_int64(s);
         if (S == NA_INT64) { out[i] = NA_REAL; continue; }
         rem += s - S;
-      }
-
-      if (do_yday) {
-        // yday and d are 1 based
-        d = d - cctz::get_yearday(cctz::civil_day(ct1));
-        if (loop_yday) d += yday[i]; else d += yday[0];
-      }
-
-      if (do_wday) {
-        // wday is 1 based and starts on week_start
-        int cur_wday = (static_cast<int>(cctz::get_weekday(cctz::civil_day(ct1))) + 8 - week_start) % 7;
-        d = d - cur_wday - 1;
-        if (loop_wday) d += wday[i]; else d += wday[0];
       }
 
       const cctz::civil_second cs2(y, m, d, H, M, S);

@@ -1,8 +1,8 @@
 
 #include "common.h"
 
-#define FLOOR(x, n) ((x/n) * n)
-#define FLOOR1(x, n) (((x - 1)/n) * n)
+#define FLOOR_MULTI_UNIT(x, n) ((x/n) * n)
+#define FLOOR_MULTI_UNIT1(x, n) (((x - 1)/n) * n)
 inline double floor_multi_unit(double x, double n) noexcept {
   return std::floor(x/n) * n;
 }
@@ -29,6 +29,33 @@ Unit name2unit(std::string unit_name) {
   if (unit_name == "year") return Unit::YEAR;
   if (unit_name == "week") return Unit::WEEK;
   Rf_error("Invalid unit_name (%s)", unit_name.c_str());
+}
+
+// used in time_floor exclusively
+template<typename T>
+inline double civil_time_to_posix(const T& ct,
+                                  const cctz::time_zone& tz,
+                                  const time_point& tp_orig,
+                                  const cctz::civil_second& cs_orig) noexcept {
+  cctz::time_zone::civil_lookup cl = tz.lookup(ct);
+  return civil_lookup_to_posix(cl, tz, tp_orig,cs_orig, true, 0.0);
+}
+
+// used for time_ceiling exclusively
+template<typename T>
+inline double civil_time_to_posix(const T& ct,
+                                  const cctz::time_zone& tz,
+                                  const time_point& tp_orig,
+                                  const cctz::civil_second& cs_orig,
+                                  const int N,
+                                  const bool check_boundary) noexcept {
+  if (check_boundary && cs_orig == ct - N) {
+    time_point tpnew = cctz::convert(cs_orig, tz);
+    return tpnew.time_since_epoch().count();
+  } else {
+    cctz::time_zone::civil_lookup cl = tz.lookup(ct);
+    return civil_lookup_to_posix(cl, tz, tp_orig,cs_orig, true, 0.0);
+  }
 }
 
 // [[Rcpp::export]]
@@ -74,37 +101,37 @@ newDatetimeVector C_time_ceiling(const NumericVector dt,
      }
      case Unit::MINUTE : {
        cctz::civil_minute ct = cctz::civil_minute(cctz::civil_hour(cs)) + CEIL_MULTI_UNIT(cs.minute(), N);
-       out[i] = civil_time_to_posix(ct, cs, tz, N, check_boundary); break;
+       out[i] = civil_time_to_posix(ct, tz, tp, cs, N, check_boundary); break;
      }
      case Unit::HOUR : {
        cctz::civil_hour ct = cctz::civil_hour(cctz::civil_day(cs)) + CEIL_MULTI_UNIT(cs.hour(), N);
-       out[i] = civil_time_to_posix(ct, cs, tz, N, check_boundary); break;
+       out[i] = civil_time_to_posix(ct, tz, tp, cs, N, check_boundary); break;
      }
      case Unit::DAY : {
        /* Rprintf("day:%d ceil:%d\n", cs.day(), CEIL_MULTI_UNIT1(cs.day(), N)); */
        cctz::civil_day ct = cctz::civil_day(cctz::civil_month(cs)) + CEIL_MULTI_UNIT1(cs.day(), N);
-       out[i] = civil_time_to_posix(ct, cs, tz, N, check_boundary); break;
+       out[i] = civil_time_to_posix(ct, tz, tp, cs, N, check_boundary); break;
      }
      case Unit::WEEK : {
        if (N != 1)
          Rf_warning("Multi-unit week ceiling is not supported; ignoring");
        cctz::civil_day ct = cctz::next_weekday(cctz::civil_day(cs), wday);
-       out[i] = civil_time_to_posix(ct, cs, tz, 7, check_boundary); break;
+       out[i] = civil_time_to_posix(ct, tz, tp, cs, 7, check_boundary); break;
      }
      case Unit::SEASON : {
        cctz::civil_month ct = cctz::civil_month(cctz::civil_year(cs)) + CEIL_MULTI_UNIT(cs.month(), N) - 1;
-       out[i] = civil_time_to_posix(ct, cs, tz, N, check_boundary); break;
+       out[i] = civil_time_to_posix(ct, tz, tp, cs, N, check_boundary); break;
      }
      case Unit::HALFYEAR :
      case Unit::QUARTER :
      case Unit::BIMONTH :
      case Unit::MONTH : {
        cctz::civil_month ct = cctz::civil_month(cctz::civil_year(cs)) + CEIL_MULTI_UNIT1(cs.month(), N);
-       out[i] = civil_time_to_posix(ct, cs, tz, N, check_boundary); break;
+       out[i] = civil_time_to_posix(ct, tz, tp, cs, N, check_boundary); break;
      }
      case Unit::YEAR : {
        cctz::civil_year ct = cctz::civil_year(CEIL_MULTI_UNIT(cs.year(), N));
-       out[i] = civil_time_to_posix(ct, cs, tz, N, check_boundary); break;
+       out[i] = civil_time_to_posix(ct, tz, tp, cs, N, check_boundary); break;
      }
     }
   }
@@ -146,38 +173,38 @@ newDatetimeVector C_time_floor(const NumericVector dt,
        out[i] = floor_multi_unit(dsecs, nunits); break;
      }
      case Unit::MINUTE : {
-       cctz::civil_minute ct = cctz::civil_minute(cctz::civil_hour(cs)) + FLOOR(cs.minute(), N);
-       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
+       cctz::civil_minute ct = cctz::civil_minute(cctz::civil_hour(cs)) + FLOOR_MULTI_UNIT(cs.minute(), N);
+       out[i] = civil_time_to_posix(ct, tz, tp, cs); break;
      }
      case Unit::HOUR : {
-       cctz::civil_hour ct = cctz::civil_hour(cctz::civil_day(cs)) + FLOOR(cs.hour(), N);
-       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
+       cctz::civil_hour ct = cctz::civil_hour(cctz::civil_day(cs)) + FLOOR_MULTI_UNIT(cs.hour(), N);
+       out[i] = civil_time_to_posix(ct, tz, tp, cs); break;
      }
      case Unit::DAY : {
-       cctz::civil_day ct = cctz::civil_day(cctz::civil_month(cs)) + FLOOR1(cs.day(), N);
-       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
+       cctz::civil_day ct = cctz::civil_day(cctz::civil_month(cs)) + FLOOR_MULTI_UNIT1(cs.day(), N);
+       out[i] = civil_time_to_posix(ct, tz, tp, cs); break;
      }
      case Unit::WEEK : {
        if (N != 1)
          Rf_warning("Multi-unit week rounding is not supported; ignoring");
        // get the previous `wday` if `cs` is not already on `wday`
        cctz::civil_day ct = cctz::next_weekday(cctz::civil_day(cs), wday) - 7;
-       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
+       out[i] = civil_time_to_posix(ct, tz, tp, cs); break;
      }
      case Unit::SEASON : {
-       cctz::civil_month ct = cctz::civil_month(cctz::civil_year(cs)) + FLOOR(cs.month(), N) - 1;
-       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
+       cctz::civil_month ct = cctz::civil_month(cctz::civil_year(cs)) + FLOOR_MULTI_UNIT(cs.month(), N) - 1;
+       out[i] = civil_time_to_posix(ct, tz, tp, cs); break;
      }
      case Unit::HALFYEAR :
      case Unit::QUARTER :
      case Unit::BIMONTH :
      case Unit::MONTH : {
-       cctz::civil_month ct = cctz::civil_month(cctz::civil_year(cs)) + FLOOR1(cs.month(), N);
-       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
+       cctz::civil_month ct = cctz::civil_month(cctz::civil_year(cs)) + FLOOR_MULTI_UNIT1(cs.month(), N);
+       out[i] = civil_time_to_posix(ct, tz, tp, cs); break;
      }
      case Unit::YEAR : {
-       cctz::civil_year ct = cctz::civil_year(FLOOR(cs.year(), N));
-       out[i] = civil_time_to_posix(ct, tz, Roll::BOUNDARY); break;
+       cctz::civil_year ct = cctz::civil_year(FLOOR_MULTI_UNIT(cs.year(), N));
+       out[i] = civil_time_to_posix(ct, tz, tp, cs); break;
      }
     }
   }

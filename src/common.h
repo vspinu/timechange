@@ -31,7 +31,7 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
                              bool roll, double remainder = 0.0) ;
 
 template<typename T>
-inline double civil_time_to_posix(T ct, cctz::time_zone tz, Roll roll_dst) noexcept {
+inline double civil_time_to_posix(const T& ct, const cctz::time_zone& tz, const Roll& roll_dst) noexcept {
   cctz::time_zone::civil_lookup cl = tz.lookup(ct);
   time_point tp;
   if (cl.kind == cctz::time_zone::civil_lookup::SKIPPED) {
@@ -42,22 +42,23 @@ inline double civil_time_to_posix(T ct, cctz::time_zone tz, Roll roll_dst) noexc
      case Roll::PREV: tp = cl.post; break;
      case Roll::NA: return NA_REAL;
     }
+  } else if (cl.kind == cctz::time_zone::civil_lookup::REPEATED) {
+    // The mnemonics in this case should be interpreted starting from a moment
+    // in time just before the ambiguous DST. Thus next means "pre" hour. PREV
+    // means "post" hour. The PREV mnemonic is not suggestive in this
+    // case. Maybe change back to FIRST/LAST?
+    switch (roll_dst) {
+     case Roll::BOUNDARY: tp = cl.trans; break;
+     case Roll::SKIP:
+     case Roll::PREV: tp = cl.post; break;
+     case Roll::NEXT: tp = cl.pre; break;
+     case Roll::NA: return NA_REAL;
+    }
   } else {
     tp = cl.pre;
   }
   return tp.time_since_epoch().count();
 }
 
-// used in round.cpp exclusively; no roll_dst implemented; needed?
-template<typename T>
-inline double civil_time_to_posix(T ct, cctz::civil_second cs, cctz::time_zone tz, int N, bool check_boundary) noexcept {
-  if (check_boundary && cs == ct - N) {
-    time_point tpnew = cctz::convert(cs, tz);
-    return tpnew.time_since_epoch().count();
-  } else {
-    time_point tpnew = cctz::convert(ct, tz);
-    return tpnew.time_since_epoch().count();
-  }
-}
 
 #endif // TIMECHANGE_COMMON_H

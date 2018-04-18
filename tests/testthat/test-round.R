@@ -420,6 +420,7 @@ test_that("time_round behaves correctly on 60th second", {
 })
 
 test_that("time_round and time_ceiling skip day time gap", {
+
   ##  (#240)
   tz <- "Europe/Amsterdam"
   times <- ymd_hms("2013-03-31 01:00:00 CET", "2013-03-31 01:15:00 CEST",
@@ -439,6 +440,7 @@ test_that("time_round and time_ceiling skip day time gap", {
                      "2013-03-31 03:00:00 CEST", "2013-03-31 03:00:00 CEST",
                      "2013-03-31 04:00:00 CEST",
                      tz = tz)
+
   expect_equal(time_ceiling(times, "hour"), ceiling)
 
 
@@ -453,9 +455,13 @@ test_that("time_round and time_ceiling skip day time gap", {
   expect_equal(time_round(x, "hour"),  y)
 })
 
-test_that("time rounding works with repeated DST transitions", {
+test_that("time rounding with hours works with repeated DST transitions", {
+
+  ## WAF? as.POSIXct returns EDT/EST randomly on ctus("2014-11-02 01:00:00")
+  am1 <- .POSIXct(1414904400, tz = "America/New_York")
+  expect_equal(time_floor(am1 + 3600, "hour"), am1 + 3600)
   ## rounding is done in civil time for units > seconds
-  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "hour"), ctus("2014-11-02 01:00:00")) ## EDT (.5h)
+  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "hour"), am1) ## EDT (.5h)
   expect_equal(time_ceiling(ctus("2014-11-02 01:35:00"), "hour"), ctus("2014-11-02 02:00:00")) ## EST (1.5h)
   expect_equal(time_ceiling(ctus("2014-11-02 02:15:00"), "hour"), ctus("2014-11-02 03:00:00")) ## EST (45m)
   x <- ctus("2014-11-02 00:30:00")
@@ -466,17 +472,15 @@ test_that("time rounding works with repeated DST transitions", {
   expect_equal(as.numeric(difftime(time_ceiling(x, "hour"), ctus(x), units = "min")), 45)
 
   ## rounding is done in absolute time for seconds
-  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "3600s"), ctus("2014-11-02 01:00:00")) ## EDT (.5h)
+  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "3600s"), am1) ## EDT (.5h)
   x <- ctus("2014-11-02 00:30:00")
   expect_equal(as.numeric(difftime(time_ceiling(x, "3600s"), ctus(x), units = "min")), 30)
-  x <- time_add(ctus("2014-11-02 01:00:00"), minutes = 30) ## EDT
+  x <- time_add(am1, minutes = 30) ## EDT
   expect_equal(as.numeric(difftime(time_ceiling(x, "3600s"), ctus(x), units = "min")), 30)
 
-  ## WAF? as.POSIXct returns EDT/EST randomly
-
   ## rounding is done in civil time for units > seconds
-  expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), ctus("2014-11-02 01:00:00")) ## EDT (30m)
-  x <- time_add(ctus("2014-11-02 01:00:00"), minutes = 35) ## EDT
+  expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), am1) ## EDT (30m)
+  x <- time_add(am1, minutes = 35) ## EDT
   expect_equal(as.numeric(difftime(time_round(x, "hour"), ctus(x), units = "min")), -35)
   expect_equal(as.numeric(difftime(time_round(x, "3600s"), ctus(x), units = "min")), 25)
   x <- ctus("2014-11-02 02:15:00")
@@ -485,9 +489,9 @@ test_that("time rounding works with repeated DST transitions", {
   expect_equal(as.numeric(difftime(time_round(x, "3600s"), ctus(x), units = "min")), -15)
 
   ## rounding is done in civil time for units > seconds
-  expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), ctus("2014-11-02 01:00:00")) ## EDT (30m)
-  x <- .POSIXct(1414909500, tz = "America/New_York") # "2014-11-02 01:25:00"
-  expect_equal(as.numeric(difftime(time_floor(x, "hour"), x, units = "min")), -85)
+  expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), am1) ## EDT (30m)
+  x <- .POSIXct(1414909500, tz = "America/New_York") # "2014-11-02 01:25:00 EST"
+  expect_equal(as.numeric(difftime(time_floor(x, "hour"), x, units = "min")), -25)
   expect_equal(as.numeric(difftime(time_floor(x, "3600s"), x, units = "min")), -25)
   x <- ctus("2014-11-02 02:15:00") ## EST
   expect_equal(time_floor(x, "hour"), ctus("2014-11-02 02:00:00")) ## EST (15m)
@@ -495,8 +499,39 @@ test_that("time rounding works with repeated DST transitions", {
 
 })
 
+test_that("time rounding with minutes works with repeated DST transitions", {
+
+  am1 <- .POSIXct(1414904400, tz = "America/New_York")
+  expect_equal(time_ceiling(am1 + 30, "min"), am1 + 60)
+  expect_equal(time_ceiling(am1 + 3630, "min"), am1 + 3660)
+  expect_equal(time_ceiling(am1 + 3690, "min"), am1 + 3720)
+  expect_equal(time_ceiling(am1 + 30, "min"), am1 + 60)
+
+  expect_equal(time_floor(am1 + 30, "min"), am1)
+  expect_equal(time_floor(am1 + 90, "min"), am1 + 60)
+  expect_equal(time_floor(am1 + 3600, "min"), am1 + 3600)
+  expect_equal(time_floor(am1 + 3600, "sec"), am1 + 3600)
+  expect_equal(time_floor(am1 + 3690, "min"), am1 + 3660)
+  expect_equal(time_floor(am1 + 3690, "5min"), am1 + 3600)
+
+  ## rounding is done in civil time for units > seconds
+  x <- .POSIXct(1414909530, tz = "America/New_York") # "2014-11-02 01:25:30 EST"
+  expect_equal(as.numeric(difftime(time_floor(x, "minute"), x, units = "secs")), -30)
+  expect_equal(as.numeric(difftime(time_floor(x, "60s"), x, units = "secs")), -30)
+  x <- am1 + 1890
+  expect_equal(time_floor(x, "minute"), am1 + 1860)
+  expect_equal(time_floor(x, "3minute"), am1 + 1800)
+  x <- ctus("2014-11-02 02:15:00") ## EST
+  expect_equal(time_floor(x, "minute"), ctus("2014-11-02 02:15:00"))
+  expect_equal(time_floor(x, "5minute"), ctus("2014-11-02 02:15:00"))
+  expect_equal(time_floor(x, "4minute"), ctus("2014-11-02 02:12:00"))
+  expect_equal(as.numeric(difftime(time_floor(x, "3600s"), ctus(x), units = "min")), -15)
+
+})
+
 test_that("time_ceiling, time_round and time_floor behave correctly with NA", {
-  ## (bug #486)
+  am1 <- .POSIXct(1414904400, tz = "America/New_York")
+  ## (bug lubridate #486)
   x <- time_add(ymd_hms("2009-08-03 12:01:59.23", tz = "UTC"), days = 0:1)
   x[2] <- NA
   expect_equal(time_ceiling(x, unit = "day"), ymd(c("2009-08-04", NA), tz = "UTC"))

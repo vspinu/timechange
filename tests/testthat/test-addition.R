@@ -141,3 +141,27 @@ test_that("adding vectors works as expected for instants", {
                as.Date(c("2009-03-03", "2009-03-02")))
 
 })
+
+
+test_that("addition and subtraction work with repeated DST", {
+  am1 <- .POSIXct(1414904400, tz = "America/New_York")
+  am2 <- am1 + 3600*2
+
+  ## last/prev
+  expect_equal(time_subtract(am2, hours = 1), am1 + 3600)
+  expect_equal(time_subtract(am2, hours = 1, minutes = 1), am1 - 60)
+  expect_equal(time_subtract(am2 + 60, hours = 1), am1 + 3660)
+  expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 1), am1 + 3600)
+  expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 2), am1 - 60)
+  expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 1, seconds = 1), am1 - 1)
+
+  ## first/next
+  expect_equal(time_add(am1, minutes = 2), am1 + 120)
+  expect_equal(time_add(am1, minutes = 60), am2)
+  expect_equal(time_add(am1 + 60, minutes = 1), am1 + 120)
+  expect_equal(time_add(am1 + 60, hours = 1), am2 + 60)
+  expect_equal(time_add(am1 + 60, minutes = 1), am1 + 120)
+  expect_equal(time_add(am1 + 60, minutes = 60), am2 + 60)
+  expect_equal(time_add(am1 + 60, minutes = 120), am2 + 3660)
+
+})
