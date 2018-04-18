@@ -542,7 +542,6 @@ test_that("time_ceiling, time_round and time_floor behave correctly with NA", {
   expect_equal(time_round(x, unit = "minute"), ymd_hms(c("2009-08-03 12:02:00", NA), tz = "UTC"))
 })
 
-
 test_that("time_floor works for seasons", {
   dts <- ymd_hms(sprintf("2017-%d-02 0:34:3", 1:12))
   expect_equal(month(time_floor(dts, "season")), c(12, 12, 3, 3, 3, 6, 6, 6, 9, 9, 9, 12))
@@ -556,7 +555,6 @@ test_that("time_ceiling works for seasons", {
   dts <- time_force_tz(dts, "America/New_York")
   expect_equal(month(time_ceiling(dts, "season")), c(3, 3, 6, 6, 6, 9, 9, 9, 12, 12, 12, 3))
 })
-
 
 test_that("round on week respects week_start", {
   date <- ymd("2017-05-07") ## sunday

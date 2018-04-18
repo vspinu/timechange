@@ -46,16 +46,16 @@ ymd <- function(..., tz = NULL) {
 }
 
 second <- function(x)
-  as.POSIXlt(x, tz = tz(x))$sec
+  as.POSIXlt(x, tz = timechange:::tz(x))$sec
 
 hour <- function(x)
-  as.POSIXlt(x, tz = tz(x))$hour
+  as.POSIXlt(x, tz = timechange:::tz(x))$hour
 
 minute <- function(x)
-  as.POSIXlt(x, tz = tz(x))$min
+  as.POSIXlt(x, tz = timechange:::tz(x))$min
 
 month <- function(x, label = FALSE, abbr = TRUE, locale = Sys.getlocale("LC_TIME")) {
-  x <- as.POSIXlt(x, tz = tz(x))$mon + 1
+  x <- as.POSIXlt(x, tz = timechange:::tz(x))$mon + 1
   if (!label) return(x)
   names <- .get_locale_regs(locale)$month_names
   labels <- if (abbr) names$abr else names$full
@@ -63,17 +63,17 @@ month <- function(x, label = FALSE, abbr = TRUE, locale = Sys.getlocale("LC_TIME
 }
 
 year <- function(x)
-  as.POSIXlt(x, tz = tz(x))$year + 1900
+  as.POSIXlt(x, tz = timechange:::tz(x))$year + 1900
 
 mday <- function(x)
-  as.POSIXlt(x, tz = tz(x))$mday
+  as.POSIXlt(x, tz = timechange:::tz(x))$mday
 
 day <- function(x)
-  as.POSIXlt(x, tz = tz(x))$mday
+  as.POSIXlt(x, tz = timechange:::tz(x))$mday
 
 wday <- function(x, label = FALSE, abbr = TRUE,
                  week_start = 1, locale = Sys.getlocale("LC_TIME")) {
-  x <- as.POSIXlt(x, tz = tz(x))$wday + 1
+  x <- as.POSIXlt(x, tz = timechange:::tz(x))$wday + 1
   start <- as.integer(week_start)
   if (start > 7 || start < 1) stop("Invalid 'week_start' argument; must be between 1 and 7")
   if (start != 7) {
@@ -88,7 +88,7 @@ wday <- function(x, label = FALSE, abbr = TRUE,
 }
 
 yday <- function(x)
-  as.POSIXlt(x, tz = tz(x))$yday + 1
+  as.POSIXlt(x, tz = timechange:::tz(x))$yday + 1
 
 now <- function(tzone = "")
   time_at_tz(Sys.time(), tzone)

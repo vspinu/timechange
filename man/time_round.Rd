@@ -177,7 +177,7 @@ difftime(time_ceiling(x, "3600s"), x, units = "min")
 # "2014-11-02 01:25:00 EST" after 1h backroll at 2AM
 x <- .POSIXct(1414909500, tz = "America/New_York")
 x
-time_floor(x, "hour") # "2014-11-02 01:00:00 EDT"  - 1h 25m
+time_floor(x, "hour") # "2014-11-02 01:00:00 EST"  - 25m
 difftime(time_floor(x, "hour"), x, units = "min")
 time_floor(x, "3600s") # "2014-11-02 01:00:00 EST"  - 25m
 difftime(time_floor(x, "3600s"), x, units = "min")
