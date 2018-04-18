@@ -13,16 +13,17 @@
 #'   base [base::round()] function which "rounds to the even digit" per IEC
 #'   60559.
 #'
-#' For all units, with the exception of seconds and weeks, maximally allowed
-#' multi-unit is capped by the parent unit (60 mins, 24 hours etc). Multi-unit
-#' rounding of weeks is currently not supported.
+#' @section Civil Time vs Absolute Time rounding:
 #'
-#' @section Rounding of seconds:
-#'
-#' Rounding of seconds follows different rules from other units. It is performed
-#' directly on the numeric `POSIXct` representation, hence bypassing all
-#' complexities with civil times like time-zones and DST. This also allows for
-#' multi-units seconds larger than 60.
+#' Rounding of seconds is done in absolute time (numeric `POSIXct`
+#' representation), but all other units are rounded in civil time. There are two
+#' important consequences of this decision. First, rounding of seconds allows
+#' for multi-units larger than 60, while for all other units the maximal
+#' multi-unit is restricted to the containing unit (60 mins, 24 hours
+#' etc). Second, floor (ceiling) in civil time will never produce units larger
+#' (smaller) than the units in the rounded objects. See examples of rounding
+#' around DST transition with `1 hour` does not give same result as rounding
+#' with `3600 seconds`.
 #'
 #' Rounding to fractional seconds is allowed. Please note that rounding to
 #' fractions smaller than 1ms will lead to large precision errors due to the
@@ -55,8 +56,9 @@
 #' @param unit a character string specifying a time unit or a multiple of a
 #'   unit. Valid base units are `second`, `minute`, `hour`, `day`, `week`,
 #'   `month`, `bimonth`, `quarter`, `season`, `halfyear` and `year`. Arbitrary
-#'   unique English abbreviations constructor are allowed. With one letter
-#'   abreviations "m" stands for month and "M" stands for minute.
+#'   unique English abbreviations are allowed. With one letter abbreviations "m"
+#'   stands for month and "M" stands for minute. Multi-unit rounding of weeks is
+#'   currently not supported.
 #' @param change_on_boundary If NULL (the default) don't change instants on the
 #'   boundary (`time_ceiling(ymd_hms('2000-01-01 00:00:00'))` is `2000-01-01
 #'   00:00:00`), but round up `Date` objects to the next boundary
@@ -65,8 +67,8 @@
 #'   `FALSE`, date-time on the boundary are never rounded up (this was the
 #'   default for \pkg{lubridate} prior to `v1.6.0`. See section `Rounding Up
 #'   Date Objects` below for more details.
-#' @param week_start when unit is `weeks` specify the reference day; 7 being
-#'   Sunday.
+#' @param week_start when unit is `weeks` specify the reference day. Defaults to
+#'   1 (Monday).
 #' @return An object of the same class as the input object. When input is a
 #'   `Date` object and unit is smaller than `day` a `POSIXct` object is
 #'   returned.
@@ -134,6 +136,23 @@
 #' as.POSIXct("2009-08-03 12:01:59.3") ## -> "2009-08-03 12:01:59.2 CEST"
 #' time_ceiling(x, ".1 sec") ## -> "2009-08-03 12:01:59.2 CEST"
 #'
+#' ## Civil Time vs Absolute Time Rounding
+#'
+#' # "2014-11-02 01:35:00 EDT" before 1h backroll at 2AM
+#' x <- .POSIXct(1414906500, tz = "America/New_York")
+#' x
+#' time_ceiling(x, "hour") # "2014-11-02 02:00:00 EST" + 1h 25m
+#' difftime(time_ceiling(x, "hour"), x, units = "min")
+#' time_ceiling(x, "3600s") # "2014-11-02 01:00:00 EST" + 25m
+#' difftime(time_ceiling(x, "3600s"), x, units = "min")
+#'
+#' # "2014-11-02 01:25:00 EST" after 1h backroll at 2AM
+#' x <- .POSIXct(1414909500, tz = "America/New_York")
+#' x
+#' time_floor(x, "hour") # "2014-11-02 01:00:00 EDT"  - 1h 25m
+#' difftime(time_floor(x, "hour"), x, units = "min")
+#' time_floor(x, "3600s") # "2014-11-02 01:00:00 EST"  - 25m
+#' difftime(time_floor(x, "3600s"), x, units = "min")
 #' @export
 time_round <- function(time, unit = "second", week_start = getOption("week_start", 1)) {
   if (length(time) == 0L)
@@ -144,8 +163,8 @@ time_round <- function(time, unit = "second", week_start = getOption("week_start
   unit <- standardise_unit_name(parsed_unit$unit)
   validate_nunit(unit, n)
 
-  if (n == 1 && is.POSIXct(time) && unit %in% c("second", "minute", "hour", "day")) {
-    ## special case for fast rounding
+  if (n == 1 && is.POSIXt(time) && unit == "second") {
+    ## special case for fast absolute time rounding
     round.POSIXt(time, units = base_units[[unit]])
   } else {
     ct <- to_posixct(time)

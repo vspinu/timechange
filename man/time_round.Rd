@@ -21,11 +21,12 @@ time_ceiling(time, unit = "seconds", change_on_boundary = inherits(time,
 \item{unit}{a character string specifying a time unit or a multiple of a
 unit. Valid base units are \code{second}, \code{minute}, \code{hour}, \code{day}, \code{week},
 \code{month}, \code{bimonth}, \code{quarter}, \code{season}, \code{halfyear} and \code{year}. Arbitrary
-unique English abbreviations constructor are allowed. With one letter
-abreviations "m" stands for month and "M" stands for minute.}
+unique English abbreviations are allowed. With one letter abbreviations "m"
+stands for month and "M" stands for minute. Multi-unit rounding of weeks is
+currently not supported.}
 
-\item{week_start}{when unit is \code{weeks} specify the reference day; 7 being
-Sunday.}
+\item{week_start}{when unit is \code{weeks} specify the reference day. Defaults to
+1 (Monday).}
 
 \item{change_on_boundary}{If NULL (the default) don't change instants on the
 boundary (\code{time_ceiling(ymd_hms('2000-01-01 00:00:00'))} is \code{2000-01-01 00:00:00}), but round up \code{Date} objects to the next boundary
@@ -53,23 +54,24 @@ up. Note that this is in line with the behavior of R's
 base \code{\link[base:round]{base::round()}} function which "rounds to the even digit" per IEC
 60559.
 
-For all units, with the exception of seconds and weeks, maximally allowed
-multi-unit is capped by the parent unit (60 mins, 24 hours etc). Multi-unit
-rounding of weeks is currently not supported.
-
 \code{time_floor} takes a date-time object and rounds it down to the
 nearest boundary of the specified time unit.
 
 \code{time_ceiling()} takes a date-time object and rounds it up to the
 nearest boundary of the specified time unit.
 }
-\section{Rounding of seconds}{
+\section{Civil Time vs Absolute Time rounding}{
 
 
-Rounding of seconds follows different rules from other units. It is performed
-directly on the numeric \code{POSIXct} representation, hence bypassing all
-complexities with civil times like time-zones and DST. This also allows for
-multi-units seconds larger than 60.
+Rounding of seconds is done in absolute time (numeric \code{POSIXct}
+representation), but all other units are rounded in civil time. There are two
+important consequences of this decision. First, rounding of seconds allows
+for multi-units larger than 60, while for all other units the maximal
+multi-unit is restricted to the containing unit (60 mins, 24 hours
+etc). Second, floor (ceiling) in civil time will never produce units larger
+(smaller) than the units in the rounded objects. See examples of rounding
+around DST transition with \code{1 hour} does not give same result as rounding
+with \code{3600 seconds}.
 
 Rounding to fractional seconds is allowed. Please note that rounding to
 fractions smaller than 1ms will lead to large precision errors due to the
@@ -162,6 +164,23 @@ time_ceiling(x, "month", change_on_boundary = FALSE)
 as.POSIXct("2009-08-03 12:01:59.3") ## -> "2009-08-03 12:01:59.2 CEST"
 time_ceiling(x, ".1 sec") ## -> "2009-08-03 12:01:59.2 CEST"
 
+## Civil Time vs Absolute Time Rounding
+
+# "2014-11-02 01:35:00 EDT" before 1h backroll at 2AM
+x <- .POSIXct(1414906500, tz = "America/New_York")
+x
+time_ceiling(x, "hour") # "2014-11-02 02:00:00 EST" + 1h 25m
+difftime(time_ceiling(x, "hour"), x, units = "min")
+time_ceiling(x, "3600s") # "2014-11-02 01:00:00 EST" + 25m
+difftime(time_ceiling(x, "3600s"), x, units = "min")
+
+# "2014-11-02 01:25:00 EST" after 1h backroll at 2AM
+x <- .POSIXct(1414909500, tz = "America/New_York")
+x
+time_floor(x, "hour") # "2014-11-02 01:00:00 EDT"  - 1h 25m
+difftime(time_floor(x, "hour"), x, units = "min")
+time_floor(x, "3600s") # "2014-11-02 01:00:00 EST"  - 25m
+difftime(time_floor(x, "3600s"), x, units = "min")
 }
 \seealso{
 \code{\link[base:round]{base::round()}}
