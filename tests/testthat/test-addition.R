@@ -1,20 +1,20 @@
 context("Addition operations")
 
 test_that("addition handles daylight savings time", {
-  x <- ctam("2010-03-14 01:02:03")
-  y <- ctam("2010-03-15 01:02:03")
+  x <- ctus("2010-03-14 01:02:03")
+  y <- ctus("2010-03-15 01:02:03")
   expect_equal(time_add(x, days = 1), y)
 
-  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "skip"), ctam("2010-03-14 03:52:03"))
-  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "next"), ctam("2010-03-14 03:52:03"))
-  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "prev"), ctam("2010-03-14 01:52:03"))
-  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "boundary"), ctam("2010-03-14 03:00:00"))
+  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "skip"), ctus("2010-03-14 03:52:03"))
+  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "next"), ctus("2010-03-14 03:52:03"))
+  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "prev"), ctus("2010-03-14 01:52:03"))
+  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "boundary"), ctus("2010-03-14 03:00:00"))
   expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "NA"), NAam)
 
-  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "skip"), ctam("2010-03-14 01:12:03"))
-  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "next"), ctam("2010-03-14 03:12:03"))
-  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "prev"), ctam("2010-03-14 01:12:03"))
-  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary"), ctam("2010-03-14 03:00:00"))
+  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "skip"), ctus("2010-03-14 01:12:03"))
+  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "next"), ctus("2010-03-14 03:12:03"))
+  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "prev"), ctus("2010-03-14 01:12:03"))
+  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary"), ctus("2010-03-14 03:00:00"))
   expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA"), NAam)
   expect_equal(time_subtract(y, days = 1), x)
 })
@@ -28,20 +28,20 @@ test_that("addition works as expected for instants", {
   expect_equal(time_add(y, years = 1), ltutc("2009-01-01 00:00:00"))
   expect_equal(time_add(z, years = 1), as.Date("2009-01-01"))
 
-  x <- ctam("2008-01-01 00:00:00")
-  y <- ctam("2008-01-01 00:00:00")
-  expect_equal(time_add(x, years = 1), ctam("2009-01-01 00:00:00"))
-  expect_equal(time_add(y, years = 1), ctam("2009-01-01 00:00:00"))
+  x <- ctus("2008-01-01 00:00:00")
+  y <- ctus("2008-01-01 00:00:00")
+  expect_equal(time_add(x, years = 1), ctus("2009-01-01 00:00:00"))
+  expect_equal(time_add(y, years = 1), ctus("2009-01-01 00:00:00"))
   expect_equal(time_add(x, years = 1, months = 2, days = 3, hours = 4, minutes = 5, seconds = 6.6),
-               ctam("2009-03-04 04:05:06.6"))
-  expect_equal(time_add(y, years = 1), ctam("2009-01-01 00:00:00"))
+               ctus("2009-03-04 04:05:06.6"))
+  expect_equal(time_add(y, years = 1), ctus("2009-01-01 00:00:00"))
 
-  x <- ctam("2008-01-01 00:00:00")
-  y <- ctam("2008-01-01 00:00:00")
-  expect_equal(time_subtract(x, years = 1), ctam("2007-01-01 00:00:00"))
-  expect_equal(time_subtract(y, years = 1), ctam("2007-01-01 00:00:00"))
+  x <- ctus("2008-01-01 00:00:00")
+  y <- ctus("2008-01-01 00:00:00")
+  expect_equal(time_subtract(x, years = 1), ctus("2007-01-01 00:00:00"))
+  expect_equal(time_subtract(y, years = 1), ctus("2007-01-01 00:00:00"))
   expect_equal(time_subtract(x, years = 1, months = 2, days = 3, hours = 4, minutes = 5, seconds = 6.6),
-               ctam("2006-10-28 19:54:53.4"))
+               ctus("2006-10-28 19:54:53.4"))
 
 })
 

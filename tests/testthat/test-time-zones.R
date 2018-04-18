@@ -1,9 +1,7 @@
 context("Time Zones")
 
-library(lubridate)
-
 test_that("time_at_tz works as expected", {
-  x <- as.POSIXct("2008-08-03 10:01:59", tz = "America/New_York")
+  x <- ctus("2008-08-03 10:01:59")
   y <- as.POSIXlt(x)
   expect_equal(time_at_tz(x, "UTC"),
                as.POSIXct(format(as.POSIXct(x), tz = "UTC"), tz = "UTC"))
@@ -36,7 +34,7 @@ test_that("time_at_tz handles data.frames", {
 })
 
 test_that("time_force_tz works as expected", {
-  x <- ymd_hms(c("2009-08-07 00:00:01", "2009-08-07 00:00:01"))
+  x <- ctutc(c("2009-08-07 00:00:01", "2009-08-07 00:00:01"))
   expect_equal(time_force_tz(x, tz = c("America/New_York", "Europe/Amsterdam"), tzout = "UTC"),
                ymd_hms("2009-08-07 04:00:01 UTC", "2009-08-06 22:00:01 UTC"))
   expect_equal(time_force_tz(x, tz = c("America/New_York", "Europe/Amsterdam"), tzout = "America/New_York"),
@@ -84,14 +82,14 @@ test_that("time_at_tz throws warning on unrecognized time zones", {
 
 test_that("time_force_tz works as expected", {
   x <- as.POSIXct("2008-08-03 10:01:59", tz = "America/New_York")
-  expect_that(time_force_tz(x, "UTC"),
-              equals(as.POSIXct(format(as.POSIXct(x)), tz = "UTC")))
+  expect_equal(time_force_tz(x, "UTC"),
+               as.POSIXct(format(as.POSIXct(x)), tz = "UTC"))
 })
 
 test_that("time_force_tz handles vectors", {
   x <- as.POSIXct(c("2008-08-03 13:01:59", "2009-08-03 10:01:59"), tz = "America/New_York")
-  expect_that(time_force_tz(x, "UTC"),
-              equals(as.POSIXct(format(as.POSIXct(x)), tz = "UTC")))
+  expect_equal(time_force_tz(x, "UTC"),
+               as.POSIXct(format(as.POSIXct(x)), tz = "UTC"))
 })
 
 test_that("time_force_tz handles various date-time classes", {
@@ -110,8 +108,8 @@ test_that("time_force_tz handles data.frames", {
   x_out <- as.POSIXct(format(as.POSIXct(x)), tz = "UTC")
   df <- data.frame(x = x, y = as.POSIXlt(x), z = "blabla")
   df <- time_force_tz(df, "UTC")
-  expect_that(df$x, equals(x_out))
-  expect_that(df$y, equals(x_out))
+  expect_equal(df$x, x_out)
+  expect_equal(df$y, x_out)
 })
 
 test_that("time_force_tz doesn't return NA just because new time zone uses DST", {

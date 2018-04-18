@@ -1,8 +1,5 @@
 context("Rounding")
 
-library(lubridate)
-options(lubridate.week.start = 1)
-
 test_that("time_floor works for each time element", {
   x <- as.POSIXct("2009-08-03 12:01:59.34", tz = "UTC")
   expect_identical(time_floor(x, "second"), as.POSIXct("2009-08-03 12:01:59", tz = "UTC"))
@@ -64,20 +61,20 @@ test_that("multi-unit rounding works the same for POSIX and Date objects", {
   dt <- ymd("2009-08-01")
   expect_identical(time_floor(px, "5 mins"), time_floor(dt, "5 mins"))
   expect_identical(time_floor(px, "5 mins"), time_floor(dt, "5 mins"))
-  expect_identical(ceiling_date(px + 0.0001, "5 mins"), ceiling_date(dt, "5 mins"))
-  expect_identical(ceiling_date(px, "5 mins", change_on_boundary = T),
-                   ceiling_date(dt, "5 mins", change_on_boundary = T))
-  expect_identical(ceiling_date(px + 0.001, "5 hours"), ceiling_date(dt, "5 hours"))
-  expect_identical(ceiling_date(px + 0.0001, "5 hours", change_on_boundary = T), ceiling_date(dt, "5 hours", change_on_boundary = T))
-  expect_identical(ceiling_date(px + 0.001, "2 hours"), ceiling_date(dt, "2 hours"))
-  expect_identical(as_date(time_floor(px, "2 days")), time_floor(dt, "2 days"))
-  expect_identical(as_date(ceiling_date(px + 0.001, "2 days")), ceiling_date(dt, "2 days"))
-  expect_identical(as_date(time_floor(px, "5 days")), time_floor(dt, "5 days"))
-  expect_identical(as_date(ceiling_date(px + 0.001, "5 days")), ceiling_date(dt, "5 days"))
-  expect_identical(as_date(time_floor(px, "2 months")), time_floor(dt, "2 months"))
-  expect_identical(as_date(ceiling_date(px, "2 months")), ceiling_date(dt, "2 months"))
-  expect_identical(as_date(time_floor(px, "5 months")), time_floor(dt, "5 months"))
-  expect_identical(as_date(ceiling_date(px, "5 months")), ceiling_date(dt, "5 months"))
+  expect_identical(time_ceiling(px + 0.0001, "5 mins"), time_ceiling(dt, "5 mins"))
+  expect_identical(time_ceiling(px, "5 mins", change_on_boundary = T),
+                   time_ceiling(dt, "5 mins", change_on_boundary = T))
+  expect_identical(time_ceiling(px + 0.001, "5 hours"), time_ceiling(dt, "5 hours"))
+  expect_identical(time_ceiling(px + 0.0001, "5 hours", change_on_boundary = T), time_ceiling(dt, "5 hours", change_on_boundary = T))
+  expect_identical(time_ceiling(px + 0.001, "2 hours"), time_ceiling(dt, "2 hours"))
+  expect_identical(as.Date(time_floor(px, "2 days")), time_floor(dt, "2 days"))
+  expect_identical(as.Date(time_ceiling(px + 0.001, "2 days")), time_ceiling(dt, "2 days"))
+  expect_identical(as.Date(time_floor(px, "5 days")), time_floor(dt, "5 days"))
+  expect_identical(as.Date(time_ceiling(px + 0.001, "5 days")), time_ceiling(dt, "5 days"))
+  expect_identical(as.Date(time_floor(px, "2 months")), time_floor(dt, "2 months"))
+  expect_identical(as.Date(time_ceiling(px, "2 months")), time_ceiling(dt, "2 months"))
+  expect_identical(as.Date(time_floor(px, "5 months")), time_floor(dt, "5 months"))
+  expect_identical(as.Date(time_ceiling(px, "5 months")), time_ceiling(dt, "5 months"))
 })
 
 
@@ -340,29 +337,29 @@ test_that("Ceiling for partials (Date) rounds up on boundary", {
 })
 
 test_that("Ceiling for Date returns date when unit level is higher than day", {
-  expect_true(is.Date(time_ceiling(ymd("20160927"), "year")))
-  expect_true(is.Date(time_ceiling(ymd("20160927"), "halfyear")))
-  expect_true(is.Date(time_ceiling(ymd("20160927"), "quarter")))
-  expect_true(is.Date(time_ceiling(ymd("20160927"), "bimonth")))
-  expect_true(is.Date(time_ceiling(ymd("20160927"), "month")))
-  expect_true(is.Date(time_ceiling(ymd("20160927"), "week")))
-  expect_true(is.Date(time_ceiling(ymd("20160927"), "day")))
-  expect_true(is.POSIXct(time_ceiling(ymd("20160927"), "hour")))
-  expect_true(is.POSIXct(time_ceiling(ymd("20160927"), "minute")))
-  expect_true(is.POSIXct(time_ceiling(ymd("20160927"), "second")))
+  expect_true(is.Date(time_ceiling(ymd("2016-09-27"), "year")))
+  expect_true(is.Date(time_ceiling(ymd("2016-09-27"), "halfyear")))
+  expect_true(is.Date(time_ceiling(ymd("2016-09-27"), "quarter")))
+  expect_true(is.Date(time_ceiling(ymd("2016-09-27"), "bimonth")))
+  expect_true(is.Date(time_ceiling(ymd("2016-09-27"), "month")))
+  expect_true(is.Date(time_ceiling(ymd("2016-09-27"), "week")))
+  expect_true(is.Date(time_ceiling(ymd("2016-09-27"), "day")))
+  expect_true(is.POSIXct(time_ceiling(ymd("2016-09-27"), "hour")))
+  expect_true(is.POSIXct(time_ceiling(ymd("2016-09-27"), "minute")))
+  expect_true(is.POSIXct(time_ceiling(ymd("2016-09-27"), "second")))
 })
 
 test_that("Ceiling for POSIXct always returns POSIXct", {
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "year")))
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "halfyear")))
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "quarter")))
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "bimonth")))
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "month")))
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "week")))
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "day")))
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "hour")))
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "minute")))
-  expect_true(is.POSIXct(time_ceiling(ymd_hms("20160927 00:00:00"), "second")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "year")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "halfyear")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "quarter")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "bimonth")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "month")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "week")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "day")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "hour")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "minute")))
+  expect_true(is.POSIXct(time_ceiling(ymd_hms("2016-09-27 00:00:00"), "second")))
 })
 
 test_that("time_ceiling does not round up dates that are already on a boundary", {
@@ -418,7 +415,7 @@ test_that("time_round behaves correctly on 60th second", {
   x <- ymd_hms("2013-12-01 23:59:59.9999")
   expect_equal(time_round(x, unit = "second"),
                ymd("2013-12-02", tz = "UTC"))
-  second(x) <-  60
+  time_update(x, second = 60)
   expect_equal(x, ymd("2013-12-02", tz = "UTC"))
 })
 
@@ -448,23 +445,59 @@ test_that("time_round and time_ceiling skip day time gap", {
   tz <- "America/Chicago"
 
   x <- ymd_hms(c("2014-03-09 00:00:00", "2014-03-09 00:29:59", "2014-03-09 00:30:00",
-                 "2014-03-09 00:59:59", "2014-03-09 01:35:00", "2014-03-09 03:15:00",
-                 "2014-11-02 00:30:00", "2014-11-02 00:59:59", "2014-11-02 01:35:00",
-                 "2014-11-02 02:15:00", "2014-11-02 02:45:00"),
+                 "2014-03-09 00:59:59", "2014-03-09 01:35:00", "2014-03-09 03:15:00"),
                tz = tz)
-
   y <- as.POSIXct(c("2014-03-09 00:00:00", "2014-03-09 00:00:00", "2014-03-09 01:00:00",
-                    "2014-03-09 01:00:00", "2014-03-09 03:00:00", "2014-03-09 03:00:00",
-                    "2014-11-02 01:00:00", "2014-11-02 01:00:00", "2014-11-02 02:00:00",
-                    "2014-11-02 02:00:00", "2014-11-02 03:00:00"),
+                    "2014-03-09 01:00:00", "2014-03-09 03:00:00", "2014-03-09 03:00:00"),
                   tz = tz)
-
   expect_equal(time_round(x, "hour"),  y)
+})
+
+test_that("time rounding works with repeated DST transitions", {
+  ## rounding is done in civil time for units > seconds
+  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "hour"), ctus("2014-11-02 01:00:00")) ## EDT (.5h)
+  expect_equal(time_ceiling(ctus("2014-11-02 01:35:00"), "hour"), ctus("2014-11-02 02:00:00")) ## EST (1.5h)
+  expect_equal(time_ceiling(ctus("2014-11-02 02:15:00"), "hour"), ctus("2014-11-02 03:00:00")) ## EST (45m)
+  x <- ctus("2014-11-02 00:30:00")
+  expect_equal(as.numeric(difftime(time_ceiling(x, "hour"), ctus(x), units = "min")), 30)
+  x <- ctus("2014-11-02 01:30:00")
+  expect_equal(as.numeric(difftime(time_ceiling(x, "hour"), ctus(x), units = "min")), 90)
+  x <- ctus("2014-11-02 02:15:00")
+  expect_equal(as.numeric(difftime(time_ceiling(x, "hour"), ctus(x), units = "min")), 45)
+
+  ## rounding is done in absolute time for seconds
+  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "3600s"), ctus("2014-11-02 01:00:00")) ## EDT (.5h)
+  x <- ctus("2014-11-02 00:30:00")
+  expect_equal(as.numeric(difftime(time_ceiling(x, "3600s"), ctus(x), units = "min")), 30)
+  x <- time_add(ctus("2014-11-02 01:00:00"), minutes = 30) ## EDT
+  expect_equal(as.numeric(difftime(time_ceiling(x, "3600s"), ctus(x), units = "min")), 30)
+
+  ## WAF? as.POSIXct returns EDT/EST randomly
+
+  ## rounding is done in civil time for units > seconds
+  expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), ctus("2014-11-02 01:00:00")) ## EDT (30m)
+  x <- time_add(ctus("2014-11-02 01:00:00"), minutes = 35) ## EDT
+  expect_equal(as.numeric(difftime(time_round(x, "hour"), ctus(x), units = "min")), -35)
+  expect_equal(as.numeric(difftime(time_round(x, "3600s"), ctus(x), units = "min")), 25)
+  x <- ctus("2014-11-02 02:15:00")
+  expect_equal(time_round(x, "hour"), ctus("2014-11-02 02:00:00")) ## EST (15m)
+  expect_equal(as.numeric(difftime(time_round(x, "hour"), ctus(x), units = "min")), -15)
+  expect_equal(as.numeric(difftime(time_round(x, "3600s"), ctus(x), units = "min")), -15)
+
+  ## rounding is done in civil time for units > seconds
+  expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), ctus("2014-11-02 01:00:00")) ## EDT (30m)
+  x <- .POSIXct(1414909500, tz = "America/New_York") # "2014-11-02 01:25:00"
+  expect_equal(as.numeric(difftime(time_floor(x, "hour"), x, units = "min")), -85)
+  expect_equal(as.numeric(difftime(time_floor(x, "3600s"), x, units = "min")), -25)
+  x <- ctus("2014-11-02 02:15:00") ## EST
+  expect_equal(time_floor(x, "hour"), ctus("2014-11-02 02:00:00")) ## EST (15m)
+  expect_equal(as.numeric(difftime(time_floor(x, "3600s"), ctus(x), units = "min")), -15)
+
 })
 
 test_that("time_ceiling, time_round and time_floor behave correctly with NA", {
   ## (bug #486)
-  x <- ymd_hms("2009-08-03 12:01:59.23", tz = "UTC") + (0:1)*days()
+  x <- time_add(ymd_hms("2009-08-03 12:01:59.23", tz = "UTC"), days = 0:1)
   x[2] <- NA
   expect_equal(time_ceiling(x, unit = "day"), ymd(c("2009-08-04", NA), tz = "UTC"))
   expect_equal(time_ceiling(x, unit = "seconds"), ymd_hms(c("2009-08-03 12:02:00", NA), tz = "UTC"))
@@ -478,14 +511,14 @@ test_that("time_ceiling, time_round and time_floor behave correctly with NA", {
 test_that("time_floor works for seasons", {
   dts <- ymd_hms(sprintf("2017-%d-02 0:34:3", 1:12))
   expect_equal(month(time_floor(dts, "season")), c(12, 12, 3, 3, 3, 6, 6, 6, 9, 9, 9, 12))
-  dts <- force_tz(dts, "America/New_York")
+  dts <- time_force_tz(dts, "America/New_York")
   expect_equal(month(time_floor(dts, "season")), c(12, 12, 3, 3, 3, 6, 6, 6, 9, 9, 9, 12))
 })
 
 test_that("time_ceiling works for seasons", {
   dts <- ymd_hms(sprintf("2017-%d-02 0:34:3", 1:12))
   expect_equal(month(time_ceiling(dts, "season")), c(3, 3, 6, 6, 6, 9, 9, 9, 12, 12, 12, 3))
-  dts <- force_tz(dts, "America/New_York")
+  dts <- time_force_tz(dts, "America/New_York")
   expect_equal(month(time_ceiling(dts, "season")), c(3, 3, 6, 6, 6, 9, 9, 9, 12, 12, 12, 3))
 })
 

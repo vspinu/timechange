@@ -2,9 +2,6 @@ context("Time Update")
 
 ## most of the tests are borrowed from lubridate
 
-library(lubridate)
-options(lubridate.week.start = 1)
-
 test_that("update.Date returns a date object", {
   date <- as.Date("05/05/2010", "%m/%d/%Y")
   expect_that(time_update(date, day = 1), is_a("Date"))
@@ -41,7 +38,7 @@ test_that("update.Date performs simple operation as expected", {
   expect_that(mday(time_update(date, wday = 1)), equals(3))
   expect_that(month(time_update(date, month = 1)), equals(1))
   expect_that(year(time_update(date, year = 2000)), equals(2000))
-  expect_match(tz(time_update(date, tz = "UTC")), "UTC")
+  expect_match(timechange:::tz(time_update(date, tz = "UTC")), "UTC")
 })
 
 test_that("update.POSIXlt returns a POSIXlt object", {
@@ -104,8 +101,8 @@ test_that("update.POSIXt performs simple operation as expected", {
   expect_that(mday(time_update(posct, wday = 1, week_start = 7)), equals(31))
   expect_that(month(time_update(posct, month = 1)), equals(1))
   expect_that(year(time_update(posct, year = 2000)), equals(2000))
-  expect_match(tz(time_update(poslt, tz = "UTC")), "UTC")
-  expect_match(tz(time_update(posct, tz = "UTC")), "UTC")
+  expect_match(timechange:::tz(time_update(poslt, tz = "UTC")), "UTC")
+  expect_match(timechange:::tz(time_update(posct, tz = "UTC")), "UTC")
 })
 
 
@@ -207,7 +204,7 @@ test_that("update performs roll overs correctly for Date objects", {
   expect_that(month(time_update(date, yday = 366)), equals(1))
   expect_that(month(time_update(date, month = 13)), equals(1))
   expect_that(year(time_update(date, month = 13)), equals(2011))
-  expect_match(tz(time_update(date, month = 13)), "UTC")
+  expect_match(timechange:::tz(time_update(date, month = 13)), "UTC")
 })
 
 test_that("update performs roll overs correctly for POSIXlt objects", {
@@ -228,7 +225,7 @@ test_that("update performs roll overs correctly for POSIXlt objects", {
   expect_that(month(time_update(poslt, yday = 366)), equals(1))
   expect_that(month(time_update(poslt, month = 13)), equals(1))
   expect_that(year(time_update(poslt, month = 13)), equals(2011))
-  expect_match(tz(time_update(poslt, month = 13)), "GMT")
+  expect_match(timechange:::tz(time_update(poslt, month = 13)), "GMT")
 })
 
 test_that("update performs roll overs correctly for POSIXct objects", {
@@ -249,7 +246,7 @@ test_that("update performs roll overs correctly for POSIXct objects", {
   expect_that(month(time_update(posct, yday = 366)), equals(1))
   expect_that(month(time_update(posct, month = 13)), equals(1))
   expect_that(year(time_update(posct, month = 13)), equals(2011))
-  expect_match(tz(time_update(posct, month = 13)), "GMT")
+  expect_match(timechange:::tz(time_update(posct, month = 13)), "GMT")
 })
 
 test_that("update performs consecutive roll overs correctly for
@@ -264,7 +261,7 @@ test_that("update performs consecutive roll overs correctly for
     expect_that(yday(date), equals(33))
     expect_that(month(date), equals(2))
     expect_that(year(date), equals(2011))
-    expect_match(tz(date), "UTC")
+    expect_match(timechange:::tz(date), "UTC")
     date2 <- time_update(as.Date("11/01/2010", "%m/%d/%Y"),
                          second = 61, minute = 61, hour = 25, day = 32, month = 13)
     expect_that(second(date2), equals(1))
@@ -275,7 +272,7 @@ test_that("update performs consecutive roll overs correctly for
     expect_that(yday(date2), equals(33))
     expect_that(month(date2), equals(2))
     expect_that(year(date2), equals(2011))
-    expect_match(tz(date2), "UTC")
+    expect_match(timechange:::tz(date2), "UTC")
   })
 
 test_that("update performs consecutive roll overs correctly for POSIXlt objects", {
@@ -291,7 +288,7 @@ test_that("update performs consecutive roll overs correctly for POSIXlt objects"
   expect_that(yday(poslt), equals(33))
   expect_that(month(poslt), equals(2))
   expect_that(year(poslt), equals(2011))
-  expect_match(tz(poslt), "GMT")
+  expect_match(timechange:::tz(poslt), "GMT")
   poslt2 <- time_update(posl, second = 61, minute = 61, hour = 25,
                         day = 32, month = 13)
   expect_that(second(poslt2), equals(1))
@@ -302,7 +299,7 @@ test_that("update performs consecutive roll overs correctly for POSIXlt objects"
   expect_that(yday(poslt2), equals(33))
   expect_that(month(poslt2), equals(2))
   expect_that(year(poslt2), equals(2011))
-  expect_match(tz(poslt2), "GMT")
+  expect_match(timechange:::tz(poslt2), "GMT")
 })
 
 test_that("update performs consecutive roll overs correctly for POSIXct objects", {
@@ -318,7 +315,7 @@ test_that("update performs consecutive roll overs correctly for POSIXct objects"
   expect_that(yday(posct), equals(33))
   expect_that(month(posct), equals(2))
   expect_that(year(posct), equals(2011))
-  expect_match(tz(posct), "GMT")
+  expect_match(timechange:::tz(posct), "GMT")
   posct2 <- time_update(posc, second = 61, minute = 61, hour = 25,
                         day = 32, month = 13)
   expect_that(second(posct2), equals(1))
@@ -329,25 +326,25 @@ test_that("update performs consecutive roll overs correctly for POSIXct objects"
   expect_that(yday(posct2), equals(33))
   expect_that(month(posct2), equals(2))
   expect_that(year(posct2), equals(2011))
-  expect_match(tz(posct2), "GMT")
+  expect_match(timechange:::tz(posct2), "GMT")
 })
 
 test_that("update returns NA for date-times in the spring dst gap", {
   poslt <- as.POSIXlt("2010-03-14 01:59:59", tz = "UTC", format = "%Y-%m-%d %H:%M:%S")
-  poslt <- force_tz(poslt, tz = "America/New_York")
+  poslt <- time_force_tz(poslt, tz = "America/New_York")
   expect_that(is.na(time_update(poslt, second = 65)), is_true())
   expect_that(is.na(time_update(poslt, minute = 65)), is_true())
   expect_that(is.na(time_update(poslt, hour = 2)), is_true())
   poslt <- as.POSIXlt("2010-03-13 02:59:59", tz = "UTC", format = "%Y-%m-%d %H:%M:%S")
-  poslt <- force_tz(poslt, tz = "America/New_York")
+  poslt <- time_force_tz(poslt, tz = "America/New_York")
   expect_that(is.na(time_update(poslt, mday = 14)), is_true())
   expect_that(is.na(time_update(poslt, wday = 7)), is_true())
   expect_that(is.na(time_update(poslt, yday = 73)), is_true())
   poslt <- as.POSIXlt("2010-02-14 02:59:59", tz = "UTC", format = "%Y-%m-%d %H:%M:%S")
-  poslt <- force_tz(poslt, tz = "America/New_York")
+  poslt <- time_force_tz(poslt, tz = "America/New_York")
   expect_that(is.na(time_update(poslt, month = 3)), is_true())
   poslt <- as.POSIXlt("2009-03-14 02:59:59", tz = "UTC", format = "%Y-%m-%d %H:%M:%S")
-  poslt <- force_tz(poslt, tz = "America/New_York")
+  poslt <- time_force_tz(poslt, tz = "America/New_York")
   expect_that(is.na(time_update(poslt, year = 2010)), is_true())
   poslt <- as.POSIXlt("2010-03-14 02:59:59", tz = "UTC", format = "%Y-%m-%d %H:%M:%S")
   expect_that(is.na(time_update(poslt, tz = "America/New_York")), is_true())
@@ -399,12 +396,4 @@ test_that("update.POSIXct returns input of length zero when given input of lengt
 test_that("update.POSIXlt returns input of length zero when given input of length zero", {
   x <- as.POSIXlt(structure(vector(mode = "numeric"), class = c("POSIXct", "POSIXt")))
   expect_equal(time_update(x, day = 1), x)
-})
-
-test_that("Updateing on second doesn't affect hour", {
-  ## https://github.com/tidyverse/lubridate/issues/619
-  tt <- Sys.time()
-  tt2 <- tt
-  second(tt2) <- 5
-  expect_equal(hour(tt), hour(tt2))
 })
