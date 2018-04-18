@@ -155,8 +155,10 @@ time_subtract <- function(time, periods = NULL,
   if (length(time) == 0L)
     return(time)
 
-  roll_month <- match.arg(roll_month[[1]], .roll_types)
-  roll_dst <- match.arg(roll_dst[[1]], .roll_types)
+  roll_month <- match.arg(roll_month, .roll_types)
+  roll_dst <- match.arg(roll_dst, .roll_types)
+
+  ## fixme: no longer needed?
   if (roll_dst == "skip")
     roll_dst <- "prev"
 
@@ -183,5 +185,3 @@ time_subtract <- function(time, periods = NULL,
   time_add(time, periods, roll_month = roll_month, roll_dst = roll_dst)
 
 }
-
-.roll_types <- c("next", "prev", "boundary", "skip", "NA")

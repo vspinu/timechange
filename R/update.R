@@ -10,10 +10,7 @@
 #'   date-time to be updated. `day` is equivalent to `mday`. All except `second`
 #'   will be converted to integer.
 #' @param tz time zone component (a singleton character vector)
-#' @param roll logical. If `TRUE`, and the resulting date-time lands on a
-#'   non-existent civil time instant (DST gap, 29th February, etc.) roll the
-#'   date till next valid point. When `FALSE`, the default, produce NA for non
-#'   existing date-times.
+#' @param roll_month,roll_dst See [time_add()].
 #' @param week_start week starting day (Default is 1, Monday). Set `week_start`
 #'   option to change this globally.
 #' @return a date object with the requested elements updated. The object will
@@ -30,10 +27,16 @@
 time_update <- function(time, year = NULL, month = NULL,
                         yday = NULL, day = NULL, mday = NULL, wday = NULL,
                         hour = NULL, minute = NULL, second = NULL,
-                        tz = NULL, roll = FALSE, week_start = getOption("week_start", 1)) {
+                        tz = NULL,
+                        roll_month = "prev",
+                        roll_dst = "boundary",
+                        week_start = getOption("week_start", 1)) {
 
   if (length(time) == 0L)
     return(time)
+
+  roll_month <- match.arg(roll_month, .roll_types)
+  roll_dst <- match.arg(roll_dst, .roll_types)
 
   if (!is.null(day)) {
     if (!is.null(mday)) stop("both `mday` and `day` suplied")
@@ -48,17 +51,18 @@ time_update <- function(time, year = NULL, month = NULL,
   updates <- normalize_units_length(updates)
 
   if (is.POSIXct(time)) {
-    C_time_update(time, updates, tz, roll, week_start)
+    C_time_update(time, updates, tz, roll_month, roll_dst, week_start)
   } else if (is.Date(time)) {
     out <- as.POSIXct(time, tz = "UTC")
     attr(out, "tzone") <- "UTC"
-    out <- C_time_update(out, updates, tz, roll, week_start)
+    out <- C_time_update(out, updates, tz, roll_month, roll_dst, week_start)
     if (is.null(hour) && is.null(minute) && is.null(second) && is.null(tz)) {
       out <- as.Date(out, tz = "UTC")
     }
     out
   } else if (is.POSIXlt(time)) {
-    as.POSIXlt.POSIXct(C_time_update(as.POSIXct.POSIXlt(time), updates, tz, roll, week_start))
+    as.POSIXlt.POSIXct(C_time_update(as.POSIXct.POSIXlt(time),
+                                     updates, tz, roll_month, roll_dst, week_start))
   } else {
     unsupported_date_time(time)
   }

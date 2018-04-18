@@ -17,9 +17,13 @@
 // [[Rcpp::export]]
 Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
                                       const Rcpp::List& updates,
-                                      const SEXP tz = R_NilValue,
-                                      const bool roll = false,
+                                      const SEXP tz,
+                                      const std::string roll_month,
+                                      const std::string roll_dst,
                                       const int week_start = 1) {
+
+  Roll rmonth = roll_type(roll_month);
+  Roll rdst = roll_type(roll_dst);
 
   bool do_year = !Rf_isNull(updates["year"]), do_month = !Rf_isNull(updates["month"]),
     do_yday = !Rf_isNull(updates["yday"]), do_mday = !Rf_isNull(updates["mday"]),
@@ -126,6 +130,28 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
         d = loop_mday ? mday[i] : mday[0];
         if (d == NA_INT32) {out[i] = NA_REAL; continue; }
       }
+
+      cctz::civil_day cd = cctz::civil_day(y, m, d);
+      if (cd.day() != d) {
+        // month rolling kicks in
+        switch(rmonth) {
+         case Roll::SKIP: break;
+         case Roll::BOUNDARY:
+           cd = cctz::civil_day(cctz::civil_month(cd));
+           H = 0; M = 0; S = 0; rem = 0.0;
+           break;
+         case Roll::NEXT:
+           cd = cctz::civil_day(cctz::civil_month(cd));
+           break;
+         case Roll::PREV:
+           cd = cctz::civil_day(cctz::civil_month(cd)) - 1;
+           break;
+         case Roll::NA:
+           out[i] = NA_REAL;
+           continue;
+        }
+      }
+
       if (do_hour) {
         H = loop_hour ? hour[i] : hour[0];
         if (H == NA_INT32) {out[i] = NA_REAL; continue; }
@@ -139,27 +165,17 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
         if (ISNAN(s)) { out[i] = NA_REAL; continue; }
         S = floor_to_int64(s);
         if (S == NA_INT64) { out[i] = NA_REAL; continue; }
-        rem += s - S;
+        rem = s - S;
       }
 
       const cctz::civil_second cs2(y, m, d, H, M, S);
       const cctz::time_zone::civil_lookup cl2 = tzone2.lookup(cs2);
 
-      out[i] = civil_lookup_to_posix(cl2, tzone1, tp1, ct1, roll, rem);
+      out[i] = civil_lookup_to_posix(cl2, tzone1, tp1, ct1, rdst, rem);
 
     }
 
   return newDatetimeVector(out, tzto.c_str());
-}
-
-
-Roll roll_type(std::string roll_type) {
-  if (roll_type == "skip") return Roll::SKIP;
-  if (roll_type == "boundary") return Roll::BOUNDARY;
-  if (roll_type == "next") return Roll::NEXT;
-  if (roll_type == "prev") return Roll::PREV;
-  if (roll_type == "NA") return Roll::NA;
-  Rf_error("Invalid roll_month type (%s)", roll_type.c_str());
 }
 
 // [[Rcpp::export]]
@@ -321,7 +337,7 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
         cS += S;
       }
 
-      s = civil_time_to_posix(cS, tz, rdst);
+      s = civil_lookup_to_posix(tz.lookup(cS), rdst);
       out[i] = s + rem;
 
     }
@@ -331,10 +347,12 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
 
 // [[Rcpp::export]]
 newDatetimeVector C_force_tz(const NumericVector dt,
-                                   const CharacterVector tz,
-                                   const bool roll = false) {
+                             const CharacterVector tz,
+                             const std::string roll_dst) {
   // roll: logical, if `true`, and `time` falls into the DST-break, assume the
   // next valid civil time, otherwise return NA
+
+  Roll rdst = roll_type(roll_dst);
 
   if (tz.size() != 1)
     stop("`tz` argument must be a single character string");
@@ -361,7 +379,7 @@ newDatetimeVector C_force_tz(const NumericVector dt,
       time_point tp1(d1);
       cctz::civil_second ct1 = cctz::convert(tp1, tzfrom);
       const cctz::time_zone::civil_lookup cl2 = tzto.lookup(ct1);
-      out[i] = civil_lookup_to_posix(cl2, tzfrom, tp1, ct1, roll, rem);
+      out[i] = civil_lookup_to_posix(cl2, tzfrom, tp1, ct1, rdst, rem);
     }
 
   return newDatetimeVector(out, tzto_name.c_str());
@@ -370,11 +388,13 @@ newDatetimeVector C_force_tz(const NumericVector dt,
 
 // [[Rcpp::export]]
 newDatetimeVector C_force_tzs(const NumericVector dt,
-                                    const CharacterVector tzs,
-                                    const CharacterVector tz_out,
-                                    const bool roll = false) {
+                              const CharacterVector tzs,
+                              const CharacterVector tz_out,
+                              const std::string roll_dst) {
   // roll: logical, if `true`, and `time` falls into the DST-break, assume the
   // next valid civil time, otherwise return NA
+
+  Roll rdst = roll_type(roll_dst);
 
   if (tz_out.size() != 1)
     stop("In 'tzout' argument must be of length 1");
@@ -409,7 +429,7 @@ newDatetimeVector C_force_tzs(const NumericVector dt,
       cctz::civil_second csfrom = cctz::convert(tpfrom, tzfrom);
 
       const cctz::time_zone::civil_lookup clto = tzto.lookup(csfrom);
-      out[i] = civil_lookup_to_posix(clto, tzfrom, tpfrom, csfrom, roll, rem);
+      out[i] = civil_lookup_to_posix(clto, tzfrom, tpfrom, csfrom, rdst, rem);
 
     }
 

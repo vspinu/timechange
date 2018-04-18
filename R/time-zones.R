@@ -27,8 +27,10 @@
 #' ## DST skip:
 #'
 #' y <- as.POSIXct("2010-03-14 02:05:05", tz = "UTC")
-#' time_force_tz(y, "America/New_York", roll = FALSE)
-#' time_force_tz(y, "America/New_York", roll = TRUE)
+#' time_force_tz(y, "America/New_York", roll = "boundary")
+#' time_force_tz(y, "America/New_York", roll = "next")
+#' time_force_tz(y, "America/New_York", roll = "prev")
+#' time_force_tz(y, "America/New_York", roll = "NA")
 #'
 #' ## Heterogeneous time-zones:
 #'
@@ -80,30 +82,30 @@ time_at_tz <- function(time, tz = "UTC") {
 #'   hours, etc.) it is a different moment of time than the input
 #'   date-time. Computation is vectorized over both `time` and `tz` arguments.
 #'
-#' @param roll logical. If TRUE, and `time` falls into the DST-break, assume the
-#'   next valid civil time, otherwise return NA. See examples.
+#' @param roll_dst same as in `time_add` which see.
 #' @param tzout timezone of the output date-time vector. Meaningfull only when
 #'   `tz` argument is a vector of heterogenuous time-zones. This argument is
 #'   necessary because R date-time vectors cannot hold elements with different
 #'   time-zones.
 #' @name time-zones
 #' @export
-time_force_tz <- function(time, tz = "UTC", tzout = tz[[1]], roll = TRUE) {
+time_force_tz <- function(time, tz = "UTC", tzout = tz[[1]], roll_dst = "boundary") {
   if (is.list(time) && !is.POSIXlt(time)) {
     for (nm in names(time)) {
       if (is.instant(time[[nm]])) {
-        time[[nm]] <- .force_tz(time[[nm]], tz, tzout, roll)
+        time[[nm]] <- .force_tz(time[[nm]], tz, tzout, roll_dst)
       }
     }
     time
   } else {
-    .force_tz(time, tz, tzout, roll)
+    .force_tz(time, tz, tzout, roll_dst)
   }
 }
 
-.force_tz <- function(time, tz, tzout, roll) {
+.force_tz <- function(time, tz, tzout, roll_dst) {
+  roll_dst <- match.arg(roll_dst, .roll_types)
   if (length(tz) == 1L && tz == tzout) {
-    from_posixct(C_force_tz(to_posixct(time), tz, roll), time)
+    from_posixct(C_force_tz(to_posixct(time), tz, roll_dst), time)
   } else {
     if (length(tz) < length(time))
       tz <- rep_len(tz, length(time))
@@ -112,7 +114,7 @@ time_force_tz <- function(time, tz = "UTC", tzout = tz[[1]], roll = TRUE) {
       time <- rep_len(time, length(tz))
       attributes(time) <- attr
     }
-    from_posixct(C_force_tzs(to_posixct(time), tz, tzout, roll), time)
+    from_posixct(C_force_tzs(to_posixct(time), tz, tzout, roll_dst), time)
   }
 }
 

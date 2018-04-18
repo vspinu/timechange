@@ -56,17 +56,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_time_update
-Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt, const Rcpp::List& updates, const SEXP tz, const bool roll, const int week_start);
-RcppExport SEXP _timechange_C_time_update(SEXP dtSEXP, SEXP updatesSEXP, SEXP tzSEXP, SEXP rollSEXP, SEXP week_startSEXP) {
+Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt, const Rcpp::List& updates, const SEXP tz, const std::string roll_month, const std::string roll_dst, const int week_start);
+RcppExport SEXP _timechange_C_time_update(SEXP dtSEXP, SEXP updatesSEXP, SEXP tzSEXP, SEXP roll_monthSEXP, SEXP roll_dstSEXP, SEXP week_startSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type dt(dtSEXP);
     Rcpp::traits::input_parameter< const Rcpp::List& >::type updates(updatesSEXP);
     Rcpp::traits::input_parameter< const SEXP >::type tz(tzSEXP);
-    Rcpp::traits::input_parameter< const bool >::type roll(rollSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type roll_month(roll_monthSEXP);
+    Rcpp::traits::input_parameter< const std::string >::type roll_dst(roll_dstSEXP);
     Rcpp::traits::input_parameter< const int >::type week_start(week_startSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_time_update(dt, updates, tz, roll, week_start));
+    rcpp_result_gen = Rcpp::wrap(C_time_update(dt, updates, tz, roll_month, roll_dst, week_start));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -85,29 +86,29 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_force_tz
-newDatetimeVector C_force_tz(const NumericVector dt, const CharacterVector tz, const bool roll);
-RcppExport SEXP _timechange_C_force_tz(SEXP dtSEXP, SEXP tzSEXP, SEXP rollSEXP) {
+newDatetimeVector C_force_tz(const NumericVector dt, const CharacterVector tz, const std::string roll_dst);
+RcppExport SEXP _timechange_C_force_tz(SEXP dtSEXP, SEXP tzSEXP, SEXP roll_dstSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const NumericVector >::type dt(dtSEXP);
     Rcpp::traits::input_parameter< const CharacterVector >::type tz(tzSEXP);
-    Rcpp::traits::input_parameter< const bool >::type roll(rollSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_force_tz(dt, tz, roll));
+    Rcpp::traits::input_parameter< const std::string >::type roll_dst(roll_dstSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_force_tz(dt, tz, roll_dst));
     return rcpp_result_gen;
 END_RCPP
 }
 // C_force_tzs
-newDatetimeVector C_force_tzs(const NumericVector dt, const CharacterVector tzs, const CharacterVector tz_out, const bool roll);
-RcppExport SEXP _timechange_C_force_tzs(SEXP dtSEXP, SEXP tzsSEXP, SEXP tz_outSEXP, SEXP rollSEXP) {
+newDatetimeVector C_force_tzs(const NumericVector dt, const CharacterVector tzs, const CharacterVector tz_out, const std::string roll_dst);
+RcppExport SEXP _timechange_C_force_tzs(SEXP dtSEXP, SEXP tzsSEXP, SEXP tz_outSEXP, SEXP roll_dstSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const NumericVector >::type dt(dtSEXP);
     Rcpp::traits::input_parameter< const CharacterVector >::type tzs(tzsSEXP);
     Rcpp::traits::input_parameter< const CharacterVector >::type tz_out(tz_outSEXP);
-    Rcpp::traits::input_parameter< const bool >::type roll(rollSEXP);
-    rcpp_result_gen = Rcpp::wrap(C_force_tzs(dt, tzs, tz_out, roll));
+    Rcpp::traits::input_parameter< const std::string >::type roll_dst(roll_dstSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_force_tzs(dt, tzs, tz_out, roll_dst));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -131,7 +132,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_timechange_C_time_floor", (DL_FUNC) &_timechange_C_time_floor, 4},
     {"_timechange_C_local_tz", (DL_FUNC) &_timechange_C_local_tz, 0},
     {"_timechange_C_valid_tz", (DL_FUNC) &_timechange_C_valid_tz, 1},
-    {"_timechange_C_time_update", (DL_FUNC) &_timechange_C_time_update, 5},
+    {"_timechange_C_time_update", (DL_FUNC) &_timechange_C_time_update, 6},
     {"_timechange_C_time_add", (DL_FUNC) &_timechange_C_time_add, 4},
     {"_timechange_C_force_tz", (DL_FUNC) &_timechange_C_force_tz, 3},
     {"_timechange_C_force_tzs", (DL_FUNC) &_timechange_C_force_tzs, 4},

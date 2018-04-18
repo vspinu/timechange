@@ -11,9 +11,10 @@ cteu <- function(x) {
 ltutc <- function(x) {
   as.POSIXlt(x, tz = "UTC")
 }
-ltam <- function(x) {
+ltus <- function(x) {
   as.POSIXlt(x, tz = "America/New_York")
 }
+ltam <- ltus
 lteu <- function(x) {
   as.POSIXct(x, tz = "Europe/Amsterdam")
 }

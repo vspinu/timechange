@@ -17,20 +17,20 @@ C_valid_tz <- function(tz_name) {
     .Call(`_timechange_C_valid_tz`, tz_name)
 }
 
-C_time_update <- function(dt, updates, tz = NULL, roll = FALSE, week_start = 1L) {
-    .Call(`_timechange_C_time_update`, dt, updates, tz, roll, week_start)
+C_time_update <- function(dt, updates, tz, roll_month, roll_dst, week_start = 1L) {
+    .Call(`_timechange_C_time_update`, dt, updates, tz, roll_month, roll_dst, week_start)
 }
 
 C_time_add <- function(dt, periods, roll_month, roll_dst) {
     .Call(`_timechange_C_time_add`, dt, periods, roll_month, roll_dst)
 }
 
-C_force_tz <- function(dt, tz, roll = FALSE) {
-    .Call(`_timechange_C_force_tz`, dt, tz, roll)
+C_force_tz <- function(dt, tz, roll_dst) {
+    .Call(`_timechange_C_force_tz`, dt, tz, roll_dst)
 }
 
-C_force_tzs <- function(dt, tzs, tz_out, roll = FALSE) {
-    .Call(`_timechange_C_force_tzs`, dt, tzs, tz_out, roll)
+C_force_tzs <- function(dt, tzs, tz_out, roll_dst) {
+    .Call(`_timechange_C_force_tzs`, dt, tzs, tz_out, roll_dst)
 }
 
 C_local_clock <- function(dt, tzs) {

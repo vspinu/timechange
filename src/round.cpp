@@ -31,6 +31,8 @@ Unit name2unit(std::string unit_name) {
   Rf_error("Invalid unit_name (%s)", unit_name.c_str());
 }
 
+// TOTHINK: roll_dst is hard-coded. Should this be generalized?
+
 // used in time_floor exclusively
 template<typename T>
 inline double civil_time_to_posix(const T& ct,
@@ -38,7 +40,7 @@ inline double civil_time_to_posix(const T& ct,
                                   const time_point& tp_orig,
                                   const cctz::civil_second& cs_orig) noexcept {
   cctz::time_zone::civil_lookup cl = tz.lookup(ct);
-  return civil_lookup_to_posix(cl, tz, tp_orig,cs_orig, true, 0.0);
+  return civil_lookup_to_posix(cl, tz, tp_orig, cs_orig, Roll::BOUNDARY, 0.0);
 }
 
 // used for time_ceiling exclusively
@@ -54,7 +56,7 @@ inline double civil_time_to_posix(const T& ct,
     return tpnew.time_since_epoch().count();
   } else {
     cctz::time_zone::civil_lookup cl = tz.lookup(ct);
-    return civil_lookup_to_posix(cl, tz, tp_orig,cs_orig, true, 0.0);
+    return civil_lookup_to_posix(cl, tz, tp_orig,cs_orig, Roll::BOUNDARY, 0.0);
   }
 }
 

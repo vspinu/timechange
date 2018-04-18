@@ -11,7 +11,7 @@
 \usage{
 time_at_tz(time, tz = "UTC")
 
-time_force_tz(time, tz = "UTC", tzout = tz[[1]], roll = TRUE)
+time_force_tz(time, tz = "UTC", tzout = tz[[1]], roll_dst = "boundary")
 
 time_clock_at_tz(time, tz = NULL, units = "secs")
 }
@@ -32,8 +32,7 @@ according with usual R conventions.}
 necessary because R date-time vectors cannot hold elements with different
 time-zones.}
 
-\item{roll}{logical. If TRUE, and \code{time} falls into the DST-break, assume the
-next valid civil time, otherwise return NA. See examples.}
+\item{roll_dst}{same as in \code{time_add} which see.}
 
 \item{units}{passed directly to \code{\link[=as.difftime]{as.difftime()}}.}
 }
@@ -67,8 +66,10 @@ time_force_tz(x, "Europe/Amsterdam")
 ## DST skip:
 
 y <- as.POSIXct("2010-03-14 02:05:05", tz = "UTC")
-time_force_tz(y, "America/New_York", roll = FALSE)
-time_force_tz(y, "America/New_York", roll = TRUE)
+time_force_tz(y, "America/New_York", roll = "boundary")
+time_force_tz(y, "America/New_York", roll = "next")
+time_force_tz(y, "America/New_York", roll = "prev")
+time_force_tz(y, "America/New_York", roll = "NA")
 
 ## Heterogeneous time-zones:
 

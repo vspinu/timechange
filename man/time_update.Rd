@@ -6,7 +6,8 @@
 \usage{
 time_update(time, year = NULL, month = NULL, yday = NULL, day = NULL,
   mday = NULL, wday = NULL, hour = NULL, minute = NULL, second = NULL,
-  tz = NULL, roll = FALSE, week_start = getOption("week_start", 1))
+  tz = NULL, roll_month = "prev", roll_dst = "boundary",
+  week_start = getOption("week_start", 1))
 }
 \arguments{
 \item{time}{a date-time object}
@@ -17,10 +18,7 @@ will be converted to integer.}
 
 \item{tz}{time zone component (a singleton character vector)}
 
-\item{roll}{logical. If \code{TRUE}, and the resulting date-time lands on a
-non-existent civil time instant (DST gap, 29th February, etc.) roll the
-date till next valid point. When \code{FALSE}, the default, produce NA for non
-existing date-times.}
+\item{roll_month, roll_dst}{See \code{\link[=time_add]{time_add()}}.}
 
 \item{week_start}{week starting day (Default is 1, Monday). Set \code{week_start}
 option to change this globally.}

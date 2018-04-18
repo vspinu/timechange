@@ -28,36 +28,19 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
                              const cctz::time_zone& tz_orig,              // original time zone
                              const time_point& tp_orig,                   // original time point
                              const cctz::civil_second& cs_orig,           // original time in secs
-                             bool roll, double remainder = 0.0) ;
+                             const Roll& roll_dst,
+                             const double remainder) noexcept;
 
-template<typename T>
-inline double civil_time_to_posix(const T& ct, const cctz::time_zone& tz, const Roll& roll_dst) noexcept {
-  cctz::time_zone::civil_lookup cl = tz.lookup(ct);
-  time_point tp;
-  if (cl.kind == cctz::time_zone::civil_lookup::SKIPPED) {
-    switch (roll_dst) {
-     case Roll::BOUNDARY: tp = cl.trans; break;
-     case Roll::SKIP:
-     case Roll::NEXT: tp = cl.pre; break;
-     case Roll::PREV: tp = cl.post; break;
-     case Roll::NA: return NA_REAL;
-    }
-  } else if (cl.kind == cctz::time_zone::civil_lookup::REPEATED) {
-    // The mnemonics in this case should be interpreted starting from a moment
-    // in time just before the ambiguous DST. Thus next means "pre" hour. PREV
-    // means "post" hour. The PREV mnemonic is not suggestive in this
-    // case. Maybe change back to FIRST/LAST?
-    switch (roll_dst) {
-     case Roll::BOUNDARY: tp = cl.trans; break;
-     case Roll::SKIP:
-     case Roll::PREV: tp = cl.post; break;
-     case Roll::NEXT: tp = cl.pre; break;
-     case Roll::NA: return NA_REAL;
-    }
-  } else {
-    tp = cl.pre;
-  }
-  return tp.time_since_epoch().count();
+double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
+                             const Roll& roll_dst) noexcept;
+
+inline Roll roll_type(const std::string& roll_type) {
+  if (roll_type == "skip") return Roll::SKIP;
+  if (roll_type == "boundary") return Roll::BOUNDARY;
+  if (roll_type == "next") return Roll::NEXT;
+  if (roll_type == "prev") return Roll::PREV;
+  if (roll_type == "NA") return Roll::NA;
+  Rf_error("Invalid roll_month type (%s)", roll_type.c_str());
 }
 
 
