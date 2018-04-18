@@ -6,8 +6,10 @@
 \alias{timechange-package}
 \title{Package \code{timechange}}
 \description{
-Utilities for efficient updating of date-time object's components while
-accounting for time-zones and day-light saving times.
+Utilities for efficient updating of date-times components while accounting
+for time-zones and day-light saving times. When it makes sense functions
+provide a refined control of what happens in ambiguous situations through
+\code{roll_month} and \code{roll_dst} arguments.
 }
 \seealso{
 Useful links:
