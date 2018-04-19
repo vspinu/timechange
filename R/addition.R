@@ -40,16 +40,15 @@
 ##' `2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03`. This is the default.
 ##'
 ##' @param time date-time object
-##' @param periods string or list (currently unimplemented)
-##' @param years,months,weeks,days,hours,minutes,seconds Units to be added
-##'   to `time`. Each unit except for seconds must be expressed as integer
-##'   values.
+##' @param periods string of units to add/subtract (not yet implemented) or a
+##'   named list of the form `list(years = 1, months = 2, ...)`.
+##' @param years,months,weeks,days,hours,minutes,seconds Units to be added to
+##'   `time`. Each unit except for seconds must be expressed as integer values.
 ##' @param roll_month controls how addition of months and years behaves when
 ##'   standard arithmetic rules exceed limits of the resulting date's month. See
-##'   Details for the description of possible values.
-##' @param roll_dst if `TRUE` and the resulting date-time falls within the DST
-##'   gap, the time is rolled forward to the closest valid civil time. If FALSE,
-##'   NA is returned.
+##'   "Details" for the description of possible values.
+##' @param roll_dst controls how to adjust the updated time if it falls within a
+##'   DST transition intervals. See the "Details".
 ##' @examples
 ##'
 ##' # Addition

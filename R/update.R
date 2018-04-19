@@ -6,6 +6,8 @@
 #'
 #' @name time_update
 #' @param time a date-time object
+#' @param updates a string specification of components to be updated (not
+#'   implemented yet) or a named list of components.
 #' @param year,month,yday,wday,mday,day,hour,minute,second components of the
 #'   date-time to be updated. `day` is equivalent to `mday`. All except `second`
 #'   will be converted to integer.
@@ -24,7 +26,7 @@
 #' time_update(date, minute = 10, second = 3)
 #' time_update(date, minute = 10, second = 3, tz = "America/New_York")
 #' @export
-time_update <- function(time, year = NULL, month = NULL,
+time_update <- function(time, updates = NULL, year = NULL, month = NULL,
                         yday = NULL, day = NULL, mday = NULL, wday = NULL,
                         hour = NULL, minute = NULL, second = NULL,
                         tz = NULL,
@@ -43,11 +45,11 @@ time_update <- function(time, year = NULL, month = NULL,
     mday <- day
   }
 
-  updates <- list(year = year, month = month,
-                  yday = yday, mday = mday, wday = wday,
-                  hour = hour, minute = minute,
-                  second = second)
-
+  updates <- modifyList(as.list(updates),
+                        list(year = year, month = month,
+                             yday = yday, mday = mday, wday = wday,
+                             hour = hour, minute = minute,
+                             second = second))
   updates <- normalize_units_length(updates)
 
   if (is.POSIXct(time)) {

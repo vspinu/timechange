@@ -58,6 +58,8 @@ from_posixct <- function(ct, time, force_date = FALSE) {
 }
 
 normalize_units_length <- function(units) {
+  if (length(units) == 0)
+    return(units)
   maxlen <- max(unlist(lapply(units, length)))
   if (maxlen > 1) {
     for (nm in names(units)) {
