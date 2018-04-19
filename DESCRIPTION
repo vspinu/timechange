@@ -2,13 +2,13 @@ Package: timechange
 Title: Efficient Changing of Date-Times
 Version: 0.0.1
 Authors@R: person("Vitalie", "Spinu", email = "spinuvit@gmail.com", role = c("aut", "cre"))
-Description: Efficient routines for manipulation of date-time objects with
-   correct accounting for time-zones and daylight saving times. Includes
+Description: Efficient routines for manipulation of date-time objects while
+   accounting for time-zones and daylight saving times. The package includes
    utilities for updating of date-time components (year, month, day etc.),
-   modifying time-zones, rounding of date-times and period arithmetic.
-   Parts of the 'CCTZ' source code, released under the Apache 2.0 License, are
-   included in this package. See <https://github.com/google/cctz> for more
-   details.
+   modification of time-zones, rounding of date-times, period addition and
+   subtraction etc. Parts of the 'CCTZ' source code, released under the Apache
+   2.0 License, are included in this package. See
+   <https://github.com/google/cctz> for more details.
 Depends: R (>= 3.3)
 License: GPL-3
 Encoding: UTF-8
@@ -24,6 +24,6 @@ SystemRequirements: A system with zoneinfo data (e.g. /usr/share/zoneinfo) as
     well as a recent-enough C++11 compiler (such as g++-4.8 or later). On
     Windows the zoneinfo included with R is used.
 BugReports: https://github.com/vspinu/timechange/issues
-URL: https://github.com/timechange/mlvocab/
+URL: https://github.com/vspinu/timechange/
 RoxygenNote: 6.0.1
 Roxygen: list(markdown = TRUE)

@@ -14,7 +14,7 @@ provide a refined control of what happens in ambiguous situations through
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/timechange/mlvocab/}
+  \item \url{https://github.com/vspinu/timechange/}
   \item Report bugs at \url{https://github.com/vspinu/timechange/issues}
 }
 

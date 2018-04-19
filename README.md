@@ -2,7 +2,7 @@
 
 ## timechange
 
-Utilities for efficient manipulation of date-time objects while accounting for time-zones and day-light saving times. Supported date time classes are `Date`, `POSIXct`, `POSIXlt` ([`nanosecond`](https://cran.rstudio.com/web/packages/nanotime/index.html) is [planned](https://github.com/vspinu/timechange/issues/1)).
+Utilities for efficient manipulation of date-time objects while accounting for time-zones and day-light saving times. Supported date time classes are `Date`, `POSIXct`, `POSIXlt` ([`nanosecond`](https://cran.r-project.org/package=nanotime) is [planned](https://github.com/vspinu/timechange/issues/1)).
 
 Currently implemented:
 
