@@ -16,19 +16,18 @@ time_subtract(time, periods = NULL, years = NULL, months = NULL,
 \arguments{
 \item{time}{date-time object}
 
-\item{periods}{string or list (currently unimplemented)}
+\item{periods}{string of units to add/subtract (not yet implemented) or a
+named list of the form \code{list(years = 1, months = 2, ...)}.}
 
-\item{years, months, weeks, days, hours, minutes, seconds}{Units to be added
-to \code{time}. Each unit except for seconds must be expressed as integer
-values.}
+\item{years, months, weeks, days, hours, minutes, seconds}{Units to be added to
+\code{time}. Each unit except for seconds must be expressed as integer values.}
 
 \item{roll_month}{controls how addition of months and years behaves when
 standard arithmetic rules exceed limits of the resulting date's month. See
-Details for the description of possible values.}
+"Details" for the description of possible values.}
 
-\item{roll_dst}{if \code{TRUE} and the resulting date-time falls within the DST
-gap, the time is rolled forward to the closest valid civil time. If FALSE,
-NA is returned.}
+\item{roll_dst}{controls how to adjust the updated time if it falls within a
+DST transition intervals. See the "Details".}
 }
 \description{
 Add periods to date-time objects. Periods track the change in

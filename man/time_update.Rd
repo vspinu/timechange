@@ -4,13 +4,16 @@
 \alias{time_update}
 \title{Update components of a date-time object}
 \usage{
-time_update(time, year = NULL, month = NULL, yday = NULL, day = NULL,
-  mday = NULL, wday = NULL, hour = NULL, minute = NULL, second = NULL,
-  tz = NULL, roll_month = "prev", roll_dst = "boundary",
-  week_start = getOption("week_start", 1))
+time_update(time, updates = NULL, year = NULL, month = NULL,
+  yday = NULL, day = NULL, mday = NULL, wday = NULL, hour = NULL,
+  minute = NULL, second = NULL, tz = NULL, roll_month = "prev",
+  roll_dst = "boundary", week_start = getOption("week_start", 1))
 }
 \arguments{
 \item{time}{a date-time object}
+
+\item{updates}{a string specification of components to be updated (not
+implemented yet) or a named list of components.}
 
 \item{year, month, yday, wday, mday, day, hour, minute, second}{components of the
 date-time to be updated. \code{day} is equivalent to \code{mday}. All except \code{second}

@@ -14,9 +14,10 @@ inline double ceil_multi_unit(double x, double n) noexcept {
 }
 
 enum class Unit {YEAR, HALFYEAR, QUARTER, SEASON, BIMONTH, MONTH,
-                 WEEK, DAY, HOUR, MINUTE, SECOND};
+                 WEEK, DAY, HOUR, MINUTE, SECOND, ASECOND};
 
 Unit name2unit(std::string unit_name) {
+  if (unit_name == "asecond") return Unit::ASECOND;
   if (unit_name == "second") return Unit::SECOND;
   if (unit_name == "minute") return Unit::MINUTE;
   if (unit_name == "hour") return Unit::HOUR;
@@ -75,6 +76,8 @@ newDatetimeVector C_time_ceiling(const NumericVector dt,
   size_t n = dt.size();
   NumericVector out(n);
   int N = static_cast<int>(nunits);
+  if (unit != Unit::ASECOND && N == 0)
+    Rf_error("Unit is 0 or fractional. Use 'aseconds' for fractional rounding.");
   if (unit == Unit::HALFYEAR) N *= 6;
   else if (unit == Unit::QUARTER) N *= 3;
   else if (unit == Unit::BIMONTH) N *= 2;
@@ -91,8 +94,8 @@ newDatetimeVector C_time_ceiling(const NumericVector dt,
     time_point tp(ss);
     cctz::civil_second cs = cctz::convert(tp, tz);
     switch(unit) {
-     case Unit::SECOND : {
-       // seconds are special: fractional nunits and nunits > 60 are supported
+     case Unit::ASECOND : {
+       // aseconds are duration in seconds: fractional nunits and nunits > 60 are supported
        double posix = ceil_multi_unit(dsecs, nunits);
        /* Rprintf("dsecs:%f posix:%f\n", dsecs, posix); */
        if (check_boundary && (posix - nunits) == dsecs)
@@ -100,6 +103,10 @@ newDatetimeVector C_time_ceiling(const NumericVector dt,
        else
          out[i] = posix;
        break;
+     }
+     case Unit::SECOND : {
+       cctz::civil_second ct = cctz::civil_second(cctz::civil_minute(cs)) + CEIL_MULTI_UNIT(cs.second(), N);
+       out[i] = civil_time_to_posix(ct, tz, tp, cs, N, check_boundary); break;
      }
      case Unit::MINUTE : {
        cctz::civil_minute ct = cctz::civil_minute(cctz::civil_hour(cs)) + CEIL_MULTI_UNIT(cs.minute(), N);
@@ -156,6 +163,8 @@ newDatetimeVector C_time_floor(const NumericVector dt,
   size_t n = dt.size();
   NumericVector out(n);
   int N = static_cast<int>(nunits);
+  if (unit != Unit::ASECOND && N == 0)
+    Rf_error("Unit is 0 or fractional. Use 'aseconds' for fractional rounding.");
   if (unit == Unit::HALFYEAR) N *= 6;
   else if (unit == Unit::QUARTER) N *= 3;
   else if (unit == Unit::BIMONTH) N *= 2;
@@ -170,9 +179,13 @@ newDatetimeVector C_time_floor(const NumericVector dt,
     time_point tp(ss);
     cctz::civil_second cs = cctz::convert(tp, tz);
     switch(unit) {
-     case Unit::SECOND : {
+     case Unit::ASECOND : {
        // seconds are special: fractional nunits and nunits > 60 are supported
        out[i] = floor_multi_unit(dsecs, nunits); break;
+     }
+     case Unit::SECOND : {
+       cctz::civil_second ct = cctz::civil_second(cctz::civil_minute(cs)) + FLOOR_MULTI_UNIT(cs.second(), N);
+       out[i] = civil_time_to_posix(ct, tz, tp, cs); break;
      }
      case Unit::MINUTE : {
        cctz::civil_minute ct = cctz::civil_minute(cctz::civil_hour(cs)) + FLOOR_MULTI_UNIT(cs.minute(), N);

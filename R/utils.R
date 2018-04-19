@@ -78,12 +78,12 @@ normalize_units_length <- function(units) {
 standardise_unit_name <- function(x) {
   dates <- c("second", "minute", "hour", "day", "week", "month", "year",
              ## these ones are used for rounding only
-             "bimonth", "quarter", "halfyear", "season")
+             "asecond", "bimonth", "quarter", "halfyear", "season")
   y <- gsub("(.)s$", "\\1", x)
   y <- substr(y, 1, 3)
   res <- dates[pmatch(y, dates)]
   if (any(is.na(res))) {
-    stop("Invalid period name: ", paste(x[is.na(res)], collapse = ", "),
+    stop("Invalid unit name: ", paste(x[is.na(res)], collapse = ", "),
          call. = FALSE)
   }
   res
@@ -101,7 +101,7 @@ parse_units <- function(unit) {
 
   if (!is.na(p[[1]])) {
 
-    period_units <- c("second", "minute", "hour", "day", "week", "month", "year")
+    units <- c("second", "minute", "hour", "day", "week", "month", "year")
 
     wp <- which(p > 0)
     if (length(wp) > 1) {
@@ -110,11 +110,10 @@ parse_units <- function(unit) {
       stop("Cannot't parse heterogenuous or fractional units larger than one minute.")
     }
 
-    list(n = p[wp], unit = period_units[wp])
+    list(n = p[wp], unit = units[wp])
 
   } else {
-    ## this part is for backward compatibility and allows for bimonth, halfyear
-    ## and quarter
+    ## allow for bimonth, halfyear, quarter, season and asecond
 
     m <- regexpr(" *(?<n>[0-9.,]+)? *(?<unit>[^ \t\n]+)", unit[[1]], perl = T)
     if (m > 0) {
@@ -124,7 +123,7 @@ parse_units <- function(unit) {
       start <- attr(m, "capture.start")
       end <- start + attr(m, "capture.length") - 1L
       n <- if (end[[1]] >= start[[1]]) {
-             as.integer(substring(unit, start[[1]], end[[1]]))
+             as.numeric(substring(unit, start[[1]], end[[1]]))
            } else {
              1
            }

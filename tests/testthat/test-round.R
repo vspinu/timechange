@@ -16,44 +16,45 @@ test_that("time_floor works for each time element", {
 
 test_that("time_floor and time_round throw on invalid multi-unit spec", {
   x <- ymd_hms("2009-08-03 12:01:57.11")
-  expect_silent(time_floor(x, "120 sec"))
+  expect_silent(time_floor(x, "120 asec"))
+  expect_error(time_ceiling(x, "120 sec"))
   expect_error(time_floor(x, "120 min"))
   expect_error(time_floor(x, "25 h"))
   expect_error(time_floor(x, "32 days"))
-  expect_silent(time_ceiling(x, "120 sec"))
   expect_error(time_ceiling(x, "120 min"))
   expect_error(time_ceiling(x, "25 h"))
   expect_error(time_ceiling(x, "32 days"))
 })
 
 test_that("time_floor works for multi-units", {
-  x <- as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC")
-  expect_identical(time_floor(x, "2 secs"),   as.POSIXct("2009-08-03 12:01:58", tz = "UTC"))
-  expect_identical(time_floor(x, "2s"),   as.POSIXct("2009-08-03 12:01:58", tz = "UTC"))
-  expect_identical(time_floor(x, "2 mins"),   as.POSIXct("2009-08-03 12:00:00", tz = "UTC"))
-  expect_identical(time_floor(x, "2M"),   as.POSIXct("2009-08-03 12:00:00", tz = "UTC"))
-  expect_identical(time_floor(x, "2 hours"),     as.POSIXct("2009-08-03 12:00:00", tz = "UTC"))
-  expect_identical(time_floor(x, "2h"),     as.POSIXct("2009-08-03 12:00:00", tz = "UTC"))
-  expect_identical(time_floor(x, "2 days"),      as.POSIXct("2009-08-03 00:00:00", tz = "UTC"))
-  expect_identical(time_floor(x, "3 days"),      as.POSIXct("2009-08-01 00:00:00", tz = "UTC"))
-  expect_identical(time_floor(x, "10 days"),      as.POSIXct("2009-08-01 00:00:00", tz = "UTC"))
-  expect_identical(time_floor(x, "10d"),      as.POSIXct("2009-08-01 00:00:00", tz = "UTC"))
-  expect_identical(time_floor(x, "2 month"),    as.POSIXct("2009-07-01 00:00:00", tz = "UTC"))
-  expect_identical(time_floor(x, "2m"),    as.POSIXct("2009-07-01 00:00:00", tz = "UTC"))
+  x <- cteu("2009-08-03 12:01:59.23")
+  expect_identical(time_floor(x, "2 secs"),   cteu("2009-08-03 12:01:58"))
+  expect_identical(time_floor(x, "2s"),   cteu("2009-08-03 12:01:58"))
+  expect_identical(time_floor(x, "2 mins"),   cteu("2009-08-03 12:00:00"))
+  expect_identical(time_floor(x, "2M"),   cteu("2009-08-03 12:00:00"))
+  expect_identical(time_floor(x, "2 hours"),     cteu("2009-08-03 12:00:00"))
+  expect_identical(time_floor(x, "2h"),     cteu("2009-08-03 12:00:00"))
+  expect_identical(time_floor(x, "2 days"),      cteu("2009-08-03 00:00:00"))
+  expect_identical(time_floor(x, "3 days"),      cteu("2009-08-01 00:00:00"))
+  expect_identical(time_floor(x, "10 days"),      cteu("2009-08-01 00:00:00"))
+  expect_identical(time_floor(x, "10d"),      cteu("2009-08-01 00:00:00"))
+  expect_identical(time_floor(x, "2 month"),    cteu("2009-07-01 00:00:00"))
+  expect_identical(time_floor(x, "2m"),    cteu("2009-07-01 00:00:00"))
   expect_identical(time_floor(x, "2 bimonth"),  time_floor(x, "4 months"))
   expect_identical(time_floor(x, "2 quarter"),  time_floor(x, "6 months"))
   expect_identical(time_floor(x, "2 halfyear"), time_floor(x, "year"))
-  expect_identical(time_floor(x, "2 year"),     as.POSIXct("2008-01-01 00:00:00", tz = "UTC"))
+  expect_identical(time_floor(x, "2 year"),     cteu("2008-01-01 00:00:00"))
 })
 
 test_that("time_floor works for fractional multi-units", {
   x <- as.POSIXct("2009-08-03 12:01:59.23001", tz = "UTC")
-  expect_identical(time_floor(x, ".2 secs"),   as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
-  expect_identical(time_floor(x, ".1s"),   as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
-  expect_equal(time_floor(x, ".05s"),   as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
-  expect_equal(time_floor(x, ".01s"),   as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC"))
-  expect_equal(time_floor(x, ".005s"),   as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC"))
+  expect_error(time_floor(x, ".2 secs"))
   expect_equal(time_floor(x, ".5 mins"),   as.POSIXct("2009-08-03 12:01:30", tz = "UTC"))
+  expect_identical(time_floor(x, ".2asec"),   as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
+  expect_identical(time_floor(x, ".1asec"),   as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
+  expect_equal(time_floor(x, ".05as"),   as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
+  expect_equal(time_floor(x, ".01as"),   as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC"))
+  expect_equal(time_floor(x, ".005as"),   as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC"))
 })
 
 test_that("multi-unit rounding works the same for POSIX and Date objects", {
@@ -123,24 +124,24 @@ test_that("time_ceiling works for multi-units", {
 
 test_that("time_ceiling works for fractional multi-units", {
   x <- as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC")
-  expect_identical(time_ceiling(x, ".2 secs"),   as.POSIXct("2009-08-03 12:01:59.4", tz = "UTC"))
-  expect_identical(time_ceiling(x, ".1s"),   as.POSIXct("2009-08-03 12:01:59.3", tz = "UTC"))
-  expect_equal(time_ceiling(x, ".05s"),   as.POSIXct("2009-08-03 12:01:59.25", tz = "UTC"))
+  expect_identical(time_ceiling(x, ".2 asecs"),   as.POSIXct("2009-08-03 12:01:59.4", tz = "UTC"))
+  expect_identical(time_ceiling(x, ".1a"),   as.POSIXct("2009-08-03 12:01:59.3", tz = "UTC"))
+  expect_equal(time_ceiling(x, ".05as"),   as.POSIXct("2009-08-03 12:01:59.25", tz = "UTC"))
   expect_equal(time_ceiling(x, ".5 mins"),   as.POSIXct("2009-08-03 12:02:00", tz = "UTC"))
 })
 
 test_that("time_round works for each time element", {
-  x <- as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC")
-  expect_equal(time_round(x, "second"), as.POSIXct("2009-08-03 12:01:59", tz = "UTC"))
-  expect_equal(time_round(x, "minute"), as.POSIXct("2009-08-03 12:02:00", tz = "UTC"))
-  expect_equal(time_round(x, "hour"), as.POSIXct("2009-08-03 12:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "day"), as.POSIXct("2009-08-04 00:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "week"), as.POSIXct("2009-08-03 00:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "month"), as.POSIXct("2009-08-01 00:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "bimonth"), as.POSIXct("2009-09-01 00:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "quarter"), as.POSIXct("2009-07-01 00:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "halfyear"), as.POSIXct("2009-07-01 00:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "year"), as.POSIXct("2010-01-01 00:00:00", tz = "UTC"))
+  x <- ctus("2009-08-03 12:01:59.23")
+  expect_equal(time_round(x, "second"), ctus("2009-08-03 12:01:59"))
+  expect_equal(time_round(x, "minute"), ctus("2009-08-03 12:02:00"))
+  expect_equal(time_round(x, "hour"), ctus("2009-08-03 12:00:00"))
+  expect_equal(time_round(x, "day"), ctus("2009-08-04 00:00:00"))
+  expect_equal(time_round(x, "week"), ctus("2009-08-03 00:00:00"))
+  expect_equal(time_round(x, "month"), ctus("2009-08-01 00:00:00"))
+  expect_equal(time_round(x, "bimonth"), ctus("2009-09-01 00:00:00"))
+  expect_equal(time_round(x, "quarter"), ctus("2009-07-01 00:00:00"))
+  expect_equal(time_round(x, "halfyear"), ctus("2009-07-01 00:00:00"))
+  expect_equal(time_round(x, "year"), ctus("2010-01-01 00:00:00"))
 })
 
 test_that("time_floor and time_ceiling work with leap years", {
@@ -155,29 +156,29 @@ test_that("time_floor and time_ceiling work with leap years", {
 })
 
 test_that("time_round works for multi-units", {
-  x <- as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC")
-  expect_equal(time_round(x, "2 second"), as.POSIXct("2009-08-03 12:02:00", tz = "UTC"))
-  expect_equal(time_round(x, "2 minute"), as.POSIXct("2009-08-03 12:02:00", tz = "UTC"))
-  expect_equal(time_round(x, "3 mins"), as.POSIXct("2009-08-03 12:03:00", tz = "UTC"))
-  expect_equal(time_round(x, "5 mins"), as.POSIXct("2009-08-03 12:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "2 hour"), as.POSIXct("2009-08-03 12:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "5 hour"), as.POSIXct("2009-08-03 10:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "2 days"), as.POSIXct("2009-08-03 00:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "2 months"), as.POSIXct("2009-09-01 00:00:00", tz = "UTC"))
+  x <- ctutc("2009-08-03 12:01:59.23")
+  expect_equal(time_round(x, "2 second"), ctutc("2009-08-03 12:02:00"))
+  expect_equal(time_round(x, "2 minute"), ctutc("2009-08-03 12:02:00"))
+  expect_equal(time_round(x, "3 mins"), ctutc("2009-08-03 12:03:00"))
+  expect_equal(time_round(x, "5 mins"), ctutc("2009-08-03 12:00:00"))
+  expect_equal(time_round(x, "2 hour"), ctutc("2009-08-03 12:00:00"))
+  expect_equal(time_round(x, "5 hour"), ctutc("2009-08-03 10:00:00"))
+  expect_equal(time_round(x, "2 days"), ctutc("2009-08-03 00:00:00"))
+  expect_equal(time_round(x, "2 months"), ctutc("2009-09-01 00:00:00"))
   expect_equal(time_round(x, "bimonth"), time_round(x, "2 months"))
   expect_equal(time_round(x, "bimonth"), time_round(x, "4 months"))
   expect_equal(time_round(x, "quarter"), time_round(x, "3 months"))
   expect_equal(time_round(x, "halfyear"), time_round(x, "6 months"))
-  expect_equal(time_round(x, "3 years"), as.POSIXct("2010-01-01 00:00:00", tz = "UTC"))
-  expect_equal(time_round(x, "4 years"), as.POSIXct("2008-01-01 00:00:00", tz = "UTC"))
+  expect_equal(time_round(x, "3 years"), ctutc("2010-01-01 00:00:00"))
+  expect_equal(time_round(x, "4 years"), ctutc("2008-01-01 00:00:00"))
 })
 
 test_that("time_round works for fractional multi-units", {
-  x <- as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC")
-  expect_equal(time_round(x, ".2 secs"),   as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
-  expect_equal(time_round(x, ".1s"),   as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
-  expect_equal(time_round(x, ".05s"),   as.POSIXct("2009-08-03 12:01:59.25", tz = "UTC"))
-  expect_equal(time_round(x, ".5 mins"),   as.POSIXct("2009-08-03 12:02:00", tz = "UTC"))
+  x <- ctus("2009-08-03 12:01:59.23")
+  expect_equal(time_round(x, ".2 asecs"),   ctus("2009-08-03 12:01:59.2"))
+  expect_equal(time_round(x, ".1as"),   ctus("2009-08-03 12:01:59.2"))
+  expect_equal(time_round(x, ".05as"),   ctus("2009-08-03 12:01:59.25"))
+  expect_equal(time_round(x, ".5 mins"),   ctus("2009-08-03 12:02:00"))
 })
 
 test_that("time_floor handles vectors", {
@@ -472,30 +473,30 @@ test_that("time rounding with hours works with repeated DST transitions", {
   expect_equal(as.numeric(difftime(time_ceiling(x, "hour"), ctus(x), units = "min")), 45)
 
   ## rounding is done in absolute time for seconds
-  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "3600s"), am1) ## EDT (.5h)
+  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "3600a"), am1) ## EDT (.5h)
   x <- ctus("2014-11-02 00:30:00")
-  expect_equal(as.numeric(difftime(time_ceiling(x, "3600s"), ctus(x), units = "min")), 30)
+  expect_equal(as.numeric(difftime(time_ceiling(x, "3600a"), ctus(x), units = "min")), 30)
   x <- time_add(am1, minutes = 30) ## EDT
-  expect_equal(as.numeric(difftime(time_ceiling(x, "3600s"), ctus(x), units = "min")), 30)
+  expect_equal(as.numeric(difftime(time_ceiling(x, "3600a"), ctus(x), units = "min")), 30)
 
   ## rounding is done in civil time for units > seconds
   expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), am1) ## EDT (30m)
   x <- time_add(am1, minutes = 35) ## EDT
   expect_equal(as.numeric(difftime(time_round(x, "hour"), ctus(x), units = "min")), -35)
-  expect_equal(as.numeric(difftime(time_round(x, "3600s"), ctus(x), units = "min")), 25)
+  expect_equal(as.numeric(difftime(time_round(x, "3600a"), ctus(x), units = "min")), 25)
   x <- ctus("2014-11-02 02:15:00")
   expect_equal(time_round(x, "hour"), ctus("2014-11-02 02:00:00")) ## EST (15m)
   expect_equal(as.numeric(difftime(time_round(x, "hour"), ctus(x), units = "min")), -15)
-  expect_equal(as.numeric(difftime(time_round(x, "3600s"), ctus(x), units = "min")), -15)
+  expect_equal(as.numeric(difftime(time_round(x, "3600a"), ctus(x), units = "min")), -15)
 
   ## rounding is done in civil time for units > seconds
   expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), am1) ## EDT (30m)
   x <- .POSIXct(1414909500, tz = "America/New_York") # "2014-11-02 01:25:00 EST"
   expect_equal(as.numeric(difftime(time_floor(x, "hour"), x, units = "min")), -25)
-  expect_equal(as.numeric(difftime(time_floor(x, "3600s"), x, units = "min")), -25)
+  expect_equal(as.numeric(difftime(time_floor(x, "3600a"), x, units = "min")), -25)
   x <- ctus("2014-11-02 02:15:00") ## EST
   expect_equal(time_floor(x, "hour"), ctus("2014-11-02 02:00:00")) ## EST (15m)
-  expect_equal(as.numeric(difftime(time_floor(x, "3600s"), ctus(x), units = "min")), -15)
+  expect_equal(as.numeric(difftime(time_floor(x, "3600a"), ctus(x), units = "min")), -15)
 
 })
 
@@ -525,7 +526,7 @@ test_that("time rounding with minutes works with repeated DST transitions", {
   expect_equal(time_floor(x, "minute"), ctus("2014-11-02 02:15:00"))
   expect_equal(time_floor(x, "5minute"), ctus("2014-11-02 02:15:00"))
   expect_equal(time_floor(x, "4minute"), ctus("2014-11-02 02:12:00"))
-  expect_equal(as.numeric(difftime(time_floor(x, "3600s"), ctus(x), units = "min")), -15)
+  expect_equal(as.numeric(difftime(time_floor(x, "3600a"), ctus(x), units = "min")), -15)
 
 })
 

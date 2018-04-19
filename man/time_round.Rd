@@ -19,11 +19,14 @@ time_ceiling(time, unit = "seconds", change_on_boundary = inherits(time,
 \item{time}{a date-time vector (\code{Date}, \code{POSIXct} or \code{POSIXlt})}
 
 \item{unit}{a character string specifying a time unit or a multiple of a
-unit. Valid base units are \code{second}, \code{minute}, \code{hour}, \code{day}, \code{week},
-\code{month}, \code{bimonth}, \code{quarter}, \code{season}, \code{halfyear} and \code{year}. Arbitrary
-unique English abbreviations are allowed. With one letter abbreviations "m"
-stands for month and "M" stands for minute. Multi-unit rounding of weeks is
-currently not supported.}
+unit. Valid base periods for civil time rounding are \code{second}, \code{minute},
+\code{hour}, \code{day}, \code{week}, \code{month}, \code{bimonth}, \code{quarter}, \code{season}, \code{halfyear}
+and \code{year}. The only unit for absolute time rounding is \code{asecond}. Other
+absolute units can be achieved with multiples of \code{asecond} ("60a", "3600a"
+etc). See "Details" and examples. Arbitrary unique English abbreviations
+are allowed. With one letter abbreviations are supported, including the
+\code{strptime} formats "y", "m", "d", "M", "H", "S". Multi-unit rounding of
+weeks is currently not supported.}
 
 \item{week_start}{when unit is \code{weeks} specify the reference day. Defaults to
 1 (Monday).}
@@ -63,19 +66,20 @@ nearest boundary of the specified time unit.
 \section{Civil Time vs Absolute Time rounding}{
 
 
-Rounding of seconds is done in absolute time (numeric \code{POSIXct}
-representation), but all other units are rounded in civil time. There are two
-important consequences of this decision. First, rounding of seconds allows
-for multi-units larger than 60, while for all other units the maximal
-multi-unit is restricted to the containing unit (60 mins, 24 hours
-etc). Second, floor (ceiling) in civil time will never produce units larger
-(smaller) than the units in the rounded objects. See examples of rounding
-around DST transition with \code{1 hour} does not give same result as rounding
-with \code{3600 seconds}.
+Rounding in civil time is done on actual clock time (ymdHMS) and is affected
+by civil time irregularities like DST. One important characteristic of civil
+time rounding is that floor (ceiling) does not produce civil times that are
+bigger (smaller) than the rounded civil time.
 
-Rounding to fractional seconds is allowed. Please note that rounding to
-fractions smaller than 1ms will lead to large precision errors due to the
-floating point representation of the POSIXct objects.
+Absolute time rounding (with \code{aseconds}) is done on the absolute time (number
+of seconds since origin), Thus, rounding of \code{aseconds} allows for fractional
+seconds and multi-units larger than 60. See examples of rounding around DST
+transition where rounding in civil time does not give same result as rounding
+with the corresponding \code{X aseconds}.
+
+Please note that absolute rounding to fractions smaller than 1ms will result
+to large precision errors due to the floating point representation of the
+POSIXct objects.
 }
 
 \section{Ceiling of \code{Date} objects}{
@@ -107,15 +111,16 @@ The behavior on the boundary can be changed by setting
 options(digits.secs=6)
 
 x <- as.POSIXct("2009-08-03 12:01:59.23")
-time_round(x, ".5s")
+time_round(x, ".5 asec")
 time_round(x, "sec")
 time_round(x, "second")
+time_round(x, "asecond")
 time_round(x, "minute")
 time_round(x, "5 mins")
 time_round(x, "5M") # "M" for minute "m" for month
 time_round(x, "hour")
 time_round(x, "2 hours")
-time_round(x, "2h")
+time_round(x, "2H")
 time_round(x, "day")
 time_round(x, "week")
 time_round(x, "month")
@@ -125,7 +130,7 @@ time_round(x, "halfyear")
 time_round(x, "year")
 
 x <- as.POSIXct("2009-08-03 12:01:59.23")
-time_floor(x, ".1s")
+time_floor(x, ".1 asec")
 time_floor(x, "second")
 time_floor(x, "minute")
 time_floor(x, "M")
@@ -141,7 +146,7 @@ time_floor(x, "halfyear")
 time_floor(x, "year")
 
 x <- as.POSIXct("2009-08-03 12:01:59.23")
-time_ceiling(x, ".1 sec")
+time_ceiling(x, ".1 asec")
 time_ceiling(x, "second")
 time_ceiling(x, "minute")
 time_ceiling(x, "5 mins")
@@ -161,26 +166,28 @@ time_ceiling(x, "month")
 time_ceiling(x, "month", change_on_boundary = FALSE)
 
 ## As of R 3.4.2 POSIXct printing of fractional numbers is wrong
-as.POSIXct("2009-08-03 12:01:59.3") ## -> "2009-08-03 12:01:59.2 CEST"
-time_ceiling(x, ".1 sec") ## -> "2009-08-03 12:01:59.2 CEST"
+as.POSIXct("2009-08-03 12:01:59.3", tz = "UTC") ## -> "2009-08-03 12:01:59.2 UTC"
+time_ceiling(x, ".1 asec") ## -> "2009-08-03 12:01:59.2 UTC"
 
 ## Civil Time vs Absolute Time Rounding
 
-# "2014-11-02 01:35:00 EDT" before 1h backroll at 2AM
-x <- .POSIXct(1414906500, tz = "America/New_York")
+# "2014-11-02 01:59:59.5 EDT" before 1h backroll at 2AM
+x <- .POSIXct(1414907999.5, tz = "America/New_York")
 x
-time_ceiling(x, "hour") # "2014-11-02 02:00:00 EST" + 1h 25m
-difftime(time_ceiling(x, "hour"), x, units = "min")
-time_ceiling(x, "3600s") # "2014-11-02 01:00:00 EST" + 25m
-difftime(time_ceiling(x, "3600s"), x, units = "min")
+time_ceiling(x, "hour") # "2014-11-02 02:00:00 EST"
+time_ceiling(x, "minute")
+time_ceiling(x, "sec")
+difftime(time_ceiling(x, "s"), x)
+time_ceiling(x, "1a") # "2014-11-02 01:00:00 EST"
+difftime(time_ceiling(x, "a"), x)
 
-# "2014-11-02 01:25:00 EST" after 1h backroll at 2AM
-x <- .POSIXct(1414909500, tz = "America/New_York")
+# "2014-11-02 01:00:00.5 EST" after 1h backroll at 2AM
+x <- .POSIXct(1414908000.5, tz = "America/New_York")
 x
-time_floor(x, "hour") # "2014-11-02 01:00:00 EST"  - 25m
-difftime(time_floor(x, "hour"), x, units = "min")
-time_floor(x, "3600s") # "2014-11-02 01:00:00 EST"  - 25m
-difftime(time_floor(x, "3600s"), x, units = "min")
+time_floor(x, "hour") # "2014-11-02 01:00:00 EST"
+difftime(time_floor(x, "hour"), x)
+time_floor(x, "3600a") # "2014-11-02 01:00:00 EST"  - 25m
+difftime(time_floor(x, "a"), x)
 }
 \seealso{
 \code{\link[base:round]{base::round()}}
