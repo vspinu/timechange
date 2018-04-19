@@ -67,8 +67,8 @@ time_force_tz(x, "Europe/Amsterdam")
 
 y <- as.POSIXct("2010-03-14 02:05:05", tz = "UTC")
 time_force_tz(y, "America/New_York", roll = "boundary")
-time_force_tz(y, "America/New_York", roll = "next")
-time_force_tz(y, "America/New_York", roll = "prev")
+time_force_tz(y, "America/New_York", roll = "first")
+time_force_tz(y, "America/New_York", roll = "last")
 time_force_tz(y, "America/New_York", roll = "NA")
 
 ## Heterogeneous time-zones:

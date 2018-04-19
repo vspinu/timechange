@@ -24,20 +24,19 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
     switch (roll_dst) {
      case Roll::BOUNDARY: tp = cl.trans; break;
      case Roll::SKIP:
-     case Roll::NEXT: tp = cl.pre; break;
-     case Roll::PREV: tp = cl.post; break;
+     case Roll::FIRST: tp = cl.pre; break;
+     case Roll::LAST: tp = cl.post; break;
      case Roll::NA: return NA_REAL;
     }
   } else if (cl.kind == cctz::time_zone::civil_lookup::REPEATED) {
     // The mnemonics in this case should be interpreted starting from a moment
-    // in time just before the ambiguous DST. Thus next means "pre" hour. PREV
-    // means "post" hour. The PREV mnemonic is not suggestive in this
-    // case. Maybe change back to FIRST/LAST?
+    // in time just before the ambiguous DST. Thus "first" means "pre" hour. PREV
+    // means "post" hour.
     switch (roll_dst) {
      case Roll::BOUNDARY: tp = cl.trans; break;
      case Roll::SKIP:
-     case Roll::PREV: tp = cl.post; break;
-     case Roll::NEXT: tp = cl.pre; break;
+     case Roll::LAST: tp = cl.post; break;
+     case Roll::FIRST: tp = cl.pre; break;
      case Roll::NA: return NA_REAL;
     }
   } else {

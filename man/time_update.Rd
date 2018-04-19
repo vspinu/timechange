@@ -6,7 +6,7 @@
 \usage{
 time_update(time, updates = NULL, year = NULL, month = NULL,
   yday = NULL, day = NULL, mday = NULL, wday = NULL, hour = NULL,
-  minute = NULL, second = NULL, tz = NULL, roll_month = "prev",
+  minute = NULL, second = NULL, tz = NULL, roll_month = "last",
   roll_dst = "boundary", week_start = getOption("week_start", 1))
 }
 \arguments{

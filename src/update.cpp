@@ -149,10 +149,10 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
            cd = cctz::civil_day(cctz::civil_month(cd));
            H = 0; M = 0; S = 0; rem = 0.0;
            break;
-         case Roll::NEXT:
+         case Roll::FIRST:
            cd = cctz::civil_day(cctz::civil_month(cd));
            break;
-         case Roll::PREV:
+         case Roll::LAST:
            cd = cctz::civil_day(cctz::civil_month(cd)) - 1;
            break;
          case Roll::NA:
@@ -299,10 +299,10 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
            cd = cctz::civil_day(cctz::civil_month(cd));
            add_my_hms = false;
            break;
-         case Roll::NEXT:
+         case Roll::FIRST:
            cd = cctz::civil_day(cctz::civil_month(cd));
            break;
-         case Roll::PREV:
+         case Roll::LAST:
            cd = cctz::civil_day(cctz::civil_month(cd)) - 1;
            break;
          case Roll::NA:

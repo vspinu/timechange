@@ -1,5 +1,5 @@
 
-.roll_types <- c("next", "prev", "boundary", "skip", "NA")
+.roll_types <- c("first", "last", "boundary", "skip", "NA")
 
 is.POSIXt <- function(x) "POSIXt" %in% class(x)
 is.POSIXlt <- function(x) "POSIXlt" %in% class(x)
