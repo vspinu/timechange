@@ -13,7 +13,7 @@
 #' time_get(x)
 #' @export
 time_get <- function(time,
-                     components = c("year", "month", "yday", "day", "wday", "hour", "minute", "second"),
+                     components = c("year", "month", "yday", "mday", "wday", "hour", "minute", "second"),
                      week_start = getOption("timechange.week_start", 1)) {
 
   if (length(diffs <- setdiff(components, names(components_template))) > 0) {
