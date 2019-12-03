@@ -96,8 +96,14 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
       double dti = loop_dt ? dt[i] : dt[0];
       int_fast64_t secs = floor_to_int64(dti);
 
+
       if (ISNAN(dti) || secs == NA_INT64) {
-        out[i] = NA_REAL;
+        if (dti == R_PosInf)
+          out[i] = R_PosInf;
+        else if (dti == R_NegInf)
+          out[i] = R_NegInf;
+        else
+          out[i] = NA_REAL;
         continue;
       }
 
@@ -261,7 +267,12 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
       int_fast64_t secs = floor_to_int64(dti);
 
       if (ISNAN(dti) || secs == NA_INT64) {
-        out[i] = NA_REAL;
+        if (dti == R_PosInf)
+          out[i] = R_PosInf;
+        else if (dti == R_NegInf)
+          out[i] = R_NegInf;
+        else
+          out[i] = NA_REAL;
         continue;
       }
 

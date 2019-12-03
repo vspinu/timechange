@@ -1,5 +1,16 @@
 context("Time Update")
 
+
+test_that("Non-finite date-times are handled correctly", {
+  expect_identical(unclass(time_update(.POSIXct(Inf), hour = 1)), Inf)
+  expect_identical(unclass(time_add(.POSIXct(-Inf), hour = 1)), -Inf)
+  expect_identical(unclass(time_add(.POSIXct(NA_real_), hour = 1)), NA_real_)
+
+  expect_identical(unclass(time_add(.Date(Inf), day = 1)), Inf)
+  expect_identical(unclass(time_add(.Date(-Inf), day = 1)), -Inf)
+  expect_identical(unclass(time_add(.POSIXct(NA_real_), day = 1)), NA_real_)
+})
+
 ## most of the tests are borrowed from lubridate
 
 test_that("update.Date returns a date object", {
