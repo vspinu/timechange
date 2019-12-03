@@ -62,11 +62,11 @@ inline double civil_time_to_posix(const T& ct,
 }
 
 // [[Rcpp::export]]
-newDatetimeVector C_time_ceiling(const NumericVector dt,
-                                 const std::string unit_name,
-                                 const double nunits,
-                                 const int week_start,
-                                 const bool change_on_boundary) {
+Rcpp::newDatetimeVector C_time_ceiling(const NumericVector dt,
+                                       const std::string unit_name,
+                                       const double nunits,
+                                       const int week_start,
+                                       const bool change_on_boundary) {
 
   Unit unit = name2unit(unit_name);
   std::string tz_name = tz_from_tzone_attr(dt);
@@ -150,10 +150,10 @@ newDatetimeVector C_time_ceiling(const NumericVector dt,
 
 
 // [[Rcpp::export]]
-newDatetimeVector C_time_floor(const NumericVector dt,
-                               const std::string unit_name,
-                               const double nunits,
-                               const int week_start) {
+Rcpp::newDatetimeVector C_time_floor(const NumericVector dt,
+                                     const std::string unit_name,
+                                     const double nunits,
+                                     const int week_start) {
 
   Unit unit = name2unit(unit_name);
   std::string tz_name = tz_from_tzone_attr(dt);

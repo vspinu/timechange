@@ -13,6 +13,8 @@
 // R's timezone registry:
 // https://github.com/SurajGupta/r-source/blob/master/src/extra/tzone/registryTZ.c
 
+// C++20 date/calendar proposal: https://github.com/HowardHinnant/date
+
 
 // [[Rcpp::export]]
 Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
@@ -33,11 +35,6 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
     do_hour = updates.containsElementNamed("hour"),
     do_minute = updates.containsElementNamed("minute"),
     do_second = updates.containsElementNamed("second");
-
-  /* bool do_year = !Rf_isNull(updates["year"]), do_month = !Rf_isNull(updates["month"]), */
-  /*   do_yday = !Rf_isNull(updates["yday"]), do_mday = !Rf_isNull(updates["mday"]), */
-  /*   do_wday = !Rf_isNull(updates["wday"]), do_hour = !Rf_isNull(updates["hour"]), */
-  /*   do_minute = !Rf_isNull(updates["minute"]), do_second = !Rf_isNull(updates["second"]); */
 
   const IntegerVector& year = do_year ? updates["year"] : IntegerVector::create(0);
   const IntegerVector& month = do_month ? updates["month"] : IntegerVector::create(0);
@@ -204,6 +201,8 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
     do_minute = periods.containsElementNamed("minutes"),
     do_second = periods.containsElementNamed("seconds");
 
+  if (dt.size() == 0) return(newDatetimeVector(dt));
+
   const IntegerVector& year = do_year ? periods["years"] : IntegerVector::create(0);
   const IntegerVector& month = do_month ? periods["months"] : IntegerVector::create(0);
   const IntegerVector& week = do_week ? periods["weeks"] : IntegerVector::create(0);
@@ -212,7 +211,6 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
   const IntegerVector& minute = do_minute ? periods["minutes"] : IntegerVector::create(0);
   const NumericVector& second = do_second ? periods["seconds"] : NumericVector::create(0);
 
-  if (dt.size() == 0) return(newDatetimeVector(dt));
 
   std::vector<R_xlen_t> sizes {
     year.size(), month.size(), week.size(), day.size(),
@@ -355,9 +353,9 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
 }
 
 // [[Rcpp::export]]
-newDatetimeVector C_force_tz(const NumericVector dt,
-                             const CharacterVector tz,
-                             const std::string roll_dst) {
+Rcpp::newDatetimeVector C_force_tz(const NumericVector dt,
+                                   const CharacterVector tz,
+                                   const std::string roll_dst) {
   // roll: logical, if `true`, and `time` falls into the DST-break, assume the
   // next valid civil time, otherwise return NA
 

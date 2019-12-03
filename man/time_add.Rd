@@ -5,13 +5,33 @@
 \alias{time_subtract}
 \title{Arithmetics with periods}
 \usage{
-time_add(time, periods = NULL, years = NULL, months = NULL,
-  weeks = NULL, days = NULL, hours = NULL, minutes = NULL,
-  seconds = NULL, roll_month = "last", roll_dst = "first")
+time_add(
+  time,
+  periods = NULL,
+  years = NULL,
+  months = NULL,
+  weeks = NULL,
+  days = NULL,
+  hours = NULL,
+  minutes = NULL,
+  seconds = NULL,
+  roll_month = "last",
+  roll_dst = "first"
+)
 
-time_subtract(time, periods = NULL, years = NULL, months = NULL,
-  weeks = NULL, days = NULL, hours = NULL, minutes = NULL,
-  seconds = NULL, roll_month = "last", roll_dst = "last")
+time_subtract(
+  time,
+  periods = NULL,
+  years = NULL,
+  months = NULL,
+  weeks = NULL,
+  days = NULL,
+  hours = NULL,
+  minutes = NULL,
+  seconds = NULL,
+  roll_month = "last",
+  roll_dst = "last"
+)
 }
 \arguments{
 \item{time}{date-time object}
@@ -47,21 +67,21 @@ for a refined control of what happens when an addition of irregular periods
 Let's start with an example. What happens when you add "1 month 3 days" to
 "2000-01-31 01:02:03"? \pkg{`timechange`} operates by applying larger
 periods first. First months are added\code{1 + 1 = February} which results in
-non-existent time of \code{2000-02-31 01:02:03}. Here the \code{roll_month}
+non-existent time of \verb{2000-02-31 01:02:03}. Here the \code{roll_month}
 adjustment kicks in:
 \itemize{
 \item \code{skip} - no adjustment is done to the simple arithmetic operations (the
-gap is skipped as if it's not there. Thus, \code{2000-01-31 01:02:03 + 1 month + 3 days} is equivalent to \code{2000-01-01 01:02:03 + 1 month + 31 days + 3 days}
-resulting in \code{2000-03-05 01:02:03}.
+gap is skipped as if it's not there. Thus, \verb{2000-01-31 01:02:03 + 1 month + 3 days} is equivalent to \verb{2000-01-01 01:02:03 + 1 month + 31 days + 3 days}
+resulting in \verb{2000-03-05 01:02:03}.
 \item \code{NA} - if any of the intermediate additions result in non-existent dates
 \code{NA} is produced. This is how arithmetic in \code{lubridate} operates.
 \item \code{boundary} - if an intermediate computation falls in a gap, the date is
-adjusted to the next valid time. Thus, \code{2000-01-31 01:02:03 + month = 2000-03-01 00:00:00}.
+adjusted to the next valid time. Thus, \verb{2000-01-31 01:02:03 + month = 2000-03-01 00:00:00}.
 \item \code{next} - is like \code{boundary} but preserves the smaller units. Thus,
-\code{2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03}.
+\verb{2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03}.
 \item \code{prev} - is like \code{next} but instead of rolling forward to the first day of
 the month, it rolls back to the last valid day of the previous month. Thus,
-\code{2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03}. This is the default.
+\verb{2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03}. This is the default.
 }
 }
 \examples{

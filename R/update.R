@@ -1,21 +1,20 @@
 #' Update components of a date-time object
 #'
-#' `time_update` returns a date-time with the specified elements updated.
-#' Elements not specified will be left unchanged.
+#' `time_update` returns a date-time with the supplied date-time components
+#' updated.
 #'
 #'
 #' @name time_update
 #' @param time a date-time object
-#' @param updates a string specification of components to be updated (not
-#'   implemented yet) or a named list of components.
+#' @param updates a named list of components
 #' @param year,month,yday,wday,mday,day,hour,minute,second components of the
-#'   date-time to be updated. `day` is equivalent to `mday`. All except `second`
-#'   will be converted to integer.
+#'   date-time to be updated. `day` is equivalent to `mday`. All components
+#'   except `second` will be converted to integer.
 #' @param tz time zone component (a singleton character vector)
 #' @param roll_month,roll_dst See [time_add()].
 #' @param week_start week starting day (Default is 1, Monday). Set `week_start`
 #'   option to change this globally.
-#' @return a date object with the requested elements updated. The object will
+#' @return A date-time with the requested elements updated. The object will
 #'   retain its original class unless the original class is `Date` and at least
 #'   one of the `hour`, `minute`, `second` or `tz` is supplied, in which case a
 #'   `POSIXct` object is returned.

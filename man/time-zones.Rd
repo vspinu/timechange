@@ -3,9 +3,7 @@
 \name{time-zones}
 \alias{time-zones}
 \alias{time_at_tz}
-\alias{time-zones}
 \alias{time_force_tz}
-\alias{time-zones}
 \alias{time_clock_at_tz}
 \title{Time-zone manipulation}
 \usage{
