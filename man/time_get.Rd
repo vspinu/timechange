@@ -7,7 +7,7 @@
 time_get(
   time,
   components = c("year", "month", "day", "hour", "minute", "second"),
-  week_start = getOption("week_start", 1)
+  week_start = getOption("timechange.week_start", 1)
 )
 }
 \arguments{
@@ -17,8 +17,8 @@ time_get(
 one of "year", "month", "yday", "day", "mday", "wday", "hour", "minute",
 "second" where "day" is the same as "mday".}
 
-\item{week_start}{week starting day (Default is 1, Monday). Set \code{week_start}
-option to change this globally.}
+\item{week_start}{week starting day (Default is 1, Monday). Set
+\code{timechange.week_start} option to change this globally.}
 }
 \value{
 A data.frame of the requested components
