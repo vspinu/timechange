@@ -6,7 +6,7 @@
 \usage{
 time_get(
   time,
-  components = c("year", "month", "day", "hour", "minute", "second"),
+  components = c("year", "month", "yday", "day", "wday", "hour", "minute", "second"),
   week_start = getOption("week_start", 1)
 )
 }

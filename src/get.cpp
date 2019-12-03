@@ -20,9 +20,9 @@ bool charvec_contains(const CharacterVector vec, const std::string& elt) {
 }
 
 // [[Rcpp::export]]
-Rcpp::List C_time_get(const NumericVector& dt,
-                      const CharacterVector& components,
-                      const int week_start = 1) {
+Rcpp::DataFrame C_time_get(const NumericVector& dt,
+                           const CharacterVector& components,
+                           const int week_start = 1) {
 
   std::vector<std::string> comps = Rcpp::as<std::vector<std::string>>(components);
 
@@ -33,15 +33,17 @@ Rcpp::List C_time_get(const NumericVector& dt,
 
   R_xlen_t N = dt.size();
 
+  R_len_t N_comps = 0;
+
   for (std::string comp: comps) {
-    if (comp == "year") { do_year = true; continue; };
-    if (comp == "month") { do_month = true; continue; };
-    if (comp == "yday") { do_yday = true; continue; };
-    if (comp == "day" || comp == "mday") { do_mday = true; continue; };
-    if (comp == "wday") { do_wday = true; continue; };
-    if (comp == "hour") { do_hour = true; continue; };
-    if (comp == "minute") { do_minute = true; continue; };
-    if (comp == "second") { do_second = true; continue; };
+    if (comp == "year") { if (do_year) { continue; } do_year = true; N_comps++; continue; };
+    if (comp == "month") { if (do_month) { continue; } do_month = true; N_comps++; continue; };
+    if (comp == "yday") { if (do_yday) { continue; } do_yday = true; N_comps++; continue; };
+    if (comp == "day" || comp == "mday") { if (do_mday) { continue; } do_mday = true; N_comps++; continue; };
+    if (comp == "wday") { if (do_wday) { continue; } do_wday = true; N_comps++; continue; };
+    if (comp == "hour") { if (do_hour) { continue; } do_hour = true; N_comps++; continue; };
+    if (comp == "minute") { if (do_minute) { continue; } do_minute = true; N_comps++; continue; };
+    if (comp == "second") { if (do_second) { continue; } do_second = true; N_comps++; continue; };
     Rf_error("Invalid datetime component '%s'", comp.c_str());
   }
 
@@ -95,21 +97,22 @@ Rcpp::List C_time_get(const NumericVector& dt,
 
     }
 
-  List out = DataFrame::create();
-  CharacterVector names;
+  List lst(N_comps);
+  CharacterVector names(N_comps);
 
-  for (std::string comp: comps) {
-    if (comp == "year") { out.push_back(year); names.push_back("year"); continue; };
-    if (comp == "month") { out.push_back(month); names.push_back("month"); continue; };
-    if (comp == "yday") { out.push_back(yday); names.push_back("yday"); continue; };
-    if (comp == "day") { out.push_back(mday); names.push_back("day"); continue; };
-    if (comp == "mday") { out.push_back(mday); names.push_back("mday"); continue; };
-    if (comp == "wday") { out.push_back(wday); names.push_back("wday"); continue; };
-    if (comp == "hour") { out.push_back(hour); names.push_back("hour"); continue; };
-    if (comp == "minute") { out.push_back(minute); names.push_back("minute"); continue; };
-    if (comp == "second") { out.push_back(second); names.push_back("second"); continue; };
-  }
+  R_len_t pos = 0;
 
-  out.attr("names") = names;
+  if (do_year) {lst[pos] = year; names[pos] = "year"; pos++;};
+  if (do_month) {lst[pos] = month; names[pos] = "month"; pos++;};
+  if (do_yday) {lst[pos] = yday; names[pos] = "yday"; pos++;};
+  if (do_mday) {lst[pos] = mday; names[pos] = "mday"; pos++;};
+  if (do_wday) {lst[pos] = wday; names[pos] = "wday"; pos++;};
+  if (do_hour) {lst[pos] = hour; names[pos] = "hour"; pos++;};
+  if (do_minute) {lst[pos] = minute; names[pos] = "minute"; pos++;};
+  if (do_second) {lst[pos] = second; names[pos] = "second"; pos++;};
+
+  lst.attr("names") = names;
+
+  DataFrame out = Rcpp::as<DataFrame>(lst);
   return out;
 }
