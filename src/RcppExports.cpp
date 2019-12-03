@@ -5,8 +5,21 @@
 
 using namespace Rcpp;
 
+// C_time_get
+Rcpp::List C_time_get(const NumericVector& dt, const CharacterVector& components, const int week_start);
+RcppExport SEXP _timechange_C_time_get(SEXP dtSEXP, SEXP componentsSEXP, SEXP week_startSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type dt(dtSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type components(componentsSEXP);
+    Rcpp::traits::input_parameter< const int >::type week_start(week_startSEXP);
+    rcpp_result_gen = Rcpp::wrap(C_time_get(dt, components, week_start));
+    return rcpp_result_gen;
+END_RCPP
+}
 // C_time_ceiling
-newDatetimeVector C_time_ceiling(const NumericVector dt, const std::string unit_name, const double nunits, const int week_start, const bool change_on_boundary);
+Rcpp::newDatetimeVector C_time_ceiling(const NumericVector dt, const std::string unit_name, const double nunits, const int week_start, const bool change_on_boundary);
 RcppExport SEXP _timechange_C_time_ceiling(SEXP dtSEXP, SEXP unit_nameSEXP, SEXP nunitsSEXP, SEXP week_startSEXP, SEXP change_on_boundarySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -21,7 +34,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_time_floor
-newDatetimeVector C_time_floor(const NumericVector dt, const std::string unit_name, const double nunits, const int week_start);
+Rcpp::newDatetimeVector C_time_floor(const NumericVector dt, const std::string unit_name, const double nunits, const int week_start);
 RcppExport SEXP _timechange_C_time_floor(SEXP dtSEXP, SEXP unit_nameSEXP, SEXP nunitsSEXP, SEXP week_startSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -86,7 +99,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_force_tz
-newDatetimeVector C_force_tz(const NumericVector dt, const CharacterVector tz, const std::string roll_dst);
+Rcpp::newDatetimeVector C_force_tz(const NumericVector dt, const CharacterVector tz, const std::string roll_dst);
 RcppExport SEXP _timechange_C_force_tz(SEXP dtSEXP, SEXP tzSEXP, SEXP roll_dstSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -128,6 +141,7 @@ END_RCPP
 RcppExport SEXP C_parse_period(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_timechange_C_time_get", (DL_FUNC) &_timechange_C_time_get, 3},
     {"_timechange_C_time_ceiling", (DL_FUNC) &_timechange_C_time_ceiling, 5},
     {"_timechange_C_time_floor", (DL_FUNC) &_timechange_C_time_floor, 4},
     {"_timechange_C_local_tz", (DL_FUNC) &_timechange_C_local_tz, 0},
