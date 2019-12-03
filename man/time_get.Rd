@@ -7,7 +7,7 @@
 time_get(
   time,
   components = c("year", "month", "yday", "day", "wday", "hour", "minute", "second"),
-  week_start = getOption("week_start", 1)
+  week_start = getOption("timechange.week_start", 1)
 )
 }
 \arguments{

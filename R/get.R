@@ -14,7 +14,7 @@
 #' @export
 time_get <- function(time,
                      components = c("year", "month", "yday", "day", "wday", "hour", "minute", "second"),
-                     week_start = getOption("week_start", 1)) {
+                     week_start = getOption("timechange.week_start", 1)) {
 
   if (length(diffs <- setdiff(components, names(components_template))) > 0) {
     stop(sprintf("Invalid components: %s", paste(diffs, collapse = ", ")))
