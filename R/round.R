@@ -5,13 +5,12 @@
 #'   abbreviations are supported - secs, min, mins, 2 minutes, 3 years, 2s, 1d
 #'   etc.
 #'
-#' @description `time_round()` takes a date-time object and rounds it to the
-#'   nearest value of the specified time unit. For rounding date-times which is
-#'   exactly halfway between two consecutive units, the convention is to round
-#'   up. Note that this is in line with the behavior of R's
-#'   [base::round.POSIXt()] function but does not follow the convention of the
-#'   base [base::round()] function which "rounds to the even digit" per IEC
-#'   60559.
+#' @description `time_round()` rounds a date-time to the nearest value of the
+#'   specified time unit. For rounding date-times which is exactly halfway
+#'   between two consecutive units, the convention is to round up. Note that
+#'   this is in line with the behavior of R's [base::round.POSIXt()] function
+#'   but does not follow the convention of the base [base::round()] function
+#'   which "rounds to the even digit" per IEC 60559.
 #'
 #' @section Civil Time vs Absolute Time rounding:
 #'
@@ -71,8 +70,8 @@
 #'   `FALSE`, date-time on the boundary are never rounded up (this was the
 #'   default for \pkg{lubridate} prior to `v1.6.0`. See section `Rounding Up
 #'   Date Objects` below for more details.
-#' @param week_start when unit is `weeks` specify the reference day. Defaults to
-#'   1 (Monday).
+#' @param week_start When unit is `weeks`, this is the first day of the
+#'   week. Defaults to 1 (Monday).
 #' @return An object of the same class as the input object. When input is a
 #'   `Date` object and unit is smaller than `day` a `POSIXct` object is
 #'   returned.
@@ -161,7 +160,7 @@
 #' time_floor(x, "3600a") # "2014-11-02 01:00:00 EST"  - 25m
 #' difftime(time_floor(x, "a"), x)
 #' @export
-time_round <- function(time, unit = "second", week_start = getOption("week_start", 1)) {
+time_round <- function(time, unit = "second", week_start = getOption("timechange.week_start", 1)) {
   if (length(time) == 0L)
     return(time)
 
@@ -186,11 +185,11 @@ time_round <- function(time, unit = "second", week_start = getOption("week_start
   }
 }
 
-#' @description `time_floor` takes a date-time object and rounds it down to the
-#'   nearest boundary of the specified time unit.
+#' @description `time_floor` rounds down a date-time to the nearest lower
+#'   boundary of the specified time unit.
 #' @name time_round
 #' @export
-time_floor <- function(time, unit = "seconds", week_start = getOption("week_start", 1)) {
+time_floor <- function(time, unit = "seconds", week_start = getOption("timechange.week_start", 1)) {
 
   if (length(time) == 0)
     return(time)
@@ -205,13 +204,13 @@ time_floor <- function(time, unit = "seconds", week_start = getOption("week_star
 
 }
 
-#' @description`time_ceiling()` takes a date-time object and rounds it up to the
-#'   nearest boundary of the specified time unit.
+#' @description`time_ceiling()` rounds up the date-time to the nearest boundary
+#'   of the specified time unit.
 #' @name time_round
 #' @export
 time_ceiling <- function(time, unit = "seconds",
                          change_on_boundary = inherits(time, "Date"),
-                         week_start = getOption("week_start", 1)) {
+                         week_start = getOption("timechange.week_start", 1)) {
 
   if (length(time) == 0)
     return(time)

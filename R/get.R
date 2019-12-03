@@ -5,8 +5,8 @@
 #' @param components a character vector of components to return. Component is
 #'   one of "year", "month", "yday", "day", "mday", "wday", "hour", "minute",
 #'   "second" where "day" is the same as "mday".
-#' @param week_start week starting day (Default is 1, Monday). Set `week_start`
-#'   option to change this globally.
+#' @param week_start week starting day (Default is 1, Monday). Set
+#'   `timechange.week_start` option to change this globally.
 #' @return A data.frame of the requested components
 #' @examples
 #' x <- as.POSIXct("2019-02-03")

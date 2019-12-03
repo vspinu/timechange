@@ -19,7 +19,7 @@ time_update(
   tz = NULL,
   roll_month = "last",
   roll_dst = "boundary",
-  week_start = getOption("week_start", 1)
+  week_start = getOption("timechange.week_start", 1)
 )
 }
 \arguments{
@@ -35,18 +35,17 @@ except \code{second} will be converted to integer.}
 
 \item{roll_month, roll_dst}{See \code{\link[=time_add]{time_add()}}.}
 
-\item{week_start}{week starting day (Default is 1, Monday). Set \code{week_start}
-option to change this globally.}
+\item{week_start}{first day of the week (default is 1, Monday). Set
+\code{timechange.week_start} option to change this globally.}
 }
 \value{
-A date-time with the requested elements updated. The object will
-retain its original class unless the original class is \code{Date} and at least
-one of the \code{hour}, \code{minute}, \code{second} or \code{tz} is supplied, in which case a
-\code{POSIXct} object is returned.
+A date-time with the requested elements updated.  Retain its original
+class unless the original class is \code{Date} and at least one of the \code{hour},
+\code{minute}, \code{second} or \code{tz} is supplied, in which case a \code{POSIXct} object is
+returned.
 }
 \description{
-\code{time_update} returns a date-time with the supplied date-time components
-updated.
+Update components of a date-time object
 }
 \examples{
 date <- as.Date("2009-02-10")

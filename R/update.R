@@ -1,9 +1,5 @@
 #' Update components of a date-time object
 #'
-#' `time_update` returns a date-time with the supplied date-time components
-#' updated.
-#'
-#'
 #' @name time_update
 #' @param time a date-time object
 #' @param updates a named list of components
@@ -12,12 +8,12 @@
 #'   except `second` will be converted to integer.
 #' @param tz time zone component (a singleton character vector)
 #' @param roll_month,roll_dst See [time_add()].
-#' @param week_start week starting day (Default is 1, Monday). Set `week_start`
-#'   option to change this globally.
-#' @return A date-time with the requested elements updated. The object will
-#'   retain its original class unless the original class is `Date` and at least
-#'   one of the `hour`, `minute`, `second` or `tz` is supplied, in which case a
-#'   `POSIXct` object is returned.
+#' @param week_start first day of the week (default is 1, Monday). Set
+#'   `timechange.week_start` option to change this globally.
+#' @return A date-time with the requested elements updated.  Retain its original
+#'   class unless the original class is `Date` and at least one of the `hour`,
+#'   `minute`, `second` or `tz` is supplied, in which case a `POSIXct` object is
+#'   returned.
 #' @examples
 #' date <- as.Date("2009-02-10")
 #' time_update(date, year = 2010, month = 1, mday = 1)
@@ -31,7 +27,7 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
                         tz = NULL,
                         roll_month = "last",
                         roll_dst = "boundary",
-                        week_start = getOption("week_start", 1)) {
+                        week_start = getOption("timechange.week_start", 1)) {
 
   if (length(time) == 0L)
     return(time)
