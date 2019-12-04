@@ -41,8 +41,8 @@ time_get <- function(time,
       out$year <- out$year + 1900L
     if (!is.null(out$yday))
       out$yday <- out$yday + 1L
-    if (!is.null(out$month))
-      out$month <- out$month + 1L
+    if (!is.null(out$mon))
+      out$mon <- out$mon + 1L
     if (!is.null(out$wday))
       out$wday <- 1L + (out$wday + (6L - week_start)) %% 7L
 
