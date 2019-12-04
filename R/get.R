@@ -31,7 +31,7 @@ time_get <- function(time,
   if (is.POSIXct(time)) {
     C_time_get(time, components, week_start)
   } else if (is.Date(time)) {
-    time <- as.POSIXct(time, tz = "UTC")
+    time <- date2posixct(time)
     C_time_get(time, components, week_start)
   } else if (is.POSIXlt(time)) {
     compslt <- timechange2posixlt[components]
@@ -53,6 +53,13 @@ time_get <- function(time,
   } else {
     unsupported_date_time(time)
   }
+}
+
+# Because `as.POSIXct.Date()` always uses local timezone
+date2posixct <- function(x) {
+  out <- unclass(x) * 86400
+  attributes(out) <- list(tzone = "UTC", class = c("POSIXct", "POSIXt"))
+  out
 }
 
 timechange2posixlt <- c("year" = "year",
