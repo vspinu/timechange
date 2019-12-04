@@ -47,7 +47,6 @@ time_get <- function(time,
       out$wday <- 1L + (out$wday + (6L - week_start)) %% 7L
 
     out_names <- names(compslt)
-    out_names[out_names == "day"] <- "mday"
     names(out) <- out_names
 
     as.data.frame(out)
