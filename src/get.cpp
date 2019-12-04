@@ -36,14 +36,14 @@ Rcpp::DataFrame C_time_get(const NumericVector& dt,
   R_len_t N_comps = 0;
 
   for (std::string comp: comps) {
-    if (comp == "year") { if (do_year) { continue; } do_year = true; N_comps++; continue; };
-    if (comp == "month") { if (do_month) { continue; } do_month = true; N_comps++; continue; };
-    if (comp == "yday") { if (do_yday) { continue; } do_yday = true; N_comps++; continue; };
-    if (comp == "day" || comp == "mday") { if (do_mday) { continue; } do_mday = true; N_comps++; continue; };
-    if (comp == "wday") { if (do_wday) { continue; } do_wday = true; N_comps++; continue; };
-    if (comp == "hour") { if (do_hour) { continue; } do_hour = true; N_comps++; continue; };
-    if (comp == "minute") { if (do_minute) { continue; } do_minute = true; N_comps++; continue; };
-    if (comp == "second") { if (do_second) { continue; } do_second = true; N_comps++; continue; };
+    if (comp == "year") { do_year = true; N_comps++; continue; };
+    if (comp == "month") { do_month = true; N_comps++; continue; };
+    if (comp == "yday") { do_yday = true; N_comps++; continue; };
+    if (comp == "day" || comp == "mday") { do_mday = true; N_comps++; continue; };
+    if (comp == "wday") { do_wday = true; N_comps++; continue; };
+    if (comp == "hour") { do_hour = true; N_comps++; continue; };
+    if (comp == "minute") { do_minute = true; N_comps++; continue; };
+    if (comp == "second") { do_second = true; N_comps++; continue; };
     Rf_error("Invalid datetime component '%s'", comp.c_str());
   }
 
@@ -102,16 +102,18 @@ Rcpp::DataFrame C_time_get(const NumericVector& dt,
 
   R_len_t pos = 0;
 
-  if (do_year) {out[pos] = year; names[pos] = "year"; pos++;};
-  if (do_month) {out[pos] = month; names[pos] = "month"; pos++;};
-  if (do_yday) {out[pos] = yday; names[pos] = "yday"; pos++;};
-  if (do_mday) {out[pos] = mday; names[pos] = "mday"; pos++;};
-  if (do_wday) {out[pos] = wday; names[pos] = "wday"; pos++;};
-  if (do_hour) {out[pos] = hour; names[pos] = "hour"; pos++;};
-  if (do_minute) {out[pos] = minute; names[pos] = "minute"; pos++;};
-  if (do_second) {out[pos] = second; names[pos] = "second"; pos++;};
+  for (std::string comp: comps) {
+    if (comp == "year") { out[pos] = year; names[pos] = "year"; pos++; };
+    if (comp == "month") { out[pos] = month; names[pos] = "month"; pos++; };
+    if (comp == "yday") { out[pos] = yday; names[pos] = "yday"; pos++; };
+    if (comp == "day") { out[pos] = mday; names[pos] = "day"; pos++; };
+    if (comp == "mday") { out[pos] = mday; names[pos] = "mday"; pos++; }
+    if (comp == "wday") { out[pos] = wday; names[pos] = "wday"; pos++; };
+    if (comp == "hour") { out[pos] = hour; names[pos] = "hour"; pos++; };
+    if (comp == "minute") { out[pos] = minute; names[pos] = "minute"; pos++; };
+    if (comp == "second") { out[pos] = second; names[pos] = "second"; pos++; };
+  }
 
   out.attr("names") = names;
-
   return out;
 }
