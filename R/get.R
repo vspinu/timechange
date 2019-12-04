@@ -34,7 +34,8 @@ time_get <- function(time,
     time <- date2posixct(time)
     C_time_get(time, components, week_start)
   } else if (is.POSIXlt(time)) {
-    compslt <- timechange2posixlt[components]
+    unique_components <- unique(components)
+    compslt <- timechange2posixlt[unique_components]
     out <- unclass(time)[compslt]
 
     if (!is.null(out$year))
@@ -48,6 +49,8 @@ time_get <- function(time,
 
     out_names <- names(compslt)
     names(out) <- out_names
+
+    out <- out[components]
 
     as.data.frame(out)
   } else {
