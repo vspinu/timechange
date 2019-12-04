@@ -97,22 +97,21 @@ Rcpp::DataFrame C_time_get(const NumericVector& dt,
 
     }
 
-  List lst(N_comps);
+  List out(N_comps);
   CharacterVector names(N_comps);
 
   R_len_t pos = 0;
 
-  if (do_year) {lst[pos] = year; names[pos] = "year"; pos++;};
-  if (do_month) {lst[pos] = month; names[pos] = "month"; pos++;};
-  if (do_yday) {lst[pos] = yday; names[pos] = "yday"; pos++;};
-  if (do_mday) {lst[pos] = mday; names[pos] = "mday"; pos++;};
-  if (do_wday) {lst[pos] = wday; names[pos] = "wday"; pos++;};
-  if (do_hour) {lst[pos] = hour; names[pos] = "hour"; pos++;};
-  if (do_minute) {lst[pos] = minute; names[pos] = "minute"; pos++;};
-  if (do_second) {lst[pos] = second; names[pos] = "second"; pos++;};
+  if (do_year) {out[pos] = year; names[pos] = "year"; pos++;};
+  if (do_month) {out[pos] = month; names[pos] = "month"; pos++;};
+  if (do_yday) {out[pos] = yday; names[pos] = "yday"; pos++;};
+  if (do_mday) {out[pos] = mday; names[pos] = "mday"; pos++;};
+  if (do_wday) {out[pos] = wday; names[pos] = "wday"; pos++;};
+  if (do_hour) {out[pos] = hour; names[pos] = "hour"; pos++;};
+  if (do_minute) {out[pos] = minute; names[pos] = "minute"; pos++;};
+  if (do_second) {out[pos] = second; names[pos] = "second"; pos++;};
 
-  lst.attr("names") = names;
+  out.attr("names") = names;
 
-  DataFrame out = Rcpp::as<DataFrame>(lst);
   return out;
 }
