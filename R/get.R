@@ -34,10 +34,6 @@ time_get <- function(time,
     time <- as.POSIXct(time, tz = "UTC")
     C_time_get(time, components, week_start)
   } else if (is.POSIXlt(time)) {
-    components[components == "day"] <- "mday"
-    components <- unique(components)
-    all_components <- names(timechange2posixlt)
-    components <- all_components[sort(match(components, all_components))]
     compslt <- timechange2posixlt[components]
     out <- unclass(time)[compslt]
 
@@ -50,7 +46,10 @@ time_get <- function(time,
     if (!is.null(out$wday))
       out$wday <- 1L + (out$wday + (6L - week_start)) %% 7L
 
-    names(out) <- names(compslt)
+    out_names <- names(compslt)
+    out_names[out_names == "day"] <- "mday"
+    names(out) <- out_names
+
     as.data.frame(out)
   } else {
     unsupported_date_time(time)
@@ -61,6 +60,7 @@ timechange2posixlt <- c("year" = "year",
                         "month" = "mon",
                         "yday" = "yday",
                         "mday" = "mday",
+                        "day" = "mday",
                         "wday" = "wday",
                         "hour" = "hour",
                         "minute" = "min",
