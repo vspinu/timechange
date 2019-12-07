@@ -6,7 +6,7 @@
 using namespace Rcpp;
 
 // C_time_get
-Rcpp::List C_time_get(const NumericVector& dt, const CharacterVector& components, const int week_start);
+Rcpp::DataFrame C_time_get(const NumericVector& dt, const CharacterVector& components, const int week_start);
 RcppExport SEXP _timechange_C_time_get(SEXP dtSEXP, SEXP componentsSEXP, SEXP week_startSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

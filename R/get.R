@@ -13,48 +13,66 @@
 #' time_get(x)
 #' @export
 time_get <- function(time,
-                        components = c("year", "month", "day", "hour", "minute", "second"),
-                        week_start = getOption("timechange.week_start", 1)) {
+                     components = c("year", "month", "yday", "mday", "wday", "hour", "minute", "second"),
+                     week_start = getOption("timechange.week_start", 1)) {
 
   if (length(diffs <- setdiff(components, names(components_template))) > 0) {
     stop(sprintf("Invalid components: %s", paste(diffs, collapse = ", ")))
   }
 
-  if (length(time) == 0L)
+  if (length(time) == 0L) {
     return(components_template[components])
+  }
 
-  out <-
-    if (is.POSIXct(time)) {
-      C_time_get(time, components, week_start)
-    } else if (is.Date(time)) {
-      time <- as.POSIXct(time, tz = "UTC")
-      C_time_get(out, components, week_start)
-    } else if (is.POSIXlt(time)) {
-      compslt <- timechange2posixlt[components]
-      out <- unclass(time)[compslt]
-      if (!is.null(out$year))
-        out$year <- out$year + 1900L
-      if (!is.null(out$yday))
-        out$yday <- out$yday + 1L
-      if (!is.null(out$month))
-        out$month <- out$month + 1L
-      if (!is.null(out$wday))
-        out$wday <- 1L + (x + (6L - week_start)) %% 7L
-      out
-    } else {
-      unsupported_date_time(time)
-    }
-  as.data.frame(out)
+  if (length(components) == 0L) {
+    return(components_empty_template(length(time)))
+  }
+
+  if (is.POSIXct(time)) {
+    C_time_get(time, components, week_start)
+  } else if (is.Date(time)) {
+    time <- date2posixct(time)
+    C_time_get(time, components, week_start)
+  } else if (is.POSIXlt(time)) {
+    unique_components <- unique(components)
+    compslt <- timechange2posixlt[unique_components]
+    out <- unclass(time)[compslt]
+
+    if (!is.null(out$year))
+      out$year <- out$year + 1900L
+    if (!is.null(out$yday))
+      out$yday <- out$yday + 1L
+    if (!is.null(out$mon))
+      out$mon <- out$mon + 1L
+    if (!is.null(out$wday))
+      out$wday <- 1L + (out$wday + (6L - week_start)) %% 7L
+
+    out_names <- names(compslt)
+    names(out) <- out_names
+
+    out <- out[components]
+
+    as.data.frame(out)
+  } else {
+    unsupported_date_time(time)
+  }
+}
+
+# Because `as.POSIXct.Date()` always uses local timezone
+date2posixct <- function(x) {
+  out <- unclass(x) * 86400
+  attributes(out) <- list(tzone = "UTC", class = c("POSIXct", "POSIXt"))
+  out
 }
 
 timechange2posixlt <- c("year" = "year",
                         "month" = "mon",
-                        "day" = "mday",
                         "yday" = "yday",
                         "mday" = "mday",
+                        "day" = "mday",
                         "wday" = "wday",
                         "hour" = "hour",
-                        "minute" = "minute",
+                        "minute" = "min",
                         "second" = "sec")
 
 components_template <- data.frame(year = integer(),
@@ -66,3 +84,12 @@ components_template <- data.frame(year = integer(),
                                   hour = integer(),
                                   minute = integer(),
                                   second = double())
+
+components_empty_template <- function(n) {
+  structure(
+    list(),
+    names = character(),
+    class = "data.frame",
+    row.names = .set_row_names(n)
+  )
+}

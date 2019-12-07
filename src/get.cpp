@@ -20,9 +20,9 @@ bool charvec_contains(const CharacterVector vec, const std::string& elt) {
 }
 
 // [[Rcpp::export]]
-Rcpp::List C_time_get(const NumericVector& dt,
-                      const CharacterVector& components,
-                      const int week_start = 1) {
+Rcpp::DataFrame C_time_get(const NumericVector& dt,
+                           const CharacterVector& components,
+                           const int week_start = 1) {
 
   std::vector<std::string> comps = Rcpp::as<std::vector<std::string>>(components);
 
@@ -33,15 +33,17 @@ Rcpp::List C_time_get(const NumericVector& dt,
 
   R_xlen_t N = dt.size();
 
+  R_len_t N_comps = 0;
+
   for (std::string comp: comps) {
-    if (comp == "year") { do_year = true; continue; };
-    if (comp == "month") { do_month = true; continue; };
-    if (comp == "yday") { do_yday = true; continue; };
-    if (comp == "day" || comp == "mday") { do_mday = true; continue; };
-    if (comp == "wday") { do_wday = true; continue; };
-    if (comp == "hour") { do_hour = true; continue; };
-    if (comp == "minute") { do_minute = true; continue; };
-    if (comp == "second") { do_second = true; continue; };
+    if (comp == "year") { do_year = true; N_comps++; continue; };
+    if (comp == "month") { do_month = true; N_comps++; continue; };
+    if (comp == "yday") { do_yday = true; N_comps++; continue; };
+    if (comp == "day" || comp == "mday") { do_mday = true; N_comps++; continue; };
+    if (comp == "wday") { do_wday = true; N_comps++; continue; };
+    if (comp == "hour") { do_hour = true; N_comps++; continue; };
+    if (comp == "minute") { do_minute = true; N_comps++; continue; };
+    if (comp == "second") { do_second = true; N_comps++; continue; };
     Rf_error("Invalid datetime component '%s'", comp.c_str());
   }
 
@@ -95,19 +97,21 @@ Rcpp::List C_time_get(const NumericVector& dt,
 
     }
 
-  List out = DataFrame::create();
-  CharacterVector names;
+  List out(N_comps);
+  CharacterVector names(N_comps);
+
+  R_len_t pos = 0;
 
   for (std::string comp: comps) {
-    if (comp == "year") { out.push_back(year); names.push_back("year"); continue; };
-    if (comp == "month") { out.push_back(month); names.push_back("month"); continue; };
-    if (comp == "yday") { out.push_back(yday); names.push_back("yday"); continue; };
-    if (comp == "day") { out.push_back(mday); names.push_back("day"); continue; };
-    if (comp == "mday") { out.push_back(mday); names.push_back("mday"); continue; };
-    if (comp == "wday") { out.push_back(wday); names.push_back("wday"); continue; };
-    if (comp == "hour") { out.push_back(hour); names.push_back("hour"); continue; };
-    if (comp == "minute") { out.push_back(minute); names.push_back("minute"); continue; };
-    if (comp == "second") { out.push_back(second); names.push_back("second"); continue; };
+    if (comp == "year") { out[pos] = year; names[pos] = "year"; pos++; };
+    if (comp == "month") { out[pos] = month; names[pos] = "month"; pos++; };
+    if (comp == "yday") { out[pos] = yday; names[pos] = "yday"; pos++; };
+    if (comp == "day") { out[pos] = mday; names[pos] = "day"; pos++; };
+    if (comp == "mday") { out[pos] = mday; names[pos] = "mday"; pos++; }
+    if (comp == "wday") { out[pos] = wday; names[pos] = "wday"; pos++; };
+    if (comp == "hour") { out[pos] = hour; names[pos] = "hour"; pos++; };
+    if (comp == "minute") { out[pos] = minute; names[pos] = "minute"; pos++; };
+    if (comp == "second") { out[pos] = second; names[pos] = "second"; pos++; };
   }
 
   out.attr("names") = names;
