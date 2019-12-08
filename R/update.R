@@ -50,7 +50,7 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
   if (is.POSIXct(time)) {
     C_time_update(time, updates, tz, roll_month, roll_dst, week_start)
   } else if (is.Date(time)) {
-    out <- as.POSIXct(time, tz = "UTC")
+    out <- date2posixct(time)
     attr(out, "tzone") <- "UTC"
     out <- C_time_update(out, updates, tz, roll_month, roll_dst, week_start)
     if (is.null(hour) && is.null(minute) && is.null(second) && is.null(tz)) {

@@ -58,13 +58,6 @@ time_get <- function(time,
   }
 }
 
-# Because `as.POSIXct.Date()` always uses local timezone
-date2posixct <- function(x) {
-  out <- unclass(x) * 86400
-  attributes(out) <- list(tzone = "UTC", class = c("POSIXct", "POSIXt"))
-  out
-}
-
 timechange2posixlt <- c("year" = "year",
                         "month" = "mon",
                         "yday" = "yday",

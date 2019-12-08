@@ -130,7 +130,7 @@ time_add <- function(time, periods = NULL,
   if (is.POSIXct(time)) {
     C_time_add(time, periods, roll_month, roll_dst)
   } else if (is.Date(time)) {
-    out <- as.POSIXct(time, tz = "UTC")
+    out <- date2posixct(time)
     attr(out, "tzone") <- "UTC"
     out <- C_time_add(out, periods, roll_month, roll_dst)
     if (is.null(hours) && is.null(minutes) && is.null(seconds)) {

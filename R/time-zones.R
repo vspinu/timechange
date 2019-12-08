@@ -134,6 +134,9 @@ time_clock_at_tz <- function(time, tz = NULL, units = "secs") {
     }
     time
   } else {
+    time <-
+      if (is.Date(time)) date2posixct(time)
+      else as.POSIXct(time)
     .clock_at_tz(time, tz, units)
   }
 }
@@ -148,7 +151,7 @@ time_clock_at_tz <- function(time, tz = NULL, units = "secs") {
     time <- rep_len(time, length(tz))
     attributes(time) <- attr
   }
-  secs <- C_local_clock(as.POSIXct(time), tz)
+  secs <- C_local_clock(time, tz)
   out <- structure(secs, units = "secs", class = "difftime")
   units(out) <- units
   out

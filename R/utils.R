@@ -135,3 +135,11 @@ parse_units <- function(unit) {
 
   }
 }
+
+
+# Because `as.POSIXct.Date()` always uses local timezone
+date2posixct <- function(x) {
+  out <- unclass(x) * 86400
+  attributes(out) <- list(tzone = "UTC", class = c("POSIXct", "POSIXt"))
+  out
+}
