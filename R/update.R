@@ -20,6 +20,12 @@
 #' time_update(date, year = 2010, month = 13, mday = 1)
 #' time_update(date, minute = 10, second = 3)
 #' time_update(date, minute = 10, second = 3, tz = "America/New_York")
+#'
+#' time <- as.POSIXct("2015-02-03", tz = "America/New_York")
+#' time_update(time, year = 2016, yday = 10)
+#' time_update(ymd("15-02-03", tz = "America/New_York"), year = 2000, yday = 1)
+#' time_update(ymd("15-02-03", tz = "America/New_York"), year = 2015, yday = 1)
+#' time_update(ymd("15-02-03", tz = "America/New_York"), year = 2016, yday = 10)
 #' @export
 time_update <- function(time, updates = NULL, year = NULL, month = NULL,
                         yday = NULL, day = NULL, mday = NULL, wday = NULL,

@@ -29,8 +29,8 @@ test_that("time_at_tz handles data.frames", {
   df <- data.frame(x = x, y = as.POSIXlt(x), z = "blabla")
   df <- time_at_tz(df, "UTC")
   x_out <- as.POSIXct(format(as.POSIXct(x), tz = "UTC"), tz = "UTC")
-  expect_that(df$x, equals(x_out))
-  expect_that(df$y, equals(x_out))
+  expect_equal(df$x, x_out)
+  expect_equal(df$y, x_out)
 })
 
 test_that("time_force_tz works as expected", {

@@ -7,18 +7,18 @@ warnings_are_errors: true
 
 matrix:
   include:
-    - r: oldrel
-    - r: release
-    - r: devel
-      name: 'R:devel[valgrind]]'
-      r_check_args: '--use-valgrind'
-      env: VALGRIND_OPTS='--leak-check=full --track-origins=yes'
-      addons:
-        apt:
-          packages:
-            valgrind
-    - os: osx
-      name: osx-default
+    # - r: oldrel
+    # - r: release
+    # - r: devel
+    #   name: 'R: devel [valgrind]]'
+    #   r_check_args: '--use-valgrind'
+    #   env: VALGRIND_OPTS='--leak-check=full --track-origins=yes'
+    #   addons:
+    #     apt:
+    #       packages:
+    #         valgrind
+    # - os: osx
+    #   name: osx-default
     - os: osx
       osx_image: xcode8.3
       name: osx-xcode8.3
