@@ -9,6 +9,7 @@ LIBCCTZ=./cctz/src/time_zone_fixed.o \
     ./cctz/src/time_zone_libc.o \
     ./cctz/src/time_zone_lookup.o \
     ./cctz/src/time_zone_posix.o \
+    ./cctz/src/zone_info_source.o \
 
 $(SHLIB): libcctz.a
 
