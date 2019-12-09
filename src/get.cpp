@@ -31,19 +31,17 @@ Rcpp::DataFrame C_time_get(const NumericVector& dt,
     do_mday = false, do_wday = false, do_hour = false,
     do_minute = false, do_second = false;
 
-  R_xlen_t N = dt.size();
-
-  R_len_t N_comps = 0;
+  R_xlen_t N = dt.size(), N_comps = components.size();
 
   for (std::string comp: comps) {
-    if (comp == "year") { do_year = true; N_comps++; continue; };
-    if (comp == "month") { do_month = true; N_comps++; continue; };
-    if (comp == "yday") { do_yday = true; N_comps++; continue; };
-    if (comp == "day" || comp == "mday") { do_mday = true; N_comps++; continue; };
-    if (comp == "wday") { do_wday = true; N_comps++; continue; };
-    if (comp == "hour") { do_hour = true; N_comps++; continue; };
-    if (comp == "minute") { do_minute = true; N_comps++; continue; };
-    if (comp == "second") { do_second = true; N_comps++; continue; };
+    if (comp == "year") { do_year = true; continue; };
+    if (comp == "month") { do_month = true; continue; };
+    if (comp == "yday") { do_yday = true; continue; };
+    if (comp == "day" || comp == "mday") { do_mday = true; continue; };
+    if (comp == "wday") { do_wday = true; continue; };
+    if (comp == "hour") { do_hour = true; continue; };
+    if (comp == "minute") { do_minute = true; continue; };
+    if (comp == "second") { do_second = true; continue; };
     Rf_error("Invalid datetime component '%s'", comp.c_str());
   }
 
