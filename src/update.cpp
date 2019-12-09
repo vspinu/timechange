@@ -116,13 +116,15 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
         y = ct1.year(), m = ct1.month(), d = ct1.day(),
         H = ct1.hour(), M = ct1.minute(), S = ct1.second();
 
+      /* Rprintf("dti: %f sec:%ld H:%d M:%d S:%d\n", dti, secs, H, M, S); */
+
       if (do_year) {
         y = loop_year ? year[i] : year[0];
-        if (y == NA_INT32) {out[i] = NA_REAL; continue; }
+        if (y == NA_INT32) { out[i] = NA_REAL; continue; }
       }
       if (do_month) {
         m = loop_month ? month[i] : month[0];
-        if (m == NA_INT32) {out[i] = NA_REAL; continue; }
+        if (m == NA_INT32) { out[i] = NA_REAL; continue; }
       }
 
       if (do_yday) {
@@ -166,11 +168,11 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
 
       if (do_hour) {
         H = loop_hour ? hour[i] : hour[0];
-        if (H == NA_INT32) {out[i] = NA_REAL; continue; }
+        if (H == NA_INT32) { out[i] = NA_REAL; continue; }
       }
       if (do_minute) {
         M = loop_minute ? minute[i] : minute[0];
-        if (M == NA_INT32) {out[i] = NA_REAL; continue; }
+        if (M == NA_INT32) { out[i] = NA_REAL; continue; }
       }
       if (do_second) {
         double s = loop_second ? second[i] : second[0];

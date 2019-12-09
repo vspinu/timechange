@@ -21,11 +21,10 @@
 #' time_update(date, minute = 10, second = 3)
 #' time_update(date, minute = 10, second = 3, tz = "America/New_York")
 #'
-#' time <- as.POSIXct("2015-02-03", tz = "America/New_York")
+#' time <- as.POSIXct("2015-02-03 01:02:03", tz = "America/New_York")
 #' time_update(time, year = 2016, yday = 10)
-#' time_update(ymd("15-02-03", tz = "America/New_York"), year = 2000, yday = 1)
-#' time_update(ymd("15-02-03", tz = "America/New_York"), year = 2015, yday = 1)
-#' time_update(ymd("15-02-03", tz = "America/New_York"), year = 2016, yday = 10)
+#' time_update(time, year = 2016, yday = 10, tz = "Europe/Amsterdam")
+#' time_update(time, second = 30,  tz = "America/New_York")
 #' @export
 time_update <- function(time, updates = NULL, year = NULL, month = NULL,
                         yday = NULL, day = NULL, mday = NULL, wday = NULL,
