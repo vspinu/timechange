@@ -7,13 +7,15 @@ is.POSIXct <- function(x) "POSIXct" %in% class(x)
 is.Date <- function(x) "Date" %in% class(x)
 is.instant <- function(x) any(c("POSIXt", "Date") %in% class(x))
 
+is.utc <- function(tz) tz %in% c('UTC', 'GMT', 'Etc/UTC', 'Etc/GMT', 'GMT-0', 'GMT+0', 'GMT0')
+
 unsupported_date_time <- function(x) {
   stop(sprintf("Unsupported date-time class '%s'", paste(class(x), sep = "/")))
 }
 
 date_to_posixct <- function(date, tz = "UTC") {
   utc <- .POSIXct(unclass(date) * 86400, tz = "UTC")
-  if (tz == "UTC") utc
+  if (is.utc(tz)) utc
   else time_force_tz(utc, tz)
 }
 
