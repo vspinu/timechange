@@ -63,7 +63,7 @@ etc.
 specified time unit. For rounding date-times which is exactly halfway
 between two consecutive units, the convention is to round up. Note that
 this is in line with the behavior of R's \code{\link[base:round.POSIXt]{base::round.POSIXt()}} function
-but does not follow the convention of the base \code{\link[base:round]{base::round()}} function
+but does not follow the convention of the base \code{\link[base:Round]{base::round()}} function
 which "rounds to the even digit" per IEC 60559.
 
 \code{time_floor} rounds down a date-time to the nearest lower
@@ -199,5 +199,5 @@ time_floor(x, "3600a") # "2014-11-02 01:00:00 EST"  - 25m
 difftime(time_floor(x, "a"), x)
 }
 \seealso{
-\code{\link[base:round]{base::round()}}
+\code{\link[base:Round]{base::round()}}
 }
