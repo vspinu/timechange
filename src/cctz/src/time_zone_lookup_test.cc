@@ -12,7 +12,7 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
-#include "time_zone.h"
+#include "cctz/time_zone.h"
 
 #include <chrono>
 #include <cstddef>
@@ -23,7 +23,7 @@
 #include <thread>
 #include <vector>
 
-#include "civil_time.h"
+#include "cctz/civil_time.h"
 #include "gtest/gtest.h"
 
 namespace chrono = std::chrono;
@@ -209,6 +209,7 @@ const char* const kTimeZoneNames[] = {
   "America/North_Dakota/Beulah",
   "America/North_Dakota/Center",
   "America/North_Dakota/New_Salem",
+  "America/Nuuk",
   "America/Ojinaga",
   "America/Panama",
   "America/Pangnirtung",
@@ -928,7 +929,7 @@ TEST(MakeTime, Normalization) {
 
 // NOTE: Run this with -ftrapv to detect overflow problems.
 TEST(MakeTime, SysSecondsLimits) {
-  const char RFC3339[] =  "%Y-%m-%dT%H:%M:%S%Ez";
+  const char RFC3339[] =  "%Y-%m-%d%ET%H:%M:%S%Ez";
   const time_zone utc = utc_time_zone();
   const time_zone east = fixed_time_zone(chrono::hours(14));
   const time_zone west = fixed_time_zone(-chrono::hours(14));
@@ -999,13 +1000,17 @@ TEST(MakeTime, SysSecondsLimits) {
 #if defined(_WIN32) || defined(_WIN64)
     // localtime_s() and gmtime_s() don't believe in years outside [1970:3000].
 #else
-    const time_zone utc = LoadZone("libc:UTC");
+    const time_zone cut = LoadZone("libc:UTC");
     const year_t max_tm_year = year_t{std::numeric_limits<int>::max()} + 1900;
-    tp = convert(civil_second(max_tm_year, 12, 31, 23, 59, 59), utc);
-    EXPECT_EQ("2147485547-12-31T23:59:59+00:00", format(RFC3339, tp, utc));
+    tp = convert(civil_second(max_tm_year, 12, 31, 23, 59, 59), cut);
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
+    // The BSD gmtime_r() fails on extreme positive tm_year values.
+#else
+    EXPECT_EQ("2147485547-12-31T23:59:59+00:00", format(RFC3339, tp, cut));
+#endif
     const year_t min_tm_year = year_t{std::numeric_limits<int>::min()} + 1900;
-    tp = convert(civil_second(min_tm_year, 1, 1, 0, 0, 0), utc);
-    EXPECT_EQ("-2147481748-01-01T00:00:00+00:00", format(RFC3339, tp, utc));
+    tp = convert(civil_second(min_tm_year, 1, 1, 0, 0, 0), cut);
+    EXPECT_EQ("-2147481748-01-01T00:00:00+00:00", format(RFC3339, tp, cut));
 #endif
   }
 }
@@ -1024,17 +1029,17 @@ TEST(MakeTime, LocalTimeLibC) {
     ASSERT_EQ(0, setenv("TZ", *np, 1));  // change what "localtime" means
     const auto zi = local_time_zone();
     const auto lc = LoadZone("libc:localtime");
-    time_zone::civil_transition trans;
+    time_zone::civil_transition transition;
     for (auto tp = zi.lookup(civil_second()).trans;
-         zi.next_transition(tp, &trans);
-         tp = zi.lookup(trans.to).trans) {
-      const auto fcl = zi.lookup(trans.from);
-      const auto tcl = zi.lookup(trans.to);
+         zi.next_transition(tp, &transition);
+         tp = zi.lookup(transition.to).trans) {
+      const auto fcl = zi.lookup(transition.from);
+      const auto tcl = zi.lookup(transition.to);
       civil_second cs;  // compare cs in zi and lc
       if (fcl.kind == time_zone::civil_lookup::UNIQUE) {
         if (tcl.kind == time_zone::civil_lookup::UNIQUE) {
           // Both unique; must be an is_dst or abbr change.
-          ASSERT_EQ(trans.from, trans.to);
+          ASSERT_EQ(transition.from, transition.to);
           const auto trans = fcl.trans;
           const auto tal = zi.lookup(trans);
           const auto tprev = trans - cctz::seconds(1);
@@ -1045,11 +1050,11 @@ TEST(MakeTime, LocalTimeLibC) {
           continue;
         }
         ASSERT_EQ(time_zone::civil_lookup::REPEATED, tcl.kind);
-        cs = trans.to;
+        cs = transition.to;
       } else {
         ASSERT_EQ(time_zone::civil_lookup::UNIQUE, tcl.kind);
         ASSERT_EQ(time_zone::civil_lookup::SKIPPED, fcl.kind);
-        cs = trans.from;
+        cs = transition.from;
       }
       if (cs.year() > 2037) break;  // limit test time (and to 32-bit time_t)
       const auto cl_zi = zi.lookup(cs);

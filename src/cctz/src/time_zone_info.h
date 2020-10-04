@@ -21,9 +21,9 @@
 #include <string>
 #include <vector>
 
-#include "civil_time.h"
-#include "time_zone.h"
-#include "zone_info_source.h"
+#include "cctz/civil_time.h"
+#include "cctz/time_zone.h"
+#include "cctz/zone_info_source.h"
 #include "time_zone_if.h"
 #include "tzfile.h"
 
@@ -92,15 +92,14 @@ class TimeZoneInfo : public TimeZoneIf {
     std::size_t DataLength(std::size_t time_len) const;
   };
 
-  void CheckTransition(const std::string& name, const TransitionType& tt,
-                       std::int_fast32_t offset, bool is_dst,
-                       const std::string& abbr) const;
+  bool GetTransitionType(std::int_fast32_t utc_offset, bool is_dst,
+                         const std::string& abbr, std::uint_least8_t* index);
   bool EquivTransitions(std::uint_fast8_t tt1_index,
                         std::uint_fast8_t tt2_index) const;
-  void ExtendTransitions(const std::string& name, const Header& hdr);
+  bool ExtendTransitions();
 
   bool ResetToBuiltinUTC(const seconds& offset);
-  bool Load(const std::string& name, ZoneInfoSource* zip);
+  bool Load(ZoneInfoSource* zip);
 
   // Helpers for BreakTime() and MakeTime().
   time_zone::absolute_lookup LocalTime(std::int_fast64_t unix_time,

@@ -1,5 +1,9 @@
 [![Build Status](https://travis-ci.org/vspinu/timechange.svg?branch=master)](https://travis-ci.org/vspinu/timechange) [![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/timechange)](https://cran.r-project.org/package=timechange) [![CRAN version](http://www.r-pkg.org/badges/version/timechange)](https://cran.r-project.org/package=timechange)
 
+<!-- badges: start -->
+[![R build status](https://github.com/vspinu/timechange/workflows/R-CMD-check/badge.svg)](https://github.com/vspinu/timechange/actions)
+<!-- badges: end -->
+
 ## timechange
 
 Utilities for efficient manipulation of date-time objects while accounting for time-zones and day-light saving times. Supported date time classes are `Date`, `POSIXct`, `POSIXlt` ([`nanosecond`](https://cran.r-project.org/package=nanotime) is [planned](https://github.com/vspinu/timechange/issues/1)).

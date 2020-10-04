@@ -1,0 +1,592 @@
+R version 3.6.1 (2019-07-05) -- "Action of the Toes"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+  Natural language support but running in an English locale
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+> pkgname <- "timechange"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> base::assign(".ExTimings", "timechange-Ex.timings", pos = 'CheckExEnv')
+> base::cat("name\tuser\tsystem\telapsed\n", file=base::get(".ExTimings", pos = 'CheckExEnv'))
+> base::assign(".format_ptime",
++ function(x) {
++   if(!is.na(x[4L])) x[1L] <- x[1L] + x[4L]
++   if(!is.na(x[5L])) x[2L] <- x[2L] + x[5L]
++   options(OutDec = '.')
++   format(x[1L:3L], digits = 7L)
++ },
++ pos = 'CheckExEnv')
+>
+> ### * </HEADER>
+> library('timechange')
+>
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("time-zones")
+> ### * time-zones
+>
+> flush(stderr()); flush(stdout())
+>
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: time-zones
+> ### Title: Time-zone manipulation
+> ### Aliases: time-zones time_at_tz time_force_tz time_clock_at_tz
+>
+> ### ** Examples
+>
+>
+> x <- as.POSIXct("2009-08-07 00:00:00", tz = "America/New_York")
+> time_at_tz(x, "UTC")
+[1] "2009-08-07 04:00:00 UTC"
+> time_force_tz(x, "UTC")
+[1] "2009-08-07 UTC"
+> time_force_tz(x, "Europe/Amsterdam")
+[1] "2009-08-07 CEST"
+>
+> ## DST skip:
+>
+> y <- as.POSIXct("2010-03-14 02:05:05", tz = "UTC")
+> time_force_tz(y, "America/New_York", roll = "boundary")
+[1] "2010-03-14 03:00:00 EDT"
+> time_force_tz(y, "America/New_York", roll = "first")
+[1] "2010-03-14 03:05:05 EDT"
+> time_force_tz(y, "America/New_York", roll = "last")
+[1] "2010-03-14 01:05:05 EST"
+> time_force_tz(y, "America/New_York", roll = "NA")
+[1] NA
+>
+> ## Heterogeneous time-zones:
+>
+> x <- as.POSIXct(c("2009-08-07 00:00:01", "2009-08-07 01:02:03"), tz = "UTC")
+> time_force_tz(x, tz = c("America/New_York", "Europe/Amsterdam"))
+[1] "2009-08-07 00:00:01 EDT" "2009-08-06 19:02:03 EDT"
+> time_force_tz(x, tz = c("America/New_York", "Europe/Amsterdam"), tzout = "America/New_York")
+[1] "2009-08-07 00:00:01 EDT" "2009-08-06 19:02:03 EDT"
+>
+> x <- as.POSIXct("2009-08-07 00:00:01", tz = "UTC")
+> time_force_tz(x, tz = c("America/New_York", "Europe/Amsterdam"))
+[1] "2009-08-07 00:00:01 EDT" "2009-08-06 18:00:01 EDT"
+>
+> ## Local clock:
+>
+> x <- as.POSIXct(c("2009-08-07 01:02:03", "2009-08-07 10:20:30"), tz = "UTC")
+> time_clock_at_tz(x, units = "secs")
+Time differences in secs
+[1]  3723 37230
+> time_clock_at_tz(x, units = "hours")
+Time differences in hours
+[1]  1.034167 10.341667
+> time_clock_at_tz(x, "Europe/Amsterdam")
+Time differences in secs
+[1] 10923 44430
+>
+> x <- as.POSIXct("2009-08-07 01:02:03", tz = "UTC")
+> time_clock_at_tz(x, tz = c("America/New_York", "Europe/Amsterdam", "Asia/Shanghai"), unit = "hours")
+Time differences in hours
+[1] 21.034167  3.034167  9.034167
+>
+>
+>
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("time-zones", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("time_add")
+> ### * time_add
+>
+> flush(stderr()); flush(stdout())
+>
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: time_add
+> ### Title: Arithmetics with periods
+> ### Aliases: time_add time_subtract
+>
+> ### ** Examples
+>
+>
+> # Addition
+>
+> ## Month gap
+> x <- as.POSIXct("2000-01-31 01:02:03", tz = "America/Chicago")
+> time_add(x, months = 1, roll_month = "first")
+[1] "2000-03-01 01:02:03 CST"
+> time_add(x, months = 1, roll_month = "last")
+[1] "2000-02-29 01:02:03 CST"
+> time_add(x, months = 1, roll_month = "boundary")
+[1] "2000-03-01 CST"
+> time_add(x, months = 1, roll_month = "skip")
+[1] "2000-03-02 01:02:03 CST"
+> time_add(x, months = 1, roll_month = "NA")
+[1] NA
+> time_add(x, months = 1, days = 3,  roll_month = "first")
+[1] "2000-03-04 01:02:03 CST"
+> time_add(x, months = 1, days = 3,  roll_month = "last")
+[1] "2000-03-03 01:02:03 CST"
+> time_add(x, months = 1, days = 3,  roll_month = "boundary")
+[1] "2000-03-04 CST"
+> time_add(x, months = 1, days = 3,  roll_month = "skip")
+[1] "2000-03-05 01:02:03 CST"
+> time_add(x, months = 1, days = 3,  roll_month = "NA")
+[1] NA
+>
+> ## DST gap
+> x <- as.POSIXlt("2010-03-14 01:02:03", tz = "America/Chicago")
+> time_add(x, hours = 1, minutes = 50, roll_dst = "first")
+[1] "2010-03-14 03:52:03 CDT"
+> time_add(x, hours = 1, minutes = 50, roll_dst = "last")
+[1] "2010-03-14 01:52:03 CST"
+> time_add(x, hours = 1, minutes = 50, roll_dst = "boundary")
+[1] "2010-03-14 03:00:00 CDT"
+> time_add(x, hours = 1, minutes = 50, roll_dst = "skip")
+[1] "2010-03-14 03:52:03 CDT"
+> time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
+[1] NA
+>
+> # SUBTRACTION
+>
+> ## Month gap
+> x <- as.POSIXct("2000-03-31 01:02:03", tz = "America/Chicago")
+> time_subtract(x, months = 1, roll_month = "first")
+[1] "2000-03-01 01:02:03 CST"
+> time_subtract(x, months = 1, roll_month = "last")
+[1] "2000-02-29 01:02:03 CST"
+> time_subtract(x, months = 1, roll_month = "boundary")
+[1] "2000-03-01 CST"
+> time_subtract(x, months = 1, roll_month = "skip")
+[1] "2000-03-02 01:02:03 CST"
+> time_subtract(x, months = 1, roll_month = "NA")
+[1] NA
+> time_subtract(x, months = 1, days = 3,  roll_month = "first")
+[1] "2000-02-27 01:02:03 CST"
+> time_subtract(x, months = 1, days = 3,  roll_month = "last")
+[1] "2000-02-26 01:02:03 CST"
+> time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
+[1] "2000-02-27 CST"
+> time_subtract(x, months = 1, days = 3,  roll_month = "skip")
+[1] "2000-02-28 01:02:03 CST"
+> time_subtract(x, months = 1, days = 3,  roll_month = "NA")
+[1] NA
+>
+> ## DST gap
+> y <- as.POSIXlt("2010-03-15 01:02:03", tz = "America/Chicago")
+> time_subtract(y, hours = 22, minutes = 50, roll_dst = "first")
+[1] "2010-03-14 03:12:03 CDT"
+> time_subtract(y, hours = 22, minutes = 50, roll_dst = "last")
+[1] "2010-03-14 01:12:03 CST"
+> time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary")
+[1] "2010-03-14 03:00:00 CDT"
+> time_subtract(y, hours = 22, minutes = 50, roll_dst = "skip")
+[1] "2010-03-14 01:12:03 CST"
+> time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA")
+[1] NA
+>
+>
+>
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("time_add", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("time_get")
+> ### * time_get
+>
+> flush(stderr()); flush(stdout())
+>
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: time_get
+> ### Title: Get components of a date-time object
+> ### Aliases: time_get
+>
+> ### ** Examples
+>
+> x <- as.POSIXct("2019-02-03")
+> time_get(x)
+  year month yday mday wday hour minute second
+1 2019     2   34    3    6    0      0      0
+>
+>
+>
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("time_get", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("time_round")
+> ### * time_round
+>
+> flush(stderr()); flush(stdout())
+>
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: time_round
+> ### Title: Round, floor and ceiling for date-time objects
+> ### Aliases: time_round time_floor time_ceiling
+>
+> ### ** Examples
+>
+>
+> ## print fractional seconds
+> options(digits.secs=6)
+>
+> x <- as.POSIXct("2009-08-03 12:01:59.23")
+> time_round(x, ".5 asec")
+[1] "2009-08-03 12:01:59 GMT"
+> time_round(x, "sec")
+[1] "2009-08-03 12:01:59 GMT"
+> time_round(x, "second")
+[1] "2009-08-03 12:01:59 GMT"
+> time_round(x, "asecond")
+[1] "2009-08-03 12:01:59 GMT"
+> time_round(x, "minute")
+[1] "2009-08-03 12:02:00 GMT"
+> time_round(x, "5 mins")
+[1] "2009-08-03 12:00:00 GMT"
+> time_round(x, "5M") # "M" for minute "m" for month
+[1] "2009-08-03 12:00:00 GMT"
+> time_round(x, "hour")
+[1] "2009-08-03 12:00:00 GMT"
+> time_round(x, "2 hours")
+[1] "2009-08-03 12:00:00 GMT"
+> time_round(x, "2H")
+[1] "2009-08-03 12:00:00 GMT"
+> time_round(x, "day")
+[1] "2009-08-04 GMT"
+> time_round(x, "week")
+[1] "2009-08-03 GMT"
+> time_round(x, "month")
+[1] "2009-08-01 GMT"
+> time_round(x, "bimonth")
+[1] "2009-09-01 GMT"
+> time_round(x, "quarter") == time_round(x, "3 months")
+[1] TRUE
+> time_round(x, "halfyear")
+[1] "2009-07-01 GMT"
+> time_round(x, "year")
+[1] "2010-01-01 GMT"
+>
+> x <- as.POSIXct("2009-08-03 12:01:59.23")
+> time_floor(x, ".1 asec")
+[1] "2009-08-03 12:01:59.2 GMT"
+> time_floor(x, "second")
+[1] "2009-08-03 12:01:59 GMT"
+> time_floor(x, "minute")
+[1] "2009-08-03 12:01:00 GMT"
+> time_floor(x, "M")
+[1] "2009-08-03 12:01:00 GMT"
+> time_floor(x, "hour")
+[1] "2009-08-03 12:00:00 GMT"
+> time_floor(x, "day")
+[1] "2009-08-03 GMT"
+> time_floor(x, "week")
+[1] "2009-08-03 GMT"
+> time_floor(x, "m")
+[1] "2009-08-01 GMT"
+> time_floor(x, "month")
+[1] "2009-08-01 GMT"
+> time_floor(x, "bimonth")
+[1] "2009-07-01 GMT"
+> time_floor(x, "quarter")
+[1] "2009-07-01 GMT"
+> time_floor(x, "season")
+[1] "2009-06-01 GMT"
+> time_floor(x, "halfyear")
+[1] "2009-07-01 GMT"
+> time_floor(x, "year")
+[1] "2009-01-01 GMT"
+>
+> x <- as.POSIXct("2009-08-03 12:01:59.23")
+> time_ceiling(x, ".1 asec")
+[1] "2009-08-03 12:01:59.2 GMT"
+> time_ceiling(x, "second")
+[1] "2009-08-03 12:02:00 GMT"
+> time_ceiling(x, "minute")
+[1] "2009-08-03 12:02:00 GMT"
+> time_ceiling(x, "5 mins")
+[1] "2009-08-03 12:05:00 GMT"
+> time_ceiling(x, "hour")
+[1] "2009-08-03 13:00:00 GMT"
+> time_ceiling(x, "day")
+[1] "2009-08-04 GMT"
+> time_ceiling(x, "week")
+[1] "2009-08-10 GMT"
+> time_ceiling(x, "month")
+[1] "2009-09-01 GMT"
+> time_ceiling(x, "bimonth") == time_ceiling(x, "2 months")
+[1] TRUE
+> time_ceiling(x, "quarter")
+[1] "2009-10-01 GMT"
+> time_ceiling(x, "season")
+[1] "2009-09-01 GMT"
+> time_ceiling(x, "halfyear")
+[1] "2010-01-01 GMT"
+> time_ceiling(x, "year")
+[1] "2010-01-01 GMT"
+>
+> ## behavior on the boundary
+> x <- as.Date("2000-01-01")
+> time_ceiling(x, "month")
+[1] "2000-02-01"
+> time_ceiling(x, "month", change_on_boundary = FALSE)
+[1] "2000-01-01"
+>
+> ## As of R 3.4.2 POSIXct printing of fractional numbers is wrong
+> as.POSIXct("2009-08-03 12:01:59.3", tz = "UTC") ## -> "2009-08-03 12:01:59.2 UTC"
+[1] "2009-08-03 12:01:59.2 UTC"
+> time_ceiling(x, ".1 asec") ## -> "2009-08-03 12:01:59.2 UTC"
+[1] "2000-01-01"
+>
+> ## Civil Time vs Absolute Time Rounding
+>
+> # "2014-11-02 01:59:59.5 EDT" before 1h backroll at 2AM
+> x <- .POSIXct(1414907999.5, tz = "America/New_York")
+> x
+[1] "2014-11-02 01:59:59.5 EDT"
+> time_ceiling(x, "hour") # "2014-11-02 02:00:00 EST"
+[1] "2014-11-02 02:00:00 EST"
+> time_ceiling(x, "minute")
+[1] "2014-11-02 02:00:00 EST"
+> time_ceiling(x, "sec")
+[1] "2014-11-02 02:00:00 EST"
+> difftime(time_ceiling(x, "s"), x)
+Time difference of 1.000139 hours
+> time_ceiling(x, "1a") # "2014-11-02 01:00:00 EST"
+[1] "2014-11-02 01:00:00 EST"
+> difftime(time_ceiling(x, "a"), x)
+Time difference of 0.5 secs
+>
+> # "2014-11-02 01:00:00.5 EST" after 1h backroll at 2AM
+> x <- .POSIXct(1414908000.5, tz = "America/New_York")
+> x
+[1] "2014-11-02 01:00:00.5 EST"
+> time_floor(x, "hour") # "2014-11-02 01:00:00 EST"
+[1] "2014-11-02 01:00:00 EST"
+> difftime(time_floor(x, "hour"), x)
+Time difference of -0.5 secs
+> time_floor(x, "3600a") # "2014-11-02 01:00:00 EST"  - 25m
+[1] "2014-11-02 01:00:00 EST"
+> difftime(time_floor(x, "a"), x)
+Time difference of -0.5 secs
+>
+>
+>
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("time_round", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("time_update")
+> ### * time_update
+>
+> flush(stderr()); flush(stdout())
+>
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: time_update
+> ### Title: Update components of a date-time object
+> ### Aliases: time_update
+>
+> ### ** Examples
+>
+> date <- as.Date("2009-02-10")
+> time_update(date, year = 2010, month = 1, mday = 1)
+[1] "2010-01-01"
+> time_update(date, year = 2010, month = 13, mday = 1)
+[1] "2011-01-01"
+> time_update(date, minute = 10, second = 3)
+[1] "2009-02-10 00:10:03 UTC"
+> time_update(date, minute = 10, second = 3, tz = "America/New_York")
+[1] "2009-02-10 00:10:03 EST"
+>
+>
+>
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("time_update", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> ### * <FOOTER>
+> ###
+> cleanEx()
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  0.44 0.029 0.514 0.003 0.002
+> grDevices::dev.off()
+null device
+          1
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')
+R CMD check failed
+Top
+Search all repositories
+
+My Repositories
+
+ vspinu/timechange 34
+ Duration: 7 min 22 sec
+
+ Finished: 4 minutes ago
+
+ tidyverse/readxl 818
+ Duration: 1 hr 10 min 26 sec
+
+ Finished: 26 minutes ago
+
+ tidyverse/hms 498
+ Duration: 1 min 46 sec
+
+ Finished: 27 minutes ago
+
+ tidyverse/blob 220
+ Duration: 1 min 43 sec
+
+ Finished: 27 minutes ago
+
+ clojure-emacs/clj-refactor.el 1444
+ Duration: 44 sec
+
+ Finished: 7 hours ago
+
+ tidyverse/lubridate 597
+ Duration: 15 min 13 sec
+
+ Finished: 8 hours ago
+
+ tidyverse/dplyr 6832
+ Duration: 36 min 38 sec
+
+ Finished: 18 hours ago
+
+ tidyverse/dtplyr 172
+ Duration: 15 min 9 sec
+
+ Finished: 21 hours ago
+
+ tidyverse/tidyr 987
+ Duration: 22 min 42 sec
+
+ Finished: a day ago
+
+ tidyverse/ggplot2 3726
+ Duration: 1 hr 9 min 25 sec
+
+ Finished: 2 days ago
+
+ tidyverse/readr 1304
+ Duration: 1 hr 4 min 31 sec
+
+ Finished: 2 days ago
+
+ tidyverse/tibble 2245
+ Duration: 24 min 29 sec
+
+ Finished: 2 days ago
+
+ emacs-ess/ESS 1446
+ Duration: 25 min 13 sec
+
+ Finished: 8 days ago
+
+ tidyverse/googlesheets4 229
+ Duration: 18 min 55 sec
+
+ Finished: 9 days ago
+
+ Fuco1/smartparens 1399
+ Duration: 8 min 1 sec
+
+ Finished: 15 days ago
+
+ tidyverse/tidyverse 262
+ Duration: 23 min 9 sec
+
+ Finished: 15 days ago
+
+ tidyverse/rvest 211
+ Duration: 16 min 24 sec
+
+ Finished: 18 days ago
+
+ tidyverse/design 153
+ Duration: 6 min 5 sec
+
+ Finished: 18 days ago
+
+ tidyverse/googledrive 1207
+ Duration: 37 min 58 sec
+
+ Finished: 19 days ago
+
+ tidyverse/forcats 331
+ Duration: 18 min 1 sec
+
+ Finished: 19 days ago
+
+ tidyverse/glue 297
+ Duration: 47 min 25 sec
+
+ Finished: 24 days ago
+
+ clojure-emacs/parseedn 13
+ Duration: 3 min 45 sec
+
+ Finished: 26 days ago
+
+ tidyverse/reprex 709
+ Duration: 23 min 40 sec
+
+ Finished: 26 days ago
+
+ tidyverse/purrr 1015
+ Duration: 22 min 29 sec
+
+ Finished: 27 days ago
+
+ tidyverse/stringr 343
+ Duration: 13 min 42 sec
+
+ Finished: 27 days ago
+
+ tidyverse/haven 562
+ Duration: 23 min 2 sec
+
+ Finished: about a month ago
+
+ tidyverse/dbplyr 730
+ Duration: 1 hr 13 min 6 sec
+
+ Finished: about a month ago
+
+ tidyverse/modelr 177
+ Duration: 1 hr 10 min 50 sec
+
+ Finished: about a month ago
+
+ tidyverse/magrittr 259
+ Duration: 25 min 56 sec
+
+ Finished: about a month ago
+
+ tidyverse/style 166
+ Duration: 3 min 23 sec
+
+ Finished: about a month ago
+
+©TRAVIS CI, GMBH
+Rigaer Straße 8
+10247 Berlin, Germany
+Work with Travis CI
+Blog
+Email
+Twitter
+HELP
+Documentation
+Community
+Changelog
+LEGAL
+Imprint
+Terms of Service
+Privacy Policy
+Security Statement
+TRAVIS CI STATUS
+●
