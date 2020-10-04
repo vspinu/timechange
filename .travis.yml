@@ -19,10 +19,6 @@ matrix:
             valgrind
     - os: osx
       name: osx-default
-    - os: osx
-      osx_image: xcode8.3
-      name: osx-xcode8.3
-      disable_homebrew: true
 
 env:
   - _R_CHECK_TESTS_NLINES_=0
