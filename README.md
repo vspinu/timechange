@@ -10,6 +10,7 @@ Utilities for efficient manipulation of date-time objects while accounting for t
 
 Currently implemented:
 
+ - __`time_get`__: get components (hour, day etc) of date-time objects
  - __`time_update`__: update date-time objects
  - __`time_round`__, __`time_ceiling`__ and __`time_floor`__: date-time rounding methods
  - __`time_force_tz`__, __`time_at_tz`__ and __`time_clock_at_tz`__: updating of time-zones and time/clock extraction at different time-zones
@@ -20,4 +21,4 @@ When it makes sense functions provide a refined control of what happens in ambig
 
 ### Stability
 
-Package is in beta state. API changes are still likely.
+Package is in beta state. API changes are possible.
