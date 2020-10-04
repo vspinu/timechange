@@ -26,5 +26,5 @@ SystemRequirements: A system with zoneinfo data (e.g. /usr/share/zoneinfo) as
     Windows the zoneinfo included with R is used.
 BugReports: https://github.com/vspinu/timechange/issues
 URL: https://github.com/vspinu/timechange/
-RoxygenNote: 7.0.1
+RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
