@@ -25,7 +25,7 @@ of heterogeneous time-zones, in which case \code{time} and \code{tz} arguments a
 paired. If \code{time} and \code{tz} lengths differ, the smaller one is recycled
 according with usual R conventions.}
 
-\item{tzout}{timezone of the output date-time vector. Meaningfull only when
+\item{tzout}{timezone of the output date-time vector. Meaningful only when
 \code{tz} argument is a vector of heterogenuous time-zones. This argument is
 necessary because R date-time vectors cannot hold elements with different
 time-zones.}

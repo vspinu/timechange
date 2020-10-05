@@ -25,3 +25,5 @@ announcement.md
 *.tar.gz
 .Rprofile
 check.txt
+cran-comments.md
+CRAN-RELEASE
