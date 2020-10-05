@@ -83,7 +83,7 @@ time_at_tz <- function(time, tz = "UTC") {
 #'   date-time. Computation is vectorized over both `time` and `tz` arguments.
 #'
 #' @param roll_dst same as in `time_add` which see.
-#' @param tzout timezone of the output date-time vector. Meaningfull only when
+#' @param tzout timezone of the output date-time vector. Meaningful only when
 #'   `tz` argument is a vector of heterogenuous time-zones. This argument is
 #'   necessary because R date-time vectors cannot hold elements with different
 #'   time-zones.
