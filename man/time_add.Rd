@@ -47,17 +47,18 @@ standard arithmetic rules exceed limits of the resulting date's month. See
 "Details" for the description of possible values.}
 
 \item{roll_dst}{controls how to adjust the updated time if it falls within a
-DST transition intervals. See the "Details".}
+DST transition intervals. See Details.}
 }
 \description{
-Add periods to date-time objects. Periods track the change in
-the "clock time" between two civil times. They are measured in common
-civil time units: years, months, days, hours, minutes, and seconds.
-
+Add periods to date-time objects. Periods track the change in the
+"clock time" between two civil times. They are measured in common civil time
+units: years, months, days, hours, minutes, and seconds.
+}
+\details{
 Arithmetic operations with multiple period units (years, months
 etc) are applied in decreasing size order, from year to second. Thus
-\code{time_add(x, months = 1, days = 3)} first adds 1 to \code{x} and then 3
-days.
+\code{time_add(x, months = 1, days = 3)} first adds 1 month to \code{x}, then ads to
+the resulting date 3 days.
 
 Generally period arithmetic is undefined due to the irregular nature of
 civil time and complexities with DST transitions. \pkg{`timechange`} allows
@@ -67,8 +68,10 @@ for a refined control of what happens when an addition of irregular periods
 Let's start with an example. What happens when you add "1 month 3 days" to
 "2000-01-31 01:02:03"? \pkg{`timechange`} operates by applying larger
 periods first. First months are added\code{1 + 1 = February} which results in
-non-existent time of \verb{2000-02-31 01:02:03}. Here the \code{roll_month}
-adjustment kicks in:
+non-existent time of \verb{2000-02-31 01:02:03}. Here the \code{roll_month} adjustment
+kicks in. After the adjustment, the remaining 3 days are added.
+
+\code{roll_month} and \code{roll_dst} can be one of the following:
 \itemize{
 \item \code{skip} - no adjustment is done to the simple arithmetic operations (the
 gap is skipped as if it's not there. Thus, \verb{2000-01-31 01:02:03 + 1 month + 3 days} is equivalent to \verb{2000-01-01 01:02:03 + 1 month + 31 days + 3 days}
@@ -77,11 +80,12 @@ resulting in \verb{2000-03-05 01:02:03}.
 \code{NA} is produced. This is how arithmetic in \code{lubridate} operates.
 \item \code{boundary} - if an intermediate computation falls in a gap, the date is
 adjusted to the next valid time. Thus, \verb{2000-01-31 01:02:03 + month = 2000-03-01 00:00:00}.
-\item \code{next} - is like \code{boundary} but preserves the smaller units. Thus,
+\item \code{first} - is like \code{boundary} but preserves the smaller units. Thus,
 \verb{2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03}.
-\item \code{prev} - is like \code{next} but instead of rolling forward to the first day of
-the month, it rolls back to the last valid day of the previous month. Thus,
-\verb{2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03}. This is the default.
+\item \code{last} - is like \code{first} but instead of rolling forward to the first day
+of the month, it rolls back to the last valid day of the previous
+month. Thus, \verb{2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03}. This is
+the default.
 }
 }
 \examples{
@@ -118,7 +122,9 @@ time_subtract(x, months = 1, roll_month = "last")
 time_subtract(x, months = 1, roll_month = "boundary")
 time_subtract(x, months = 1, roll_month = "skip")
 time_subtract(x, months = 1, roll_month = "NA")
+time_subtract(x, months = 1, days = 0,  roll_month = "first")
 time_subtract(x, months = 1, days = 3,  roll_month = "first")
+time_subtract(x, months = 1, days = 0,  roll_month = "last")
 time_subtract(x, months = 1, days = 3,  roll_month = "last")
 time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
 time_subtract(x, months = 1, days = 3,  roll_month = "skip")

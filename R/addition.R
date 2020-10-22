@@ -1,13 +1,13 @@
 ##' Arithmetics with periods
 ##'
-##' @description Add periods to date-time objects. Periods track the change in
-##'   the "clock time" between two civil times. They are measured in common
-##'   civil time units: years, months, days, hours, minutes, and seconds.
+##' @description Add periods to date-time objects. Periods track the change in the
+##' "clock time" between two civil times. They are measured in common civil time
+##' units: years, months, days, hours, minutes, and seconds.
 ##'
-##' @description Arithmetic operations with multiple period units (years, months
+##' @details Arithmetic operations with multiple period units (years, months
 ##'   etc) are applied in decreasing size order, from year to second. Thus
-##'   `time_add(x, months = 1, days = 3)` first adds 1 to `x` and then 3
-##'   days.
+##'   `time_add(x, months = 1, days = 3)` first adds 1 month to `x`, then ads to
+##'   the resulting date 3 days.
 ##'
 ##' Generally period arithmetic is undefined due to the irregular nature of
 ##' civil time and complexities with DST transitions. \pkg{`timechange`} allows
@@ -17,8 +17,10 @@
 ##' Let's start with an example. What happens when you add "1 month 3 days" to
 ##' "2000-01-31 01:02:03"? \pkg{`timechange`} operates by applying larger
 ##' periods first. First months are added`1 + 1 = February` which results in
-##' non-existent time of `2000-02-31 01:02:03`. Here the `roll_month`
-##' adjustment kicks in:
+##' non-existent time of `2000-02-31 01:02:03`. Here the `roll_month` adjustment
+##' kicks in. After the adjustment, the remaining 3 days are added.
+##'
+##' `roll_month` and `roll_dst` can be one of the following:
 ##'
 ##' * `skip` - no adjustment is done to the simple arithmetic operations (the
 ##' gap is skipped as if it's not there. Thus, `2000-01-31 01:02:03 + 1 month +
@@ -32,12 +34,13 @@
 ##' adjusted to the next valid time. Thus, `2000-01-31 01:02:03 + month =
 ##' 2000-03-01 00:00:00`.
 ##'
-##' * `next` - is like `boundary` but preserves the smaller units. Thus,
+##' * `first` - is like `boundary` but preserves the smaller units. Thus,
 ##' `2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03`.
 ##'
-##' * `prev` - is like `next` but instead of rolling forward to the first day of
-##' the month, it rolls back to the last valid day of the previous month. Thus,
-##' `2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03`. This is the default.
+##' * `last` - is like `first` but instead of rolling forward to the first day
+##' of the month, it rolls back to the last valid day of the previous
+##' month. Thus, `2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03`. This is
+##' the default.
 ##'
 ##' @param time date-time object
 ##' @param periods string of units to add/subtract (not yet implemented) or a
@@ -48,7 +51,7 @@
 ##'   standard arithmetic rules exceed limits of the resulting date's month. See
 ##'   "Details" for the description of possible values.
 ##' @param roll_dst controls how to adjust the updated time if it falls within a
-##'   DST transition intervals. See the "Details".
+##'   DST transition intervals. See Details.
 ##' @examples
 ##'
 ##' # Addition
@@ -83,7 +86,9 @@
 ##' time_subtract(x, months = 1, roll_month = "boundary")
 ##' time_subtract(x, months = 1, roll_month = "skip")
 ##' time_subtract(x, months = 1, roll_month = "NA")
+##' time_subtract(x, months = 1, days = 0,  roll_month = "first")
 ##' time_subtract(x, months = 1, days = 3,  roll_month = "first")
+##' time_subtract(x, months = 1, days = 0,  roll_month = "last")
 ##' time_subtract(x, months = 1, days = 3,  roll_month = "last")
 ##' time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
 ##' time_subtract(x, months = 1, days = 3,  roll_month = "skip")
