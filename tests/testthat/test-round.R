@@ -580,3 +580,10 @@ test_that("round on week respects week_start", {
   expect_equal(wday(time_ceiling(date, "week", week_start = 7)), 7)
 
 })
+
+test_that("rounding works on 'strange' DST gaps", {
+  ## Midnight doesn't exist. DST spring forward happens at 2020-03-29 00:00:00
+  ## and they spring forward to hour 1
+  y <- as.POSIXct("2020-03-29 01:00:00", tz = "Asia/Beirut")
+  expect_equal(time_floor(y, "day"), as.POSIXct("2020-03-29 01:00:00", tz = "Asia/Beirut"))
+})

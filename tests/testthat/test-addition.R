@@ -175,3 +175,13 @@ test_that("addition and subtraction work with repeated DST", {
   expect_equal(time_add(am1 + 60, minutes = 120), am2 + 3660)
 
 })
+
+test_that("addition works on 'strange' DST gaps", {
+  ## Midnight doesn't exist. DST spring forward happens at 2020-03-29 00:00:00
+  ## and they spring forward to hour 1
+  y <- as.POSIXct("2020-03-29 01:00:00", tz = "Asia/Beirut")
+  x <- as.POSIXct("2020-03-28 00:00:00", tz = "Asia/Beirut")
+  expect_equal(y, time_add(x, days = 1))
+  expect_equal(time_add(y, minutes = 5), time_add(x, hours = 24, minutes = 5))
+  expect_equal(time_add(y, minutes = 5), time_add(x, hours = 23, minutes = 65))
+})
