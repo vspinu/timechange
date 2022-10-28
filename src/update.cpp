@@ -9,6 +9,8 @@
 // https://github.com/google/cctz/blob/master/include/cctz/time_zone.h
 // https://github.com/devjgm/papers/blob/master/d0216r1.md
 // https://raw.githubusercontent.com/devjgm/papers/master/resources/struct-civil_lookup.png
+// https://en.wikipedia.org/wiki/Tz_database
+// https://github.com/eggert/tz/blob/2018d/etcetera#L36-L42
 
 // R's timezone registry:
 // https://github.com/SurajGupta/r-source/blob/master/src/extra/tzone/registryTZ.c
@@ -127,6 +129,7 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
         if (m == NA_INT32) { out[i] = NA_REAL; continue; }
       }
 
+      // FIXME: When roll == NA, need to check boundaries of yday and wday and return NA!!
       if (do_yday) {
         // yday and d are 1 based
         d = d - cctz::get_yearday(cctz::civil_day(ct1));
@@ -143,26 +146,25 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
       if (do_mday) {
         d = loop_mday ? mday[i] : mday[0];
         if (d == NA_INT32) {out[i] = NA_REAL; continue; }
-      }
-
-      cctz::civil_day cd = cctz::civil_day(y, m, d);
-      if (cd.day() != d) {
-        // month rolling kicks in
-        switch(rmonth) {
-         case Roll::SKIP: break;
-         case Roll::BOUNDARY:
-           cd = cctz::civil_day(cctz::civil_month(cd));
-           H = 0; M = 0; S = 0; rem = 0.0;
-           break;
-         case Roll::FIRST:
-           cd = cctz::civil_day(cctz::civil_month(cd));
-           break;
-         case Roll::LAST:
-           cd = cctz::civil_day(cctz::civil_month(cd)) - 1;
-           break;
-         case Roll::NA:
-           out[i] = NA_REAL;
-           continue;
+        cctz::civil_day cd = cctz::civil_day(y, m, d);
+        if (cd.day() != d) {
+          // month rolling kicks in
+          switch(rmonth) {
+           case Roll::SKIP: break;
+           case Roll::BOUNDARY:
+             cd = cctz::civil_day(cctz::civil_month(cd));
+             H = 0; M = 0; S = 0; rem = 0.0;
+             break;
+           case Roll::FIRST:
+             cd = cctz::civil_day(cctz::civil_month(cd));
+             break;
+           case Roll::LAST:
+             cd = cctz::civil_day(cctz::civil_month(cd)) - 1;
+             break;
+           case Roll::NA:
+             out[i] = NA_REAL;
+             continue;
+          }
         }
       }
 

@@ -462,3 +462,17 @@ test_that("update.POSIXlt returns input of length zero when given input of lengt
   x <- as.POSIXlt(structure(vector(mode = "numeric"), class = c("POSIXct", "POSIXt")))
   expect_equal(time_update(x, day = 1), x)
 })
+
+test_that("update correctly works for yday", {
+  x <- ymd("2020-01-01")
+  expect_equal(time_update(x, yday = 45), ymd("2020-02-14"))
+  ## FIXME: with NA rolling check the boundary
+  ## expect_equal(time_update(x, yday = 1000, roll_month = "NA"), NA_Date_)
+  ## expect_equal(time_update(x, wday = 10, roll_month = "NA"), NA_Date_)
+
+  x <- ymd_hms("2020-01-01 01:02:03")
+  expect_equal(time_update(x, yday = 45), ymd_hms("2020-02-14 01:02:03"))
+  ## FIXME: with NA rolling check the boundary
+  ## expect_equal(time_update(x, yday = 1000, roll_month = "NA"), NA_POSIXct_)
+  ## expect_equal(time_update(x, wday = 10, roll_month = "NA"), NA_POSIXct_)
+})

@@ -93,3 +93,6 @@ yday <- function(x)
 
 now <- function(tzone = "")
   time_at_tz(Sys.time(), tzone)
+
+NA_Date_ <- structure(NA_real_, class = "Date")
+NA_POSIXct_ <- structure(NA_real_, class = c("POSIXct", "POSIXt"), tzone = "UTC")
