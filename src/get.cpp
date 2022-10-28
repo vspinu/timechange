@@ -55,6 +55,7 @@ Rcpp::DataFrame C_time_get(const NumericVector& dt,
   NumericVector second(do_second ? N : 0);
 
   std::string tz = tz_from_tzone_attr(dt);
+
   cctz::time_zone tzone;
   load_tz_or_fail(tz, tzone, "CCTZ: Invalid timezone of the input vector: \"%s\"");
 

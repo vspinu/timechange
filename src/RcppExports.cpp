@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // C_time_get
 Rcpp::DataFrame C_time_get(const NumericVector& dt, const CharacterVector& components, const int week_start);
 RcppExport SEXP _timechange_C_time_get(SEXP dtSEXP, SEXP componentsSEXP, SEXP week_startSEXP) {
