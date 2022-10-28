@@ -48,9 +48,9 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
 // Helper for conversion functions. Get seconds from civil_lookup, but relies on
 // original time pre/post time if cl_new falls in repeated interval.
 double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new lookup
-                             const cctz::time_zone& tz_orig,              // original time zone
-                             const time_point& tp_orig,                   // original time point
-                             const cctz::civil_second& cs_orig,           // original time in secs
+                             const cctz::time_zone& tz_old,              // original time zone
+                             const time_point& tp_old,                   // original time point
+                             const cctz::civil_second& cs_old,           // original time in secs
                              const Roll& roll_dst,
                              const double remainder) noexcept {
 
@@ -58,8 +58,9 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
     // REPEATED
     // match pre or post time of original time
     time_point tp_new;
-    const cctz::time_zone::civil_lookup cl_old = tz_orig.lookup(cs_orig);
-    if (cl_old.kind == cctz::time_zone::civil_lookup::REPEATED && tp_orig >= cl_old.trans) {
+    const cctz::time_zone::civil_lookup cl_old = tz_old.lookup(cs_old);
+    if (cl_old.kind == cctz::time_zone::civil_lookup::REPEATED &&
+        tp_old >= cl_old.trans) {
       tp_new = cl_new.post;
     } else {
       tp_new = cl_new.pre;
