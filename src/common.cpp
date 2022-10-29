@@ -23,7 +23,8 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
   if (cl.kind == cctz::time_zone::civil_lookup::SKIPPED) {
     switch (roll_dst) {
      case Roll::BOUNDARY: tp = cl.trans; break;
-     case Roll::SKIP:
+     case Roll::FULL:
+     case Roll::NAym:
      case Roll::FIRST: tp = cl.pre; break;
      case Roll::LAST: tp = cl.post; break;
      case Roll::NA: return NA_REAL;
@@ -34,7 +35,8 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
     // means "post" hour.
     switch (roll_dst) {
      case Roll::BOUNDARY: tp = cl.trans; break;
-     case Roll::SKIP:
+     case Roll::FULL:
+     case Roll::NAym:
      case Roll::LAST: tp = cl.post; break;
      case Roll::FIRST: tp = cl.pre; break;
      case Roll::NA: return NA_REAL;

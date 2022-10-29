@@ -20,7 +20,7 @@ extern double fINT64_MIN;
 
 int_fast64_t floor_to_int64(double x);
 
-enum class Roll { SKIP, BOUNDARY, FIRST, LAST, NA };
+enum class Roll { FULL, BOUNDARY, FIRST, LAST, NA, NAym };
 
 // Helper for conversion functions. Get seconds from civil_lookup, but relies on
 // original time pre/post time if cl_new falls in repeated interval.
@@ -35,11 +35,15 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
                              const Roll& roll_dst) noexcept;
 
 inline Roll roll_type(const std::string& roll_type) {
-  if (roll_type == "skip") return Roll::SKIP;
+  if (roll_type == "skip") return Roll::FULL;
+  if (roll_type == "full") return Roll::FULL;
   if (roll_type == "boundary") return Roll::BOUNDARY;
   if (roll_type == "first") return Roll::FIRST;
+  if (roll_type == "first_day") return Roll::FIRST;
   if (roll_type == "last") return Roll::LAST;
+  if (roll_type == "last_day") return Roll::LAST;
   if (roll_type == "NA") return Roll::NA;
+  if (roll_type == "NAym") return Roll::NAym;
   Rf_error("Invalid roll_month type (%s)", roll_type.c_str());
 }
 

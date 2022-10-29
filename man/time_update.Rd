@@ -17,10 +17,10 @@ time_update(
   minute = NULL,
   second = NULL,
   tz = NULL,
-  roll = TRUE,
   roll_month = "last",
   roll_dst = "boundary",
-  week_start = getOption("timechange.week_start", 1)
+  week_start = getOption("timechange.week_start", 1),
+  exact = FALSE
 )
 }
 \arguments{
@@ -34,17 +34,17 @@ be converted to integer.}
 
 \item{tz}{time zone component (a singleton character vector)}
 
-\item{roll}{whether rolling is allowed. If set to \code{FALSE} no rolling or
-unit-recycling is allowed and \code{NA} is produced whenever the units of the end
-date-time don't match the provided units. This can occur when an end date falls
-into a gap (e.g. DST or Feb.29) or when large components (e.g. \code{hour = 25}) are
-supplied and result in crossing boundaries of higher units. When \code{roll = FALSE},
-\code{roll_month} and \code{roll_dst} arguments are ignored.}
-
 \item{roll_month, roll_dst}{See \code{\link[=time_add]{time_add()}}.}
 
 \item{week_start}{first day of the week (default is 1, Monday). Set
 \code{timechange.week_start} option to change this globally.}
+
+\item{exact}{logical (TRUE), whether the update should be exact. If set to \code{FALSE} no
+rolling or unit-recycling is allowed and \code{NA} is produced whenever the units of the
+end date-time don't match the provided units. This can occur when an end date falls
+into a gap (e.g. DST or Feb.29) or when large components (e.g. \code{hour = 25}) are
+supplied and result in crossing boundaries of higher units. When \code{roll = FALSE},
+\code{roll_month} and \code{roll_dst} arguments are ignored.}
 }
 \value{
 A date-time with the requested elements updated.  Retain its original class

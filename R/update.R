@@ -7,15 +7,15 @@
 #'   to be updated. `day` is equivalent to `mday`. All components except `second` will
 #'   be converted to integer.
 #' @param tz time zone component (a singleton character vector)
-#' @param roll whether rolling is allowed. If set to `FALSE` no rolling or
-#'   unit-recycling is allowed and `NA` is produced whenever the units of the end
-#'   date-time don't match the provided units. This can occur when an end date falls
-#'   into a gap (e.g. DST or Feb.29) or when large components (e.g. `hour = 25`) are
-#'   supplied and result in crossing boundaries of higher units. When `roll = FALSE`,
-#'   `roll_month` and `roll_dst` arguments are ignored.
 #' @param roll_month,roll_dst See [time_add()].
 #' @param week_start first day of the week (default is 1, Monday). Set
 #'   `timechange.week_start` option to change this globally.
+#' @param exact logical (TRUE), whether the update should be exact. If set to `FALSE` no
+#'   rolling or unit-recycling is allowed and `NA` is produced whenever the units of the
+#'   end date-time don't match the provided units. This can occur when an end date falls
+#'   into a gap (e.g. DST or Feb.29) or when large components (e.g. `hour = 25`) are
+#'   supplied and result in crossing boundaries of higher units. When `roll = FALSE`,
+#'   `roll_month` and `roll_dst` arguments are ignored.
 #' @return A date-time with the requested elements updated.  Retain its original class
 #'   unless the original class is `Date` and at least one of the `hour`, `minute`,
 #'   `second` or `tz` is supplied, in which case a `POSIXct` object is returned.
@@ -41,16 +41,16 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
                         yday = NULL, day = NULL, mday = NULL, wday = NULL,
                         hour = NULL, minute = NULL, second = NULL,
                         tz = NULL,
-                        roll = TRUE,
                         roll_month = "last",
                         roll_dst = "boundary",
-                        week_start = getOption("timechange.week_start", 1)) {
+                        week_start = getOption("timechange.week_start", 1),
+                        exact = FALSE) {
 
   if (length(time) == 0L)
     return(time)
 
-  roll_month <- match.arg(roll_month, .roll_types)
-  roll_dst <- match.arg(roll_dst, .roll_types)
+  roll_month <- match.arg(roll_month, .month_roll_types)
+  roll_dst <- match.arg(roll_dst, .dst_roll_types)
 
   if (!is.null(day)) {
     if (!is.null(mday))
@@ -73,11 +73,11 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
   updates <- normalize_units_length(updates)
 
   if (is.POSIXct(time)) {
-    C_time_update(time, updates, tz, roll, roll_month, roll_dst, week_start)
+    C_time_update(time, updates, tz, roll_month, roll_dst, week_start, exact)
   } else if (is.Date(time)) {
     out <- date2posixct(time)
     attr(out, "tzone") <- "UTC"
-    out <- C_time_update(out, updates, tz, roll, roll_month, roll_dst, week_start)
+    out <- C_time_update(out, updates, tz, roll_month, roll_dst, week_start, exact)
     if (is.null(hour) && is.null(minute) && is.null(second) && is.null(tz)) {
       out <- as.Date(out, tz = "UTC")
     }
@@ -85,7 +85,7 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
   } else if (is.POSIXlt(time)) {
     as.POSIXlt.POSIXct(
       C_time_update(as.POSIXct.POSIXlt(time),
-                    updates, tz, roll, roll_month, roll_dst, week_start))
+                    updates, tz, roll_month, roll_dst, week_start, exact))
   } else {
     unsupported_date_time(time)
   }

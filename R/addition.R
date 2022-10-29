@@ -22,25 +22,28 @@
 ##'
 ##' `roll_month` and `roll_dst` can be one of the following:
 ##'
-##' * `skip` - no adjustment is done to the simple arithmetic operations (the
-##' gap is skipped as if it's not there. Thus, `2000-01-31 01:02:03 + 1 month +
-##' 3 days` is equivalent to `2000-01-01 01:02:03 + 1 month + 31 days + 3 days`
+##' * `full` - full rolling. No adjustment is done to the simple arithmetic operations
+##' (the gap is skipped as if it's not there). For example, `2000-01-31 01:02:03 + 1
+##' month + 3 days` is equivalent to `2000-01-01 01:02:03 + 1 month + 31 days + 3 days`
 ##' resulting in `2000-03-05 01:02:03`.
 ##'
-##' * `NA` - if any of the intermediate additions result in non-existent dates
-##' `NA` is produced. This is how arithmetic in `lubridate` operates.
+##' * `NA` - if end result was rolled over the month boundary due to addition of units
+##' smaller than month (day, hour, minute, second) produce NA.
 ##'
-##' * `boundary` - if an intermediate computation falls in a gap, the date is
-##' adjusted to the next valid time. Thus, `2000-01-31 01:02:03 + month =
-##' 2000-03-01 00:00:00`.
+##' * `NAym` - if intermediate date resulting from first adding years and months ends in
+##' a non-existing date (e.g. Feb 31) produce NA. This is how period addition in
+##' lubridate works for historical reasons.
 ##'
-##' * `first` - is like `boundary` but preserves the smaller units. Thus,
+##' * `boundary` - if rolling over a month boundary occurred due to setting units
+##' smaller than month, the date is adjusted to the beginning of the month. For example,
+##' `2000-01-31 01:02:03 + month = 2000-03-01 00:00:00`.
+##'
+##' * `first_day` - is like `boundary` but preserves the smaller units. For example,
 ##' `2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03`.
 ##'
-##' * `last` - is like `first` but instead of rolling forward to the first day
-##' of the month, it rolls back to the last valid day of the previous
-##' month. Thus, `2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03`. This is
-##' the default.
+##' * `last_day` - is like `first` but instead of rolling forward to the first day of
+##' the month, it rolls back to the last valid day of the previous month. For example,
+##' `2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03`. This is the default.
 ##'
 ##' @param time date-time object
 ##' @param periods string of units to add/subtract (not yet implemented) or a
@@ -58,40 +61,40 @@
 ##'
 ##' ## Month gap
 ##' x <- as.POSIXct("2000-01-31 01:02:03", tz = "America/Chicago")
-##' time_add(x, months = 1, roll_month = "first")
-##' time_add(x, months = 1, roll_month = "last")
+##' time_add(x, months = 1, roll_month = "first_day")
+##' time_add(x, months = 1, roll_month = "last_day")
 ##' time_add(x, months = 1, roll_month = "boundary")
-##' time_add(x, months = 1, roll_month = "skip")
+##' time_add(x, months = 1, roll_month = "full")
 ##' time_add(x, months = 1, roll_month = "NA")
-##' time_add(x, months = 1, days = 3,  roll_month = "first")
-##' time_add(x, months = 1, days = 3,  roll_month = "last")
+##' time_add(x, months = 1, days = 3,  roll_month = "first_day")
+##' time_add(x, months = 1, days = 3,  roll_month = "last_day")
 ##' time_add(x, months = 1, days = 3,  roll_month = "boundary")
-##' time_add(x, months = 1, days = 3,  roll_month = "skip")
+##' time_add(x, months = 1, days = 3,  roll_month = "full")
 ##' time_add(x, months = 1, days = 3,  roll_month = "NA")
 ##'
 ##' ## DST gap
 ##' x <- as.POSIXlt("2010-03-14 01:02:03", tz = "America/Chicago")
-##' time_add(x, hours = 1, minutes = 50, roll_dst = "first")
-##' time_add(x, hours = 1, minutes = 50, roll_dst = "last")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "first_day")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "last_day")
 ##' time_add(x, hours = 1, minutes = 50, roll_dst = "boundary")
-##' time_add(x, hours = 1, minutes = 50, roll_dst = "skip")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "full")
 ##' time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
 ##'
 ##' # SUBTRACTION
 ##'
 ##' ## Month gap
 ##' x <- as.POSIXct("2000-03-31 01:02:03", tz = "America/Chicago")
-##' time_subtract(x, months = 1, roll_month = "first")
-##' time_subtract(x, months = 1, roll_month = "last")
+##' time_subtract(x, months = 1, roll_month = "first_day")
+##' time_subtract(x, months = 1, roll_month = "last_day")
 ##' time_subtract(x, months = 1, roll_month = "boundary")
-##' time_subtract(x, months = 1, roll_month = "skip")
+##' time_subtract(x, months = 1, roll_month = "full")
 ##' time_subtract(x, months = 1, roll_month = "NA")
-##' time_subtract(x, months = 1, days = 0,  roll_month = "first")
-##' time_subtract(x, months = 1, days = 3,  roll_month = "first")
-##' time_subtract(x, months = 1, days = 0,  roll_month = "last")
-##' time_subtract(x, months = 1, days = 3,  roll_month = "last")
+##' time_subtract(x, months = 1, days = 0,  roll_month = "first_day")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "first_day")
+##' time_subtract(x, months = 1, days = 0,  roll_month = "last_day")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "last_day")
 ##' time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
-##' time_subtract(x, months = 1, days = 3,  roll_month = "skip")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "full")
 ##' time_subtract(x, months = 1, days = 3,  roll_month = "NA")
 ##'
 ##' ## DST gap
@@ -99,20 +102,20 @@
 ##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "first")
 ##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "last")
 ##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary")
-##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "skip")
+##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "full")
 ##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA")
 ##' @export
 time_add <- function(time, periods = NULL,
                      years = NULL, months = NULL, weeks = NULL, days = NULL,
                      hours = NULL, minutes = NULL, seconds = NULL,
-                     roll_month = "last",
+                     roll_month = "last_day",
                      roll_dst = "first") {
 
   if (length(time) == 0L)
     return(time)
 
-  roll_month <- match.arg(roll_month[[1]], .roll_types)
-  roll_dst <- match.arg(roll_dst[[1]], .roll_types)
+  roll_month <- match.arg(roll_month[[1]], .month_roll_types)
+  roll_dst <- match.arg(roll_dst[[1]], .dst_roll_types)
 
   if (is.null(periods)) {
     periods <- list()
@@ -154,16 +157,16 @@ time_add <- function(time, periods = NULL,
 time_subtract <- function(time, periods = NULL,
                           years = NULL, months = NULL, weeks = NULL, days = NULL,
                           hours = NULL, minutes = NULL, seconds = NULL,
-                          roll_month = "last",
+                          roll_month = "last_day",
                           roll_dst = "last") {
   if (length(time) == 0L)
     return(time)
 
-  roll_month <- match.arg(roll_month, .roll_types)
-  roll_dst <- match.arg(roll_dst, .roll_types)
+  roll_month <- match.arg(roll_month, .month_roll_types)
+  roll_dst <- match.arg(roll_dst, .dst_roll_types)
 
   ## fixme: no longer needed?
-  if (roll_dst == "skip")
+  if (roll_dst %in% c("skip", "full"))
     roll_dst <- "last"
 
   if (is.null(periods)) {

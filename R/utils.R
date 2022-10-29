@@ -1,5 +1,6 @@
 
-.roll_types <- c("first", "last", "boundary", "skip", "NA")
+.month_roll_types <- c("first_day", "last_day", "boundary", "full", "skip", "NA", "NAym")
+.dst_roll_types <- c("first", "last", "boundary", "full", "skip", "NA")
 
 is.POSIXt <- function(x) "POSIXt" %in% class(x)
 is.POSIXlt <- function(x) "POSIXlt" %in% class(x)
