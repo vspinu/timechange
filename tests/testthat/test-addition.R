@@ -185,3 +185,9 @@ test_that("addition works on 'strange' DST gaps", {
   expect_equal(time_add(y, minutes = 5), time_add(x, hours = 24, minutes = 5))
   expect_equal(time_add(y, minutes = 5), time_add(x, hours = 23, minutes = 65))
 })
+
+test_that("addition errors on empty unit vectors", {
+  y <- ymd_hms("2020-03-29 01:00:00", tz = "Asia/Beirut")
+  expect_error(time_add(y, minute = integer()), "Invalid size of 'minute' vector")
+  expect_error(time_add(y, hour = 1, minute = integer()), "Invalid size of 'minute' vector")
+})

@@ -488,3 +488,16 @@ test_that("update correctly works for yday", {
   ## expect_equal(time_update(x, yday = 1000, roll_month = "NA"), NA_POSIXct_)
   ## expect_equal(time_update(x, wday = 10, roll_month = "NA"), NA_POSIXct_)
 })
+
+
+test_that("update errors on empty unit vectors", {
+  y <- ymd_hms("2020-03-29 01:00:00", tz = "Asia/Beirut")
+  expect_error(time_update(y, minute = integer()), "Invalid size of 'minute' vector")
+  expect_error(time_update(y, hour = 1, minute = integer()), "Invalid size of 'minute' vector")
+})
+
+
+test_that("updating Dates with 0 hms units produces POSIXct.", {
+  expect_equal(time_update(ymd("2020-03-03"), hour = 0, second = 0), ymd("2020-03-03", tz = "UTC"))
+  expect_equal(time_update(ymd("2020-03-03"), hour = NULL), ymd("2020-03-03"))
+})
