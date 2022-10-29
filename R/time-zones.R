@@ -103,7 +103,6 @@ time_force_tz <- function(time, tz = "UTC", tzout = tz[[1]], roll_dst = "boundar
 }
 
 .force_tz <- function(time, tz, tzout, roll_dst) {
-  roll_dst <- match.arg(roll_dst, .dst_roll_types)
   if (length(tz) == 1L && tz == tzout) {
     from_posixct(C_force_tz(to_posixct(time), tz, roll_dst), time)
   } else {

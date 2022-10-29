@@ -124,3 +124,14 @@ test_that("time_force_tz doesn't return NA just because new time zone uses DST",
 ##   expect_true(length(tz_olson) > 0)
 ##   expect_is(tz_olson, "character")
 ## })
+
+test_that("DST times are forced_tz correctly", {
+  ## DST repeated "2014-11-02 01:35:00 CST"
+  ref <- structure(1414913700, tzone = "America/Chicago", class = c("POSIXct", "POSIXt"))
+  expect_equal(C_force_tz(ymd_hms("2014-11-02 01:35:00"), tz = "America/Chicago", "post"),
+               ref)
+  expect_equal(C_force_tz(ymd_hms("2014-11-02 01:35:00"), tz = "America/Chicago", "pre"),
+               ref - 3600)
+  expect_equal(C_force_tz(ymd_hms("2014-11-02 01:35:00"), tz = "America/Chicago", "boundary"),
+               ref - 35*60)
+})

@@ -15,8 +15,8 @@ time_add(
   hours = NULL,
   minutes = NULL,
   seconds = NULL,
-  roll_month = "last",
-  roll_dst = "first"
+  roll_month = "preday",
+  roll_dst = c("pre", "post")
 )
 
 time_subtract(
@@ -29,8 +29,8 @@ time_subtract(
   hours = NULL,
   minutes = NULL,
   seconds = NULL,
-  roll_month = "last",
-  roll_dst = "last"
+  roll_month = "preday",
+  roll_dst = c("post", "pre")
 )
 }
 \arguments{
@@ -73,19 +73,21 @@ kicks in. After the adjustment, the remaining 3 days are added.
 
 \code{roll_month} and \code{roll_dst} can be one of the following:
 \itemize{
-\item \code{skip} - no adjustment is done to the simple arithmetic operations (the
-gap is skipped as if it's not there. Thus, \verb{2000-01-31 01:02:03 + 1 month + 3 days} is equivalent to \verb{2000-01-01 01:02:03 + 1 month + 31 days + 3 days}
+\item \code{boundary} - if rolling over a month boundary occurred due to setting units
+smaller than month, the date is adjusted to the beginning of the month (the
+boundary). For example, \verb{2000-01-31 01:02:03 + month = 2000-03-01 00:00:00}.
+\item \code{preday} - roll back to the last valid day of the previous month (pre-boundary
+day) preserving the H, M, S units. For example, \verb{2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03}. This is the default.
+\item \code{postday} - roll to the first day post-boundary preserving the H, M, S units. For
+example, \verb{2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03}.
+\item \code{full} - full rolling. No adjustment is done to the simple arithmetic operations
+(the gap is skipped as if it's not there). For example, \verb{2000-01-31 01:02:03 + 1 month + 3 days} is equivalent to \verb{2000-01-01 01:02:03 + 1 month + 31 days + 3 days}
 resulting in \verb{2000-03-05 01:02:03}.
-\item \code{NA} - if any of the intermediate additions result in non-existent dates
-\code{NA} is produced. This is how arithmetic in \code{lubridate} operates.
-\item \code{boundary} - if an intermediate computation falls in a gap, the date is
-adjusted to the next valid time. Thus, \verb{2000-01-31 01:02:03 + month = 2000-03-01 00:00:00}.
-\item \code{first} - is like \code{boundary} but preserves the smaller units. Thus,
-\verb{2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03}.
-\item \code{last} - is like \code{first} but instead of rolling forward to the first day
-of the month, it rolls back to the last valid day of the previous
-month. Thus, \verb{2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03}. This is
-the default.
+\item \code{NA} - if end result was rolled over the month boundary due to addition of units
+smaller than month (day, hour, minute, second) produce NA.
+\item \code{NAym} - if intermediate date resulting from first adding years and months ends in
+a non-existing date (e.g. Feb 31) produce NA. This is how period addition in
+lubridate works for historical reasons.
 }
 }
 \examples{
@@ -94,47 +96,45 @@ the default.
 
 ## Month gap
 x <- as.POSIXct("2000-01-31 01:02:03", tz = "America/Chicago")
-time_add(x, months = 1, roll_month = "first")
-time_add(x, months = 1, roll_month = "last")
+time_add(x, months = 1, roll_month = "postday")
+time_add(x, months = 1, roll_month = "preday")
 time_add(x, months = 1, roll_month = "boundary")
-time_add(x, months = 1, roll_month = "skip")
+time_add(x, months = 1, roll_month = "full")
 time_add(x, months = 1, roll_month = "NA")
-time_add(x, months = 1, days = 3,  roll_month = "first")
-time_add(x, months = 1, days = 3,  roll_month = "last")
+time_add(x, months = 1, days = 3,  roll_month = "postday")
+time_add(x, months = 1, days = 3,  roll_month = "preday")
 time_add(x, months = 1, days = 3,  roll_month = "boundary")
-time_add(x, months = 1, days = 3,  roll_month = "skip")
+time_add(x, months = 1, days = 3,  roll_month = "full")
 time_add(x, months = 1, days = 3,  roll_month = "NA")
 
 ## DST gap
 x <- as.POSIXlt("2010-03-14 01:02:03", tz = "America/Chicago")
-time_add(x, hours = 1, minutes = 50, roll_dst = "first")
-time_add(x, hours = 1, minutes = 50, roll_dst = "last")
+time_add(x, hours = 1, minutes = 50, roll_dst = "pre")
 time_add(x, hours = 1, minutes = 50, roll_dst = "boundary")
-time_add(x, hours = 1, minutes = 50, roll_dst = "skip")
-time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
+time_add(x, hours = 1, minutes = 50, roll_dst = "post")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
 
 # SUBTRACTION
 
 ## Month gap
 x <- as.POSIXct("2000-03-31 01:02:03", tz = "America/Chicago")
-time_subtract(x, months = 1, roll_month = "first")
-time_subtract(x, months = 1, roll_month = "last")
+time_subtract(x, months = 1, roll_month = "postday")
+time_subtract(x, months = 1, roll_month = "preday")
 time_subtract(x, months = 1, roll_month = "boundary")
-time_subtract(x, months = 1, roll_month = "skip")
+time_subtract(x, months = 1, roll_month = "full")
 time_subtract(x, months = 1, roll_month = "NA")
-time_subtract(x, months = 1, days = 0,  roll_month = "first")
-time_subtract(x, months = 1, days = 3,  roll_month = "first")
-time_subtract(x, months = 1, days = 0,  roll_month = "last")
-time_subtract(x, months = 1, days = 3,  roll_month = "last")
+time_subtract(x, months = 1, days = 0,  roll_month = "postday")
+time_subtract(x, months = 1, days = 3,  roll_month = "postday")
+time_subtract(x, months = 1, days = 0,  roll_month = "preday")
+time_subtract(x, months = 1, days = 3,  roll_month = "preday")
 time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
-time_subtract(x, months = 1, days = 3,  roll_month = "skip")
+time_subtract(x, months = 1, days = 3,  roll_month = "full")
 time_subtract(x, months = 1, days = 3,  roll_month = "NA")
 
 ## DST gap
 y <- as.POSIXlt("2010-03-15 01:02:03", tz = "America/Chicago")
-time_subtract(y, hours = 22, minutes = 50, roll_dst = "first")
-time_subtract(y, hours = 22, minutes = 50, roll_dst = "last")
+time_subtract(y, hours = 22, minutes = 50, roll_dst = "pre")
 time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary")
-time_subtract(y, hours = 22, minutes = 50, roll_dst = "skip")
+time_subtract(y, hours = 22, minutes = 50, roll_dst = "post")
 time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA")
 }

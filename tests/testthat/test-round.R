@@ -424,29 +424,17 @@ test_that("time_round and time_ceiling skip day time gap", {
 
   ##  (#240)
   tz <- "Europe/Amsterdam"
-  times <- ymd_hms("2013-03-31 01:00:00 CET", "2013-03-31 01:15:00 CEST",
-                   "2013-03-31 01:30:00 CEST", "2013-03-31 01:45:00 CEST",
-                   "2013-03-31 03:00:00 CEST", "2013-03-31 03:15:00 CEST",
-                   tz = tz)
-
-  round <- ymd_hms("2013-03-31 01:00:00 CET",
-                   "2013-03-31 01:00:00 CEST", "2013-03-31 03:00:00 CEST",
-                   "2013-03-31 03:00:00 CEST", "2013-03-31 03:00:00 CEST",
-                   "2013-03-31 03:00:00 CEST",
-                   tz = tz)
-  expect_equal(time_round(times, "hour"), round)
-
-  ceiling <- ymd_hms("2013-03-31 01:00:00 CET",
-                     "2013-03-31 03:00:00 CEST", "2013-03-31 03:00:00 CEST",
-                     "2013-03-31 03:00:00 CEST", "2013-03-31 03:00:00 CEST",
-                     "2013-03-31 04:00:00 CEST",
-                     tz = tz)
+  ref <- ymd_hms("2013-03-31 01:00:00 CET", tz = "Europe/Amsterdam")
+  times <- ref + c(0, 15*60, 30*60, 45*60, 3600, 3600 + 15*60)
+  floor <- ref + c(0, 0, 0, 0, 3600, 3600)
+  ceiling <- ref + c(0, 3600, 3600, 3600, 3600, 2*3600)
+  round <- ref + c(0, 0, 3600, 3600, 3600, 3600)
 
   expect_equal(time_ceiling(times, "hour"), ceiling)
-
+  expect_equal(time_floor(times, "hour"), floor)
+  expect_equal(time_round(times, "hour"), round)
 
   tz <- "America/Chicago"
-
   x <- ymd_hms(c("2014-03-09 00:00:00", "2014-03-09 00:29:59", "2014-03-09 00:30:00",
                  "2014-03-09 00:59:59", "2014-03-09 01:35:00", "2014-03-09 03:15:00"),
                tz = tz)
@@ -462,7 +450,7 @@ test_that("time rounding with hours works with repeated DST transitions", {
   am1 <- .POSIXct(1414904400, tz = "America/New_York")
   expect_equal(time_floor(am1 + 3600, "hour"), am1 + 3600)
   ## rounding is done in civil time for units > seconds
-  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "hour"), am1) ## EDT (.5h)
+  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "hour"), am1)
   expect_equal(time_ceiling(ctus("2014-11-02 01:35:00"), "hour"), ctus("2014-11-02 02:00:00")) ## EST (1.5h)
   expect_equal(time_ceiling(ctus("2014-11-02 02:15:00"), "hour"), ctus("2014-11-02 03:00:00")) ## EST (45m)
   x <- ctus("2014-11-02 00:30:00")
@@ -514,6 +502,9 @@ test_that("time rounding with minutes works with repeated DST transitions", {
   expect_equal(time_floor(am1 + 3600, "sec"), am1 + 3600)
   expect_equal(time_floor(am1 + 3690, "min"), am1 + 3660)
   expect_equal(time_floor(am1 + 3690, "5min"), am1 + 3600)
+  expect_equal(time_floor(am1 + 3690, "hour"), am1 + 3600)
+  expect_equal(time_floor(am1 + 3690, "hour"), am1 + 3600)
+  expect_equal(time_floor(am1 + 3690, "day"), am1 - 3600)
 
   ## rounding is done in civil time for units > seconds
   x <- .POSIXct(1414909530, tz = "America/New_York") # "2014-11-02 01:25:30 EST"
@@ -528,6 +519,14 @@ test_that("time rounding with minutes works with repeated DST transitions", {
   expect_equal(time_floor(x, "4minute"), ctus("2014-11-02 02:12:00"))
   expect_equal(as.numeric(difftime(time_floor(x, "3600a"), ctus(x), units = "min")), -15)
 
+})
+
+test_that("rounding works on 'strange' DST gaps", {
+  ## Midnight doesn't exist. DST spring forward happens at 2020-03-29 00:00:00
+  ## and they spring forward to hour 1
+  y <- ymd_hms("2020-03-29 01:00:01", tz = "Asia/Beirut")
+  expect_equal(time_floor(y, "day"),
+               ymd_hms("2020-03-29 01:00:00", tz = "Asia/Beirut"))
 })
 
 test_that("time_ceiling, time_round and time_floor behave correctly with NA", {
@@ -579,11 +578,4 @@ test_that("round on week respects week_start", {
   expect_equal(wday(time_ceiling(date, "week", week_start = 5)), 5)
   expect_equal(wday(time_ceiling(date, "week", week_start = 7)), 7)
 
-})
-
-test_that("rounding works on 'strange' DST gaps", {
-  ## Midnight doesn't exist. DST spring forward happens at 2020-03-29 00:00:00
-  ## and they spring forward to hour 1
-  y <- as.POSIXct("2020-03-29 01:00:00", tz = "Asia/Beirut")
-  expect_equal(time_floor(y, "day"), as.POSIXct("2020-03-29 01:00:00", tz = "Asia/Beirut"))
 })

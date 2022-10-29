@@ -74,7 +74,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_time_update
-Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt, const Rcpp::List& updates, const SEXP tz, const std::string roll_month, const std::string roll_dst, const int week_start, const bool exact);
+Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt, const Rcpp::List& updates, const SEXP tz, const std::string roll_month, const Rcpp::CharacterVector roll_dst, const int week_start, const bool exact);
 RcppExport SEXP _timechange_C_time_update(SEXP dtSEXP, SEXP updatesSEXP, SEXP tzSEXP, SEXP roll_monthSEXP, SEXP roll_dstSEXP, SEXP week_startSEXP, SEXP exactSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -83,7 +83,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::List& >::type updates(updatesSEXP);
     Rcpp::traits::input_parameter< const SEXP >::type tz(tzSEXP);
     Rcpp::traits::input_parameter< const std::string >::type roll_month(roll_monthSEXP);
-    Rcpp::traits::input_parameter< const std::string >::type roll_dst(roll_dstSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::CharacterVector >::type roll_dst(roll_dstSEXP);
     Rcpp::traits::input_parameter< const int >::type week_start(week_startSEXP);
     Rcpp::traits::input_parameter< const bool >::type exact(exactSEXP);
     rcpp_result_gen = Rcpp::wrap(C_time_update(dt, updates, tz, roll_month, roll_dst, week_start, exact));
@@ -91,7 +91,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // C_time_add
-Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt, const Rcpp::List& periods, const std::string roll_month, const std::string roll_dst);
+Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt, const Rcpp::List& periods, const std::string roll_month, const Rcpp::CharacterVector roll_dst);
 RcppExport SEXP _timechange_C_time_add(SEXP dtSEXP, SEXP periodsSEXP, SEXP roll_monthSEXP, SEXP roll_dstSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -99,26 +99,26 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type dt(dtSEXP);
     Rcpp::traits::input_parameter< const Rcpp::List& >::type periods(periodsSEXP);
     Rcpp::traits::input_parameter< const std::string >::type roll_month(roll_monthSEXP);
-    Rcpp::traits::input_parameter< const std::string >::type roll_dst(roll_dstSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::CharacterVector >::type roll_dst(roll_dstSEXP);
     rcpp_result_gen = Rcpp::wrap(C_time_add(dt, periods, roll_month, roll_dst));
     return rcpp_result_gen;
 END_RCPP
 }
 // C_force_tz
-Rcpp::newDatetimeVector C_force_tz(const NumericVector dt, const CharacterVector tz, const std::string roll_dst);
+Rcpp::newDatetimeVector C_force_tz(const NumericVector dt, const CharacterVector tz, const CharacterVector roll_dst);
 RcppExport SEXP _timechange_C_force_tz(SEXP dtSEXP, SEXP tzSEXP, SEXP roll_dstSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const NumericVector >::type dt(dtSEXP);
     Rcpp::traits::input_parameter< const CharacterVector >::type tz(tzSEXP);
-    Rcpp::traits::input_parameter< const std::string >::type roll_dst(roll_dstSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector >::type roll_dst(roll_dstSEXP);
     rcpp_result_gen = Rcpp::wrap(C_force_tz(dt, tz, roll_dst));
     return rcpp_result_gen;
 END_RCPP
 }
 // C_force_tzs
-newDatetimeVector C_force_tzs(const NumericVector dt, const CharacterVector tzs, const CharacterVector tz_out, const std::string roll_dst);
+newDatetimeVector C_force_tzs(const NumericVector dt, const CharacterVector tzs, const CharacterVector tz_out, const CharacterVector roll_dst);
 RcppExport SEXP _timechange_C_force_tzs(SEXP dtSEXP, SEXP tzsSEXP, SEXP tz_outSEXP, SEXP roll_dstSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -126,7 +126,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector >::type dt(dtSEXP);
     Rcpp::traits::input_parameter< const CharacterVector >::type tzs(tzsSEXP);
     Rcpp::traits::input_parameter< const CharacterVector >::type tz_out(tz_outSEXP);
-    Rcpp::traits::input_parameter< const std::string >::type roll_dst(roll_dstSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector >::type roll_dst(roll_dstSEXP);
     rcpp_result_gen = Rcpp::wrap(C_force_tzs(dt, tzs, tz_out, roll_dst));
     return rcpp_result_gen;
 END_RCPP

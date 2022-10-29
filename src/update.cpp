@@ -23,12 +23,12 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
                                       const Rcpp::List& updates,
                                       const SEXP tz,
                                       const std::string roll_month,
-                                      const std::string roll_dst,
+                                      const Rcpp::CharacterVector roll_dst,
                                       const int week_start = 1,
                                       const bool exact = false) {
 
-  Roll rmonth = roll_type(roll_month);
-  Roll rdst = roll_type(roll_dst);
+  RollMonth rmonth = parse_month_roll(roll_month);
+  DST rdst(roll_dst);
 
   bool do_year = updates.containsElementNamed("year"),
     do_month = updates.containsElementNamed("month"),
@@ -147,7 +147,7 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
 
       cctz::civil_month cm = cctz::civil_month(y, m);
 
-      if (rmonth == Roll::NAym) {
+      if (rmonth == RollMonth::NAym) {
         // lubridate historical case of returning NA when intermediate month+year result
         // in a invalid date
         if (d != cctz::civil_day(y, m, d).day()) { out[i] = NA_REAL; continue; }
@@ -227,21 +227,21 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
           // year or month.
           if (ncs.day() != d && ncs.month() != cm.month()) {
             switch(rmonth) {
-             case Roll::FULL: break;
-             case Roll::NA:
+             case RollMonth::FULL: break;
+             case RollMonth::NA:
                out[i] = NA_REAL;
                continue;
-             case Roll::NAym: break;
-             case Roll::BOUNDARY: {
+             case RollMonth::NAym: break;
+             case RollMonth::BOUNDARY: {
                cctz::civil_day cd = cctz::civil_day(cctz::civil_month(ncs));
                ncs = cctz::civil_second(cd.year(), cd.month(), cd.day(), 0, 0, 0);
                rem = 0.0;
                break;
              }
-             case Roll::FIRST:
+             case RollMonth::POSTDAY:
                ncs = cctz::civil_second(ncs.year(), ncs.month(), 1, ncs.hour(), ncs.minute(), ncs.second());
                break;
-             case Roll::LAST: {
+             case RollMonth::PREDAY: {
               cctz::civil_day cd = cctz::civil_day(cctz::civil_month(ncs)) - 1;
                ncs = cctz::civil_second(cd.year(), cd.month(), cd.day(), ncs.hour(), ncs.minute(), ncs.second());
                break;
@@ -265,10 +265,10 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
 Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
                                    const Rcpp::List& periods,
                                    const std::string roll_month,
-                                   const std::string roll_dst) {
+                                   const Rcpp::CharacterVector roll_dst) {
 
-  Roll rmonth = roll_type(roll_month);
-  Roll rdst = roll_type(roll_dst);
+  RollMonth rmonth = parse_month_roll(roll_month);
+  DST rdst(roll_dst);
 
   bool do_year = periods.containsElementNamed("years"),
     do_month = periods.containsElementNamed("months"),
@@ -375,21 +375,21 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
       if (cd.day() != td) {
         // month rolling kicks in
         switch(rmonth) {
-         case Roll::FULL: break;
-         case Roll::BOUNDARY:
+         case RollMonth::FULL: break;
+         case RollMonth::PREDAY:
+           cd = cctz::civil_day(cctz::civil_month(cd)) - 1;
+           break;
+         case RollMonth::BOUNDARY:
            cd = cctz::civil_day(cctz::civil_month(cd));
            add_my_hms = false;
            break;
-         case Roll::FIRST:
+         case RollMonth::POSTDAY:
            cd = cctz::civil_day(cctz::civil_month(cd));
            break;
-         case Roll::LAST:
-           cd = cctz::civil_day(cctz::civil_month(cd)) - 1;
-           break;
-         case Roll::NA:
+         case RollMonth::NA:
            out[i] = NA_REAL;
            continue;
-         case Roll::NAym: break;
+         case RollMonth::NAym: break;
         }
       }
       if (do_week) {
@@ -439,11 +439,11 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
 // [[Rcpp::export]]
 Rcpp::newDatetimeVector C_force_tz(const NumericVector dt,
                                    const CharacterVector tz,
-                                   const std::string roll_dst) {
+                                   const CharacterVector roll_dst) {
   // roll: logical, if `true`, and `time` falls into the DST-break, assume the
   // next valid civil time, otherwise return NA
 
-  Roll rdst = roll_type(roll_dst);
+  DST rdst(roll_dst);
 
   if (tz.size() != 1)
     stop("`tz` argument must be a single character string");
@@ -481,11 +481,11 @@ Rcpp::newDatetimeVector C_force_tz(const NumericVector dt,
 newDatetimeVector C_force_tzs(const NumericVector dt,
                               const CharacterVector tzs,
                               const CharacterVector tz_out,
-                              const std::string roll_dst) {
+                              const CharacterVector roll_dst) {
   // roll: logical, if `true`, and `time` falls into the DST-break, assume the
   // next valid civil time, otherwise return NA
 
-  Roll rdst = roll_type(roll_dst);
+  DST rdst(roll_dst);
 
   if (tz_out.size() != 1)
     stop("In 'tzout' argument must be of length 1");

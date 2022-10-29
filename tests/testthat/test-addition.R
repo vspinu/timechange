@@ -15,15 +15,13 @@ test_that("addition handles daylight savings time", {
   y <- ctus("2010-03-15 01:02:03")
   expect_equal(time_add(x, days = 1), y)
 
-  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "skip"), ctus("2010-03-14 03:52:03"))
-  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "first"), ctus("2010-03-14 03:52:03"))
-  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "last"), ctus("2010-03-14 01:52:03"))
+  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "post"), ctus("2010-03-14 03:52:03"))
+  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "pre"), ctus("2010-03-14 01:52:03"))
   expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "boundary"), ctus("2010-03-14 03:00:00"))
   expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "NA"), NAam)
 
-  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "skip"), ctus("2010-03-14 01:12:03"))
-  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "first"), ctus("2010-03-14 03:12:03"))
-  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "last"), ctus("2010-03-14 01:12:03"))
+  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "post"), ctus("2010-03-14 03:12:03"))
+  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "pre"), ctus("2010-03-14 01:12:03"))
   expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary"), ctus("2010-03-14 03:00:00"))
   expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA"), NAam)
   expect_equal(time_subtract(y, days = 1), x)
@@ -157,22 +155,22 @@ test_that("addition and subtraction work with repeated DST", {
   am1 <- .POSIXct(1414904400, tz = "America/New_York")
   am2 <- am1 + 3600*2
 
-  ## last/prev
-  expect_equal(time_subtract(am2, hours = 1), am1 + 3600)
-  expect_equal(time_subtract(am2, hours = 1, minutes = 1), am1 - 60)
-  expect_equal(time_subtract(am2 + 60, hours = 1), am1 + 3660)
-  expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 1), am1 + 3600)
-  expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 2), am1 - 60)
-  expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 1, seconds = 1), am1 - 1)
+  expect_equal(time_subtract(am2, hours = 1, roll_dst = "post"), am1 + 3600)
+  expect_equal(time_subtract(am2, hours = 1, roll_dst = "pre"), am1)
+  expect_equal(time_subtract(am2, hours = 1, roll_dst = c("post", "pre")), am1 + 3600)
+  expect_equal(time_subtract(am2, hours = 1, minutes = 1, roll_dst = "pre"), am1 - 60)
+  expect_equal(time_subtract(am2 + 60, hours = 1, roll_dst = "post"), am1 + 3660)
+  expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 1, roll_dst = "post"), am1 + 3600)
+  expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 2, roll_dst = "pre"), am1 - 60)
+  expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 1, seconds = 1, roll_dst = "pre"), am1 - 1)
 
-  ## first/next
-  expect_equal(time_add(am1, minutes = 2), am1 + 120)
-  expect_equal(time_add(am1, minutes = 60), am2)
-  expect_equal(time_add(am1 + 60, minutes = 1), am1 + 120)
-  expect_equal(time_add(am1 + 60, hours = 1), am2 + 60)
-  expect_equal(time_add(am1 + 60, minutes = 1), am1 + 120)
-  expect_equal(time_add(am1 + 60, minutes = 60), am2 + 60)
-  expect_equal(time_add(am1 + 60, minutes = 120), am2 + 3660)
+  expect_equal(time_add(am1, minutes = 2, roll_dst = "pre"), am1 + 120)
+  expect_equal(time_add(am1, minutes = 60, roll_dst = "pre"), am2)
+  expect_equal(time_add(am1 + 60, minutes = 1, roll_dst = "pre"), am1 + 120)
+  expect_equal(time_add(am1 + 60, hours = 1, roll_dst = "pre"), am2 + 60)
+  expect_equal(time_add(am1 + 60, minutes = 1, roll_dst = "pre"), am1 + 120)
+  expect_equal(time_add(am1 + 60, minutes = 60, roll_dst = "pre"), am2 + 60)
+  expect_equal(time_add(am1 + 60, minutes = 120, roll_dst = "pre"), am2 + 3660)
 
 })
 

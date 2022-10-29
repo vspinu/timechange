@@ -41,16 +41,13 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
                         yday = NULL, day = NULL, mday = NULL, wday = NULL,
                         hour = NULL, minute = NULL, second = NULL,
                         tz = NULL,
-                        roll_month = "last",
+                        roll_month = "preday",
                         roll_dst = "boundary",
                         week_start = getOption("timechange.week_start", 1),
                         exact = FALSE) {
 
   if (length(time) == 0L)
     return(time)
-
-  roll_month <- match.arg(roll_month, .month_roll_types)
-  roll_dst <- match.arg(roll_dst, .dst_roll_types)
 
   if (!is.null(day)) {
     if (!is.null(mday))

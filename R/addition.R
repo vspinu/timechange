@@ -22,6 +22,17 @@
 ##'
 ##' `roll_month` and `roll_dst` can be one of the following:
 ##'
+##' * `boundary` - if rolling over a month boundary occurred due to setting units
+##' smaller than month, the date is adjusted to the beginning of the month (the
+##' boundary). For example, `2000-01-31 01:02:03 + month = 2000-03-01 00:00:00`.
+##'
+##' * `preday` - roll back to the last valid day of the previous month (pre-boundary
+##' day) preserving the H, M, S units. For example, `2000-01-31 01:02:03 + 1 month =
+##' 2000-02-28 01:02:03`. This is the default.
+##'
+##' * `postday` - roll to the first day post-boundary preserving the H, M, S units. For
+##' example, `2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03`.
+##'
 ##' * `full` - full rolling. No adjustment is done to the simple arithmetic operations
 ##' (the gap is skipped as if it's not there). For example, `2000-01-31 01:02:03 + 1
 ##' month + 3 days` is equivalent to `2000-01-01 01:02:03 + 1 month + 31 days + 3 days`
@@ -33,17 +44,6 @@
 ##' * `NAym` - if intermediate date resulting from first adding years and months ends in
 ##' a non-existing date (e.g. Feb 31) produce NA. This is how period addition in
 ##' lubridate works for historical reasons.
-##'
-##' * `boundary` - if rolling over a month boundary occurred due to setting units
-##' smaller than month, the date is adjusted to the beginning of the month. For example,
-##' `2000-01-31 01:02:03 + month = 2000-03-01 00:00:00`.
-##'
-##' * `first_day` - is like `boundary` but preserves the smaller units. For example,
-##' `2000-01-31 01:02:03 + 1 month = 2000-03-01 01:02:03`.
-##'
-##' * `last_day` - is like `first` but instead of rolling forward to the first day of
-##' the month, it rolls back to the last valid day of the previous month. For example,
-##' `2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03`. This is the default.
 ##'
 ##' @param time date-time object
 ##' @param periods string of units to add/subtract (not yet implemented) or a
@@ -61,61 +61,56 @@
 ##'
 ##' ## Month gap
 ##' x <- as.POSIXct("2000-01-31 01:02:03", tz = "America/Chicago")
-##' time_add(x, months = 1, roll_month = "first_day")
-##' time_add(x, months = 1, roll_month = "last_day")
+##' time_add(x, months = 1, roll_month = "postday")
+##' time_add(x, months = 1, roll_month = "preday")
 ##' time_add(x, months = 1, roll_month = "boundary")
 ##' time_add(x, months = 1, roll_month = "full")
 ##' time_add(x, months = 1, roll_month = "NA")
-##' time_add(x, months = 1, days = 3,  roll_month = "first_day")
-##' time_add(x, months = 1, days = 3,  roll_month = "last_day")
+##' time_add(x, months = 1, days = 3,  roll_month = "postday")
+##' time_add(x, months = 1, days = 3,  roll_month = "preday")
 ##' time_add(x, months = 1, days = 3,  roll_month = "boundary")
 ##' time_add(x, months = 1, days = 3,  roll_month = "full")
 ##' time_add(x, months = 1, days = 3,  roll_month = "NA")
 ##'
 ##' ## DST gap
 ##' x <- as.POSIXlt("2010-03-14 01:02:03", tz = "America/Chicago")
-##' time_add(x, hours = 1, minutes = 50, roll_dst = "first_day")
-##' time_add(x, hours = 1, minutes = 50, roll_dst = "last_day")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "pre")
 ##' time_add(x, hours = 1, minutes = 50, roll_dst = "boundary")
-##' time_add(x, hours = 1, minutes = 50, roll_dst = "full")
-##' time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
+##' time_add(x, hours = 1, minutes = 50, roll_dst = "post")
+##' ##' time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
 ##'
 ##' # SUBTRACTION
 ##'
 ##' ## Month gap
 ##' x <- as.POSIXct("2000-03-31 01:02:03", tz = "America/Chicago")
-##' time_subtract(x, months = 1, roll_month = "first_day")
-##' time_subtract(x, months = 1, roll_month = "last_day")
+##' time_subtract(x, months = 1, roll_month = "postday")
+##' time_subtract(x, months = 1, roll_month = "preday")
 ##' time_subtract(x, months = 1, roll_month = "boundary")
 ##' time_subtract(x, months = 1, roll_month = "full")
 ##' time_subtract(x, months = 1, roll_month = "NA")
-##' time_subtract(x, months = 1, days = 0,  roll_month = "first_day")
-##' time_subtract(x, months = 1, days = 3,  roll_month = "first_day")
-##' time_subtract(x, months = 1, days = 0,  roll_month = "last_day")
-##' time_subtract(x, months = 1, days = 3,  roll_month = "last_day")
+##' time_subtract(x, months = 1, days = 0,  roll_month = "postday")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "postday")
+##' time_subtract(x, months = 1, days = 0,  roll_month = "preday")
+##' time_subtract(x, months = 1, days = 3,  roll_month = "preday")
 ##' time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
 ##' time_subtract(x, months = 1, days = 3,  roll_month = "full")
 ##' time_subtract(x, months = 1, days = 3,  roll_month = "NA")
 ##'
 ##' ## DST gap
 ##' y <- as.POSIXlt("2010-03-15 01:02:03", tz = "America/Chicago")
-##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "first")
-##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "last")
+##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "pre")
 ##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary")
-##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "full")
+##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "post")
 ##' time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA")
 ##' @export
 time_add <- function(time, periods = NULL,
                      years = NULL, months = NULL, weeks = NULL, days = NULL,
                      hours = NULL, minutes = NULL, seconds = NULL,
-                     roll_month = "last_day",
-                     roll_dst = "first") {
+                     roll_month = "preday",
+                     roll_dst = c("pre", "post")) {
 
   if (length(time) == 0L)
     return(time)
-
-  roll_month <- match.arg(roll_month[[1]], .month_roll_types)
-  roll_dst <- match.arg(roll_dst[[1]], .dst_roll_types)
 
   if (is.null(periods)) {
     periods <- list()
@@ -157,17 +152,10 @@ time_add <- function(time, periods = NULL,
 time_subtract <- function(time, periods = NULL,
                           years = NULL, months = NULL, weeks = NULL, days = NULL,
                           hours = NULL, minutes = NULL, seconds = NULL,
-                          roll_month = "last_day",
-                          roll_dst = "last") {
+                          roll_month = "preday",
+                          roll_dst = c("post", "pre")) {
   if (length(time) == 0L)
     return(time)
-
-  roll_month <- match.arg(roll_month, .month_roll_types)
-  roll_dst <- match.arg(roll_dst, .dst_roll_types)
-
-  ## fixme: no longer needed?
-  if (roll_dst %in% c("skip", "full"))
-    roll_dst <- "last"
 
   if (is.null(periods)) {
     periods <- list()

@@ -18,28 +18,25 @@ int_fast64_t floor_to_int64(double x) {
 }
 
 double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
-                             const Roll& roll_dst) noexcept {
+                             const DST& dst) noexcept {
   time_point tp;
   if (cl.kind == cctz::time_zone::civil_lookup::SKIPPED) {
-    switch (roll_dst) {
-     case Roll::BOUNDARY: tp = cl.trans; break;
-     case Roll::FULL:
-     case Roll::NAym:
-     case Roll::FIRST: tp = cl.pre; break;
-     case Roll::LAST: tp = cl.post; break;
-     case Roll::NA: return NA_REAL;
+    // meaning of pre/post in CCTZ is not the same as here. It's inverted.
+    switch (dst.skipped) {
+     case RollDST::PRE: tp = cl.post; break;
+     case RollDST::BOUNDARY: tp = cl.trans; break;
+     case RollDST::POST: tp = cl.pre; break;
+     case RollDST::NA: return NA_REAL;
     }
   } else if (cl.kind == cctz::time_zone::civil_lookup::REPEATED) {
     // The mnemonics in this case should be interpreted starting from a moment
-    // in time just before the ambiguous DST. Thus "first" means "pre" hour. PREV
+    // in time just before the ambiguous DST. Thus "first" means "pre" hour. LAST
     // means "post" hour.
-    switch (roll_dst) {
-     case Roll::BOUNDARY: tp = cl.trans; break;
-     case Roll::FULL:
-     case Roll::NAym:
-     case Roll::LAST: tp = cl.post; break;
-     case Roll::FIRST: tp = cl.pre; break;
-     case Roll::NA: return NA_REAL;
+    switch (dst.repeated) {
+     case RollDST::PRE: tp = cl.pre; break;
+     case RollDST::BOUNDARY: tp = cl.trans; break;
+     case RollDST::POST: tp = cl.post; break;
+     case RollDST::NA: return NA_REAL;
     }
   } else {
     tp = cl.pre;
@@ -53,22 +50,28 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
                              const cctz::time_zone& tz_old,              // original time zone
                              const time_point& tp_old,                   // original time point
                              const cctz::civil_second& cs_old,           // original time in secs
-                             const Roll& roll_dst,
-                             const double remainder) noexcept {
+                             const DST& dst,
+                             double remainder) noexcept {
 
   if (cl_new.kind == cctz::time_zone::civil_lookup::REPEATED) {
-    // REPEATED
+    if (dst.repeated == RollDST::BOUNDARY)
+      remainder = 0.0;
     // match pre or post time of original time
     time_point tp_new;
     const cctz::time_zone::civil_lookup cl_old = tz_old.lookup(cs_old);
-    if (cl_old.kind == cctz::time_zone::civil_lookup::REPEATED &&
-        tp_old >= cl_old.trans) {
-      tp_new = cl_new.post;
-    } else {
-      tp_new = cl_new.pre;
+    if (cl_old.kind == cctz::time_zone::civil_lookup::REPEATED) {
+      if (tp_old >= cl_old.trans) {
+        tp_new = cl_new.post;
+      } else {
+        tp_new = cl_new.pre;
+      }
+      return tp_new.time_since_epoch().count() + remainder;
     }
-    return tp_new.time_since_epoch().count() + remainder;
-  } else {
-    return civil_lookup_to_posix(cl_new, roll_dst) + remainder;
+  } else if (cl_new.kind == cctz::time_zone::civil_lookup::SKIPPED) {
+    if (dst.repeated == RollDST::BOUNDARY)
+      remainder = 0.0;
   }
+
+  return civil_lookup_to_posix(cl_new, dst) + remainder;
+
 }

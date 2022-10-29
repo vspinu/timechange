@@ -373,6 +373,30 @@ test_that("update returns NA for date-times in the spring dst gap", {
   expect_true(is.na(time_update(poslt, tz = "America/New_York", roll_dst = "NA")))
 })
 
+test_that("time_update roll_dst specs  work correctly", {
+  ## DST repeat 2022-10-29 02:00:00 CEST -- 2022-10-29 03:00:00 CET"
+  repref <- ymd_hms("2022-10-30 01:00:00", tz = "Europe/Amsterdam")
+  rep <- ymd_hms("2022-10-29 00:00:00", tz = "Europe/Amsterdam")
+
+  expect_equal(time_update(rep, day = 30, hour = 2, minute = 3, roll_dst = "pre"),
+               gapref + 3600 + 3*60)
+  expect_equal(time_update(rep, day = 30, hour = 2, minute = 3, roll_dst = "boundary"),
+               gapref + 2*3600)
+  expect_equal(time_update(rep, day = 30, hour = 2, minute = 3, roll_dst = "post"),
+               gapref + 2*3600 + 3*60)
+  expect_equal(time_update(rep, day = 30, hour = 2, second = 3.35, roll_dst = "pre"),
+               gapref + 3600 + 3.35)
+  expect_equal(time_update(rep, day = 30, hour = 2, second = 3.35, roll_dst = "boundary"),
+               gapref + 2*3600)
+  expect_equal(time_update(rep, day = 30, hour = 2, second = 3.35, roll_dst = "post"),
+               gapref + 2*3600 + 3.35)
+
+  ## DST gap    2022-03-27 01:00:00 CET  -- 2022-03-27 02:00:00 CEST
+  gapref <- ymd_hms("2022-03-27 00:00:00", tz = "Europe/Amsterdam")
+  gap <- ymd_hms("2022-03-26 00:00:00", tz = "Europe/Amsterdam")
+
+})
+
 test_that("update with roll_dst = 'boundary' works in dst gap", {
   poslt <- ltus("2010-03-14 01:59:59")
   boundary <- ltus("2010-03-14 03:00:00")
@@ -394,37 +418,37 @@ test_that("update with roll_dst = 'boundary' works in dst gap", {
 test_that("update with roll_dst = 'next' works in dst gap", {
   poslt <- ltus("2010-03-14 01:59:59")
   boundary <- ltus("2010-03-14 03:00:00")
-  expect_equal(time_update(poslt, second = 65, roll_dst = "first"), boundary + 5)
-  expect_equal(time_update(poslt, minute = 65, roll_dst = "first"), boundary + 5 * 60 + 59)
-  expect_equal(time_update(poslt, hour = 2, roll_dst = "first"), boundary +  59*60 + 59)
+  expect_equal(time_update(poslt, second = 65, roll_dst = "post"), boundary + 5)
+  expect_equal(time_update(poslt, minute = 65, roll_dst = "post"), boundary + 5 * 60 + 59)
+  expect_equal(time_update(poslt, hour = 2, roll_dst = "post"), boundary +  59*60 + 59)
   poslt <- ltus("2010-03-13 02:59:59")
-  expect_equal(time_update(poslt, mday = 14, roll_dst = "first"), boundary + 59*60 + 59)
-  expect_equal(time_update(poslt, wday = 7, roll_dst = "first"), boundary + 59*60 + 59)
-  expect_equal(time_update(poslt, yday = 73, roll_dst = "first"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, mday = 14, roll_dst = "post"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, wday = 7, roll_dst = "post"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, yday = 73, roll_dst = "post"), boundary + 59*60 + 59)
   poslt <- ltus("2010-02-14 02:59:59")
-  expect_equal(time_update(poslt, month = 3, roll_dst = "first"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, month = 3, roll_dst = "post"), boundary + 59*60 + 59)
   poslt <- ltus("2009-03-14 02:59:59")
-  expect_equal(time_update(poslt, year = 2010, roll_dst = "first"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, year = 2010, roll_dst = "post"), boundary + 59*60 + 59)
   poslt <- ltutc("2010-03-14 02:59:59")
-  expect_equal(time_update(poslt, tz = "America/New_York", roll_dst = "first"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, tz = "America/New_York", roll_dst = "post"), boundary + 59*60 + 59)
 })
 
 test_that("update with roll_dst = 'prev' works in dst gap", {
   poslt <- ltus("2010-03-14 01:59:59")
   boundary <- ltus("2010-03-14 01:00:00")
-  expect_equal(time_update(poslt, second = 65, roll_dst = "last"), boundary + 5)
-  expect_equal(time_update(poslt, minute = 65, roll_dst = "last"), boundary + 5 * 60 + 59)
-  expect_equal(time_update(poslt, hour = 2, roll_dst = "last"), boundary +  59*60 + 59)
+  expect_equal(time_update(poslt, second = 65, roll_dst = "pre"), boundary + 5)
+  expect_equal(time_update(poslt, minute = 65, roll_dst = "pre"), boundary + 5 * 60 + 59)
+  expect_equal(time_update(poslt, hour = 2, roll_dst = "pre"), boundary +  59*60 + 59)
   poslt <- ltus("2010-03-13 02:59:59")
-  expect_equal(time_update(poslt, mday = 14, roll_dst = "last"), boundary + 59*60 + 59)
-  expect_equal(time_update(poslt, wday = 7, roll_dst = "last"), boundary + 59*60 + 59)
-  expect_equal(time_update(poslt, yday = 73, roll_dst = "last"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, mday = 14, roll_dst = "pre"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, wday = 7, roll_dst = "pre"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, yday = 73, roll_dst = "pre"), boundary + 59*60 + 59)
   poslt <- ltus("2010-02-14 02:59:59")
-  expect_equal(time_update(poslt, month = 3, roll_dst = "last"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, month = 3, roll_dst = "pre"), boundary + 59*60 + 59)
   poslt <- ltus("2009-03-14 02:59:59")
-  expect_equal(time_update(poslt, year = 2010, roll_dst = "last"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, year = 2010, roll_dst = "pre"), boundary + 59*60 + 59)
   poslt <- ltutc("2010-03-14 02:59:59")
-  expect_equal(time_update(poslt, tz = "America/New_York", roll_dst = "last"), boundary + 59*60 + 59)
+  expect_equal(time_update(poslt, tz = "America/New_York", roll_dst = "pre"), boundary + 59*60 + 59)
 })
 
 test_that("update handles vectors of dates", {
