@@ -24,6 +24,7 @@
 #' time_force_tz(x, "UTC")
 #' time_force_tz(x, "Europe/Amsterdam")
 #'
+#'
 #' ## DST skip:
 #'
 #' y <- as.POSIXct("2010-03-14 02:05:05", tz = "UTC")
@@ -32,8 +33,10 @@
 #' time_force_tz(y, "America/New_York", roll = "pre")
 #' time_force_tz(y, "America/New_York", roll = "NA")
 #'
+#'
 #' ## DST skipped and repeated
-#' y <- ymd_hms("2010-03-14 02:05:05 UTC", "2014-11-02 01:35:00", tz = "UTC")
+#'
+#' y <- as.POSIXct(c("2010-03-14 02:05:05 UTC", "2014-11-02 01:35:00"), tz = "UTC")
 #' time_force_tz(y, "America/New_York", roll_dst = c("NA", "pre"))
 #' time_force_tz(y, "America/New_York", roll_dst = c("boundary", "post"))
 #'
@@ -47,7 +50,6 @@
 #' time_force_tz(x, tz = c("America/New_York", "Europe/Amsterdam"))
 #'
 #' ## Local clock:
-#'
 #' x <- as.POSIXct(c("2009-08-07 01:02:03", "2009-08-07 10:20:30"), tz = "UTC")
 #' time_clock_at_tz(x, units = "secs")
 #' time_clock_at_tz(x, units = "hours")

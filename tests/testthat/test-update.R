@@ -376,20 +376,20 @@ test_that("update returns NA for date-times in the spring dst gap", {
 test_that("time_update roll_dst specs  work correctly", {
   ## DST repeat 2022-10-29 02:00:00 CEST -- 2022-10-29 03:00:00 CET"
   repref <- ymd_hms("2022-10-30 01:00:00", tz = "Europe/Amsterdam")
-  rep <- ymd_hms("2022-10-29 00:00:00", tz = "Europe/Amsterdam")
+  rep <- ymd_hms("2022-10-29 00:01:02", tz = "Europe/Amsterdam")
 
   expect_equal(time_update(rep, day = 30, hour = 2, minute = 3, roll_dst = "pre"),
-               repref + 3600 + 3*60)
+               repref + 3600 + 3*60 + 2)
   expect_equal(time_update(rep, day = 30, hour = 2, minute = 3, roll_dst = "boundary"),
                repref + 2*3600)
   expect_equal(time_update(rep, day = 30, hour = 2, minute = 3, roll_dst = "post"),
-               repref + 2*3600 + 3*60)
+               repref + 2*3600 + 3*60 + 2)
   expect_equal(time_update(rep, day = 30, hour = 2, second = 3.35, roll_dst = "pre"),
-               repref + 3600 + 3.35)
+               repref + 3600 + 60 + 3.35)
   expect_equal(time_update(rep, day = 30, hour = 2, second = 3.35, roll_dst = "boundary"),
                repref + 2*3600)
   expect_equal(time_update(rep, day = 30, hour = 2, second = 3.35, roll_dst = "post"),
-               repref + 2*3600 + 3.35)
+               repref + 2*3600 + 60 + 3.35)
 
   ## DST gap    2022-03-27 01:00:00 CET  -- 2022-03-27 02:00:00 CEST
   gapref <- ymd_hms("2022-03-27 00:00:00", tz = "Europe/Amsterdam")
