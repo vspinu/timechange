@@ -1,3 +1,12 @@
+Version 0.1.0
+=============
+
+## New Features:
+
+ * Refactor `roll_month` and `roll_dst` parameterisation
+   + more intuitive names
+   + full control over the behavior of repeated and skipped DST intervals
+ * `time_update()` gains new argument `exact = FALSE` in order to enforce very strict updating rules
 
 Version 0.0.2
 =============
