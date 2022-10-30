@@ -29,9 +29,6 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
      case RollDST::NA: return NA_REAL;
     }
   } else if (cl.kind == cctz::time_zone::civil_lookup::REPEATED) {
-    // The mnemonics in this case should be interpreted starting from a moment
-    // in time just before the ambiguous DST. Thus "first" means "pre" hour. LAST
-    // means "post" hour.
     switch (dst.repeated) {
      case RollDST::PRE: tp = cl.pre; break;
      case RollDST::BOUNDARY: tp = cl.trans; break;
