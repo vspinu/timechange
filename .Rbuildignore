@@ -21,3 +21,5 @@
 ^\.github$
 ^CRAN-RELEASE$
 cran-comments.md
+^CRAN-SUBMISSION$
+^cran-comments\.md$
