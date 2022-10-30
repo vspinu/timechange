@@ -12,7 +12,7 @@
 #'   rolling or unit-recycling is allowed and `NA` is produced whenever the units of the
 #'   end date-time don't match the provided units. This can occur when an end date falls
 #'   into a gap (e.g. DST or Feb.29) or when large components (e.g. `hour = 25`) are
-#'   supplied and result in crossing boundaries of higher units. When `roll = FALSE`,
+#'   supplied and result in crossing boundaries of higher units. When `exact = TRUE`,
 #'   `roll_month` and `roll_dst` arguments are ignored.
 #' @return A date-time with the requested elements updated.  Retain its original class
 #'   unless the original class is `Date` and at least one of the `hour`, `minute`,
@@ -34,6 +34,7 @@
 #' time_update(time, month = 2, mday = 31, exact = TRUE)
 #' time_update(time, month = 2, mday = 31, exact = FALSE)
 #'
+#' ## DST skipped
 #' time <- as.POSIXct("2015-02-03 01:02:03", tz = "America/New_York")
 #' time_update(time, year = 2016, yday = 10)
 #' time_update(time, year = 2016, yday = 10, tz = "Europe/Amsterdam")
