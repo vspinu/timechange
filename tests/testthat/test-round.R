@@ -422,7 +422,6 @@ test_that("time_round behaves correctly on 60th second", {
 
 test_that("time_round and time_ceiling skip day time gap", {
 
-  ##  (#240)
   tz <- "Europe/Amsterdam"
   ref <- ymd_hms("2013-03-31 01:00:00 CET", tz = "Europe/Amsterdam")
   times <- ref + c(0, 15*60, 30*60, 45*60, 3600, 3600 + 15*60)

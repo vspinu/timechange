@@ -34,7 +34,24 @@ be converted to integer.}
 
 \item{tz}{time zone component (a singleton character vector)}
 
-\item{roll_month, roll_dst}{See \code{\link[=time_add]{time_add()}}.}
+\item{roll_month}{controls how addition of months and years behaves when standard
+arithmetic rules exceed limits of the resulting date's month. Possible values are
+"preday", "boundary", "postday", "full" and "NA". See "Details" or
+\verb{[(timechange::time_add())} for further details.}
+
+\item{roll_dst}{is a string vector of length one or two. When two values are
+supplied they specify how to roll date-times when they fall into "skipped" and
+"repeated" DST transitions respectively. Singleton strings is replicated to the
+length of two. Possible values are:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{* `pre` - Use the time before the transition boundary.
+* `boundary` - Use the time exactly at the boundary transition.
+* `post` - Use the time after the boundary transition.
+* `NA` - Produce NAs when the resulting time falls inside the problematic interval.
+}\if{html}{\out{</div>}}
+
+For example `roll_dst = c("pre", "NA") indicates that for repeated intervals
+return the time in the earlier interval and for skipped intervals return NA.}
 
 \item{week_start}{first day of the week (default is 1, Monday). Set
 \code{timechange.week_start} option to change this globally.}
@@ -71,4 +88,7 @@ time <- as.POSIXct("2015-02-03 01:02:03", tz = "America/New_York")
 time_update(time, year = 2016, yday = 10)
 time_update(time, year = 2016, yday = 10, tz = "Europe/Amsterdam")
 time_update(time, second = 30,  tz = "America/New_York")
+}
+\seealso{
+\verb{[time_add()]}
 }

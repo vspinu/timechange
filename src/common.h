@@ -50,21 +50,21 @@ inline RollDST parse_dst_roll(const std::string& roll) {
 }
 
 struct DST {
-  RollDST repeated;
   RollDST skipped;
-  DST(RollDST repeated, RollDST skipped): repeated(repeated), skipped(skipped) {}
-  DST(std::string repeated, string skipped):
-    repeated(parse_dst_roll(repeated)), skipped(parse_dst_roll(skipped)) {}
+  RollDST repeated;
+  DST(RollDST skipped, RollDST repeated): skipped(skipped), repeated(repeated) {}
+  DST(std::string skipped, std::string repeated):
+    skipped(parse_dst_roll(skipped)), repeated(parse_dst_roll(repeated)) {}
   DST(const Rcpp::CharacterVector roll_dst) {
     if (roll_dst.size() == 0 || roll_dst.size() > 2)
       stop("roll_dst must be a character vector of length 1 or 2");
     std::string dst_repeated(roll_dst[0]);
-    repeated = parse_dst_roll(dst_repeated);
+    skipped = parse_dst_roll(dst_repeated);
     if (roll_dst.size() > 1) {
       std::string dst_skipped(roll_dst[1]);
-      skipped = parse_dst_roll(dst_skipped);
+      repeated = parse_dst_roll(dst_skipped);
     } else {
-      skipped = repeated;
+      repeated = skipped;
     }
   }
 };

@@ -1,13 +1,11 @@
 #' Update components of a date-time object
 #'
-#' @name time_update
 #' @param time a date-time object
 #' @param updates a named list of components
 #' @param year,month,yday,wday,mday,day,hour,minute,second components of the date-time
 #'   to be updated. `day` is equivalent to `mday`. All components except `second` will
 #'   be converted to integer.
 #' @param tz time zone component (a singleton character vector)
-#' @param roll_month,roll_dst See [time_add()].
 #' @param week_start first day of the week (default is 1, Monday). Set
 #'   `timechange.week_start` option to change this globally.
 #' @param exact logical (TRUE), whether the update should be exact. If set to `FALSE` no
@@ -19,6 +17,8 @@
 #' @return A date-time with the requested elements updated.  Retain its original class
 #'   unless the original class is `Date` and at least one of the `hour`, `minute`,
 #'   `second` or `tz` is supplied, in which case a `POSIXct` object is returned.
+#' @inheritParams time_add
+#' @seealso `[time_add()]`
 #' @examples
 #' date <- as.Date("2009-02-10")
 #' time_update(date, year = 2010, month = 1, mday = 1)

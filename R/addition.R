@@ -4,10 +4,31 @@
 ##' "clock time" between two civil times. They are measured in common civil time
 ##' units: years, months, days, hours, minutes, and seconds.
 ##'
-##' @details Arithmetic operations with multiple period units (years, months
-##'   etc) are applied in decreasing size order, from year to second. Thus
-##'   `time_add(x, months = 1, days = 3)` first adds 1 month to `x`, then ads to
-##'   the resulting date 3 days.
+##' @param time date-time object
+##' @param periods string of units to add/subtract (not yet implemented) or a named list
+##'   of the form `list(years = 1, months = 2, ...)`.
+##' @param years,months,weeks,days,hours,minutes,seconds Units to be added to
+##'   `time`. Each unit except for seconds must be expressed as integer values.
+##' @param roll_month controls how addition of months and years behaves when standard
+##'   arithmetic rules exceed limits of the resulting date's month. Possible values are
+##'   "preday", "boundary", "postday", "full" and "NA". See "Details" or
+##'   `[(timechange::time_add())` for further details.
+##' @param roll_dst is a string vector of length one or two. When two values are
+##'   supplied they specify how to roll date-times when they fall into "skipped" and
+##'   "repeated" DST transitions respectively. Singleton strings is replicated to the
+##'   length of two. Possible values are:
+##'
+##'     * `pre` - Use the time before the transition boundary.
+##'     * `boundary` - Use the time exactly at the boundary transition.
+##'     * `post` - Use the time after the boundary transition.
+##'     * `NA` - Produce NAs when the resulting time falls inside the problematic interval.
+##'
+##'   For example `roll_dst = c("pre", "NA") indicates that for repeated intervals
+##'   return the time in the earlier interval and for skipped intervals return NA.
+##'
+##' @details Arithmetic operations with multiple period units (years, months etc) are
+##'   applied in decreasing size order, from year to second. Thus `time_add(x, months =
+##'   1, days = 3)` first adds 1 month to `x`, then ads to the resulting date 3 days.
 ##'
 ##' Generally period arithmetic is undefined due to the irregular nature of
 ##' civil time and complexities with DST transitions. \pkg{`timechange`} allows
@@ -20,7 +41,7 @@
 ##' non-existent time of `2000-02-31 01:02:03`. Here the `roll_month` adjustment
 ##' kicks in. After the adjustment, the remaining 3 days are added.
 ##'
-##' `roll_month` and `roll_dst` can be one of the following:
+##' `roll_month` can be one of the following:
 ##'
 ##' * `boundary` - if rolling over a month boundary occurred due to setting units
 ##' smaller than month, the date is adjusted to the beginning of the month (the
@@ -45,16 +66,6 @@
 ##' a non-existing date (e.g. Feb 31) produce NA. This is how period addition in
 ##' lubridate works for historical reasons.
 ##'
-##' @param time date-time object
-##' @param periods string of units to add/subtract (not yet implemented) or a
-##'   named list of the form `list(years = 1, months = 2, ...)`.
-##' @param years,months,weeks,days,hours,minutes,seconds Units to be added to
-##'   `time`. Each unit except for seconds must be expressed as integer values.
-##' @param roll_month controls how addition of months and years behaves when
-##'   standard arithmetic rules exceed limits of the resulting date's month. See
-##'   "Details" for the description of possible values.
-##' @param roll_dst controls how to adjust the updated time if it falls within a
-##'   DST transition intervals. See Details.
 ##' @examples
 ##'
 ##' # Addition
@@ -107,7 +118,7 @@ time_add <- function(time, periods = NULL,
                      years = NULL, months = NULL, weeks = NULL, days = NULL,
                      hours = NULL, minutes = NULL, seconds = NULL,
                      roll_month = "preday",
-                     roll_dst = c("pre", "post")) {
+                     roll_dst = c("post", "pre")) {
 
   if (length(time) == 0L)
     return(time)
@@ -153,7 +164,7 @@ time_subtract <- function(time, periods = NULL,
                           years = NULL, months = NULL, weeks = NULL, days = NULL,
                           hours = NULL, minutes = NULL, seconds = NULL,
                           roll_month = "preday",
-                          roll_dst = c("post", "pre")) {
+                          roll_dst = c("pre", "post")) {
   if (length(time) == 0L)
     return(time)
 

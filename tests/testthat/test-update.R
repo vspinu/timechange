@@ -379,21 +379,22 @@ test_that("time_update roll_dst specs  work correctly", {
   rep <- ymd_hms("2022-10-29 00:00:00", tz = "Europe/Amsterdam")
 
   expect_equal(time_update(rep, day = 30, hour = 2, minute = 3, roll_dst = "pre"),
-               gapref + 3600 + 3*60)
+               repref + 3600 + 3*60)
   expect_equal(time_update(rep, day = 30, hour = 2, minute = 3, roll_dst = "boundary"),
-               gapref + 2*3600)
+               repref + 2*3600)
   expect_equal(time_update(rep, day = 30, hour = 2, minute = 3, roll_dst = "post"),
-               gapref + 2*3600 + 3*60)
+               repref + 2*3600 + 3*60)
   expect_equal(time_update(rep, day = 30, hour = 2, second = 3.35, roll_dst = "pre"),
-               gapref + 3600 + 3.35)
+               repref + 3600 + 3.35)
   expect_equal(time_update(rep, day = 30, hour = 2, second = 3.35, roll_dst = "boundary"),
-               gapref + 2*3600)
+               repref + 2*3600)
   expect_equal(time_update(rep, day = 30, hour = 2, second = 3.35, roll_dst = "post"),
-               gapref + 2*3600 + 3.35)
+               repref + 2*3600 + 3.35)
 
   ## DST gap    2022-03-27 01:00:00 CET  -- 2022-03-27 02:00:00 CEST
   gapref <- ymd_hms("2022-03-27 00:00:00", tz = "Europe/Amsterdam")
   gap <- ymd_hms("2022-03-26 00:00:00", tz = "Europe/Amsterdam")
+  ### FIXME: finish these tests
 
 })
 

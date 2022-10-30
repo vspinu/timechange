@@ -42,7 +42,7 @@ inline double ct2posix4floor(const T& ct,
                              const cctz::civil_second& cs_orig) noexcept {
   cctz::time_zone::civil_lookup cl = tz.lookup(ct);
   return civil_lookup_to_posix(
-    cl, tz, tp_orig, cs_orig, DST(RollDST::POST, RollDST::BOUNDARY), 0.0);
+    cl, tz, tp_orig, cs_orig, DST(RollDST::BOUNDARY, RollDST::POST), 0.0);
 }
 
 // used for time_ceiling exclusively
@@ -59,7 +59,7 @@ inline double ct2posix4ceiling(const T& ct,
   } else {
     cctz::time_zone::civil_lookup cl = tz.lookup(ct);
     return civil_lookup_to_posix(
-      cl, tz, tp_orig, cs_orig, DST(RollDST::PRE, RollDST::BOUNDARY), 0.0);
+      cl, tz, tp_orig, cs_orig, DST(RollDST::BOUNDARY, RollDST::PRE), 0.0);
   }
 }
 

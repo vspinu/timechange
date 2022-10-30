@@ -157,7 +157,7 @@ test_that("addition and subtraction work with repeated DST", {
 
   expect_equal(time_subtract(am2, hours = 1, roll_dst = "post"), am1 + 3600)
   expect_equal(time_subtract(am2, hours = 1, roll_dst = "pre"), am1)
-  expect_equal(time_subtract(am2, hours = 1, roll_dst = c("post", "pre")), am1 + 3600)
+  expect_equal(time_subtract(am2, hours = 1, roll_dst = c("pre", "post")), am1 + 3600)
   expect_equal(time_subtract(am2, hours = 1, minutes = 1, roll_dst = "pre"), am1 - 60)
   expect_equal(time_subtract(am2 + 60, hours = 1, roll_dst = "post"), am1 + 3660)
   expect_equal(time_subtract(am2 + 60, hours = 1, minutes = 1, roll_dst = "post"), am1 + 3600)

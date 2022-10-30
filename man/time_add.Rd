@@ -16,7 +16,7 @@ time_add(
   minutes = NULL,
   seconds = NULL,
   roll_month = "preday",
-  roll_dst = c("pre", "post")
+  roll_dst = c("post", "pre")
 )
 
 time_subtract(
@@ -30,24 +30,36 @@ time_subtract(
   minutes = NULL,
   seconds = NULL,
   roll_month = "preday",
-  roll_dst = c("post", "pre")
+  roll_dst = c("pre", "post")
 )
 }
 \arguments{
 \item{time}{date-time object}
 
-\item{periods}{string of units to add/subtract (not yet implemented) or a
-named list of the form \code{list(years = 1, months = 2, ...)}.}
+\item{periods}{string of units to add/subtract (not yet implemented) or a named list
+of the form \code{list(years = 1, months = 2, ...)}.}
 
 \item{years, months, weeks, days, hours, minutes, seconds}{Units to be added to
 \code{time}. Each unit except for seconds must be expressed as integer values.}
 
-\item{roll_month}{controls how addition of months and years behaves when
-standard arithmetic rules exceed limits of the resulting date's month. See
-"Details" for the description of possible values.}
+\item{roll_month}{controls how addition of months and years behaves when standard
+arithmetic rules exceed limits of the resulting date's month. Possible values are
+"preday", "boundary", "postday", "full" and "NA". See "Details" or
+\verb{[(timechange::time_add())} for further details.}
 
-\item{roll_dst}{controls how to adjust the updated time if it falls within a
-DST transition intervals. See Details.}
+\item{roll_dst}{is a string vector of length one or two. When two values are
+supplied they specify how to roll date-times when they fall into "skipped" and
+"repeated" DST transitions respectively. Singleton strings is replicated to the
+length of two. Possible values are:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{* `pre` - Use the time before the transition boundary.
+* `boundary` - Use the time exactly at the boundary transition.
+* `post` - Use the time after the boundary transition.
+* `NA` - Produce NAs when the resulting time falls inside the problematic interval.
+}\if{html}{\out{</div>}}
+
+For example `roll_dst = c("pre", "NA") indicates that for repeated intervals
+return the time in the earlier interval and for skipped intervals return NA.}
 }
 \description{
 Add periods to date-time objects. Periods track the change in the
@@ -55,10 +67,8 @@ Add periods to date-time objects. Periods track the change in the
 units: years, months, days, hours, minutes, and seconds.
 }
 \details{
-Arithmetic operations with multiple period units (years, months
-etc) are applied in decreasing size order, from year to second. Thus
-\code{time_add(x, months = 1, days = 3)} first adds 1 month to \code{x}, then ads to
-the resulting date 3 days.
+Arithmetic operations with multiple period units (years, months etc) are
+applied in decreasing size order, from year to second. Thus \code{time_add(x, months = 1, days = 3)} first adds 1 month to \code{x}, then ads to the resulting date 3 days.
 
 Generally period arithmetic is undefined due to the irregular nature of
 civil time and complexities with DST transitions. \pkg{`timechange`} allows
@@ -71,7 +81,7 @@ periods first. First months are added\code{1 + 1 = February} which results in
 non-existent time of \verb{2000-02-31 01:02:03}. Here the \code{roll_month} adjustment
 kicks in. After the adjustment, the remaining 3 days are added.
 
-\code{roll_month} and \code{roll_dst} can be one of the following:
+\code{roll_month} can be one of the following:
 \itemize{
 \item \code{boundary} - if rolling over a month boundary occurred due to setting units
 smaller than month, the date is adjusted to the beginning of the month (the
