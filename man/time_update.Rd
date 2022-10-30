@@ -72,6 +72,7 @@ unless the original class is \code{Date} and at least one of the \code{hour}, \c
 Update components of a date-time object
 }
 \examples{
+
 date <- as.Date("2009-02-10")
 time_update(date, year = 2010, month = 1, mday = 1)
 time_update(date, year = 2010, month = 13, mday = 1)
@@ -79,10 +80,11 @@ time_update(date, minute = 10, second = 3)
 time_update(date, minute = 10, second = 3, tz = "America/New_York")
 
 time <- as.POSIXct("2015-02-03 01:02:03", tz = "America/New_York")
-time_update(time, month = 2, mday = 31, roll = FALSE)
 time_update(time, month = 2, mday = 31, roll_month = "preday")
 time_update(time, month = 2, mday = 31, roll_month = "boundary")
 time_update(time, month = 2, mday = 31, roll_month = "postday")
+time_update(time, month = 2, mday = 31, exact = TRUE)
+time_update(time, month = 2, mday = 31, exact = FALSE)
 
 time <- as.POSIXct("2015-02-03 01:02:03", tz = "America/New_York")
 time_update(time, year = 2016, yday = 10)

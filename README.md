@@ -2,6 +2,7 @@
 
 <!-- badges: start -->
 [![R build status](https://github.com/vspinu/timechange/workflows/R-CMD-check/badge.svg)](https://github.com/vspinu/timechange/actions)
+[![R-CMD-check](https://github.com/vspinu/timechange/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/vspinu/timechange/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 ## timechange
