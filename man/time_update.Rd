@@ -18,7 +18,7 @@ time_update(
   second = NULL,
   tz = NULL,
   roll_month = "preday",
-  roll_dst = "boundary",
+  roll_dst = c("boundary", "post"),
   week_start = getOption("timechange.week_start", 1),
   exact = FALSE
 )

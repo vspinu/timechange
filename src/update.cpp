@@ -466,11 +466,11 @@ Rcpp::newDatetimeVector C_force_tz(const NumericVector dt,
       /* printf("na: %i na64: %+" PRIiFAST64 "  secs: %+" PRIiFAST64 "  dt: %f\n", NA_INTEGER, INT_FAST64_MIN, secs, dt[i]); */
       if (secs == NA_INT64) {out[i] = NA_REAL; continue; }
       double rem = dt[i] - secs;
-      sys_seconds d1(secs);
-      time_point tp1(d1);
-      cctz::civil_second ct1 = cctz::convert(tp1, tzfrom);
+      sys_seconds secsfrom(secs);
+      time_point tpfrom(secsfrom);
+      cctz::civil_second ct1 = cctz::convert(tpfrom, tzfrom);
       const cctz::time_zone::civil_lookup cl2 = tzto.lookup(ct1);
-      out[i] = civil_lookup_to_posix(cl2, tzfrom, tp1, ct1, rdst, rem);
+      out[i] = civil_lookup_to_posix(cl2, tzfrom, tpfrom, ct1, rdst, rem);
     }
 
   return newDatetimeVector(out, tzto_name.c_str());

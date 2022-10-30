@@ -9,7 +9,12 @@
 \usage{
 time_at_tz(time, tz = "UTC")
 
-time_force_tz(time, tz = "UTC", tzout = tz[[1]], roll_dst = "boundary")
+time_force_tz(
+  time,
+  tz = "UTC",
+  tzout = tz[[1]],
+  roll_dst = c("boundary", "post")
+)
 
 time_clock_at_tz(time, tz = NULL, units = "secs")
 }

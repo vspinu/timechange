@@ -42,7 +42,7 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
                         hour = NULL, minute = NULL, second = NULL,
                         tz = NULL,
                         roll_month = "preday",
-                        roll_dst = "boundary",
+                        roll_dst = c("boundary", "post"),
                         week_start = getOption("timechange.week_start", 1),
                         exact = FALSE) {
 

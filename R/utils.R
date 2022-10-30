@@ -28,9 +28,11 @@ tz <- function(x) {
 }
 
 to_posixct <- function(time) {
-  if (is.POSIXct(time))
+  if (is.POSIXct(time)) {
+    # Catch rare integer POSIXct, retaining attributes
+    storage.mode(time) <- "double"
     time
-  else if (is.Date(time))
+  } else if (is.Date(time))
     date_to_posixct(time)
   else if (is.POSIXlt(time)) {
     as.POSIXct.POSIXlt(time, tz = tz(time))

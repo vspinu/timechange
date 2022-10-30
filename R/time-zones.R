@@ -89,7 +89,7 @@ time_at_tz <- function(time, tz = "UTC") {
 #'   time-zones.
 #' @name time-zones
 #' @export
-time_force_tz <- function(time, tz = "UTC", tzout = tz[[1]], roll_dst = "boundary") {
+time_force_tz <- function(time, tz = "UTC", tzout = tz[[1]], roll_dst = c("boundary", "post")) {
   if (is.list(time) && !is.POSIXlt(time)) {
     for (nm in names(time)) {
       if (is.instant(time[[nm]])) {
@@ -143,6 +143,8 @@ time_clock_at_tz <- function(time, tz = NULL, units = "secs") {
 .clock_at_tz <- function(time, tz, units) {
   if (is.null(tz))
     tz <- tz(time)
+  ## FIXME: don't replicate tz when len == 1; follow vctrs and lubridate replication
+  ## convention
   if (length(tz) < length(time))
     tz <- rep_len(tz, length(time))
   else if (length(tz) > length(time)) {
@@ -150,6 +152,8 @@ time_clock_at_tz <- function(time, tz = NULL, units = "secs") {
     time <- rep_len(time, length(tz))
     attributes(time) <- attr
   }
+  # Catch rare integer POSIXct, retaining attributes
+  storage.mode(time) <- "double"
   secs <- C_local_clock(time, tz)
   out <- structure(secs, units = "secs", class = "difftime")
   units(out) <- units
