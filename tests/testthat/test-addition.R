@@ -189,3 +189,14 @@ test_that("addition errors on empty unit vectors", {
   expect_error(time_add(y, minute = integer()), "Invalid size of 'minute' vector")
   expect_error(time_add(y, hour = 1, minute = integer()), "Invalid size of 'minute' vector")
 })
+
+test_that("Subtracting months to March 1 produces correct results", {
+  ## https://github.com/tidyverse/lubridate/issues/1037
+  time <- ymd("2022-04-01", tz = "America/New_York")
+  expect_equal(time_add(time, months = -1), ymd("2022-03-01", tz = "America/New_York"))
+  time <- ymd("2022-05-01", tz = "America/New_York")
+  expect_equal(time_add(time, months = -2), ymd("2022-03-01", tz = "America/New_York"))
+  time <- ymd_hms("2022-04-02 04:01:01", tz = "America/New_York")
+  expect_equal(time_add(time, months = -1, days = -1, hours = -4, minutes = -1, seconds = -1),
+               ymd("2022-03-01", tz = "America/New_York"))
+})
