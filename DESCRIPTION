@@ -20,7 +20,6 @@ LinkingTo:
 Suggests:
   testthat,
   knitr
-LazyData: true
 SystemRequirements: A system with zoneinfo data (e.g. /usr/share/zoneinfo) as
     well as a recent-enough C++11 compiler (such as g++-4.8 or later). On
     Windows the zoneinfo included with R is used.
