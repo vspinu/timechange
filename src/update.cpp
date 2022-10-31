@@ -74,7 +74,7 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
   if (do_second && sizes[7] != 1 && !loop_second) stop("time_update: Invalid size of 'second' vector");
 
   if (dt.size() > 1 && !loop_dt)
-    stop("C_update_dt: length of dt vector must be 1 or match the length of updating vectors");
+    stop("time_update: length of dt vector must be 1 or match the length of updating vectors");
 
   if (do_yday + do_mday + do_wday > 1)
     stop("Conflicting days input, only one of yday, mday and wday must be supplied");
@@ -312,7 +312,7 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
   if (do_second && second.size() != 1 && !loop_second) stop("time_add: Invalid size of 'second' vector");
 
   if (dt.size() > 1 && !loop_dt)
-    stop("C_update_dt: length of datetime vector must be 1 or match the length of updating vectors");
+    stop("time_add: length of datetime vector must be 1 or match the length of updating vectors");
 
   std::string tz_name = tz_from_tzone_attr(dt);
   cctz::time_zone tz;
