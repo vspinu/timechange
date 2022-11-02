@@ -142,6 +142,7 @@ time_add <- function(time, periods = NULL,
 
   prds <- list(year = year, month = month, week = week, day = day,
                hour = hour, minute = minute, second = second)
+  periods <- as.list(periods)
   for (nm in names(prds)) {
     if (!is.null(prds[[nm]]))
       if (is.null(periods[[nm]]))

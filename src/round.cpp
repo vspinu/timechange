@@ -1,5 +1,6 @@
 
 #include "common.h"
+#include "cpp11/doubles.hpp"
 
 #define FLOOR_MULTI_UNIT(x, n) ((x/n) * n)
 #define FLOOR_MULTI_UNIT1(x, n) (((x - 1)/n) * n)
@@ -63,12 +64,12 @@ inline double ct2posix4ceiling(const T& ct,
   }
 }
 
-// [[Rcpp::export]]
-Rcpp::newDatetimeVector C_time_ceiling(const NumericVector dt,
-                                       const std::string unit_name,
-                                       const double nunits,
-                                       const int week_start,
-                                       const bool change_on_boundary) {
+[[cpp11::register]]
+cpp11::writable::doubles C_time_ceiling(const cpp11::doubles dt,
+                                        const std::string unit_name,
+                                        const double nunits,
+                                        const int week_start,
+                                        const bool change_on_boundary) {
 
   Unit unit = name2unit(unit_name);
   std::string tz_name = tz_from_tzone_attr(dt);
@@ -76,7 +77,9 @@ Rcpp::newDatetimeVector C_time_ceiling(const NumericVector dt,
   load_tz_or_fail(tz_name, tz, "CCTZ: Invalid timezone of the input vector: \"%s\"");
 
   size_t n = dt.size();
-  NumericVector out(n);
+  cpp11::writable::doubles out(n);
+  init_posixct(out, tz_name.c_str());
+
   int N = static_cast<int>(nunits);
   if (unit != Unit::ASECOND && N == 0)
     Rf_error("Unit is 0 or fractional. Use 'aseconds' for fractional rounding.");
@@ -147,15 +150,15 @@ Rcpp::newDatetimeVector C_time_ceiling(const NumericVector dt,
     }
   }
 
-  return newDatetimeVector(out, tz_name.c_str());
+  return out;
 }
 
 
-// [[Rcpp::export]]
-Rcpp::newDatetimeVector C_time_floor(const NumericVector dt,
-                                     const std::string unit_name,
-                                     const double nunits,
-                                     const int week_start) {
+[[cpp11::register]]
+cpp11::writable::doubles C_time_floor(const cpp11::doubles dt,
+                                      const std::string unit_name,
+                                      const double nunits,
+                                      const int week_start) {
 
   Unit unit = name2unit(unit_name);
   std::string tz_name = tz_from_tzone_attr(dt);
@@ -163,7 +166,9 @@ Rcpp::newDatetimeVector C_time_floor(const NumericVector dt,
   load_tz_or_fail(tz_name, tz, "CCTZ: Invalid timezone of the input vector: \"%s\"");
 
   size_t n = dt.size();
-  NumericVector out(n);
+  cpp11::writable::doubles out(n);
+  init_posixct(out, tz_name.c_str());
+
   int N = static_cast<int>(nunits);
   if (unit != Unit::ASECOND && N == 0)
     Rf_error("Unit is 0 or fractional. Use 'aseconds' for fractional rounding.");
@@ -226,5 +231,5 @@ Rcpp::newDatetimeVector C_time_floor(const NumericVector dt,
     }
   }
 
-  return newDatetimeVector(out, tz_name.c_str());
+  return out;
 }

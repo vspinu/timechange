@@ -1,5 +1,6 @@
 
 #include "common.h"
+#include "cpp11/doubles.hpp"
 
 int_fast64_t NA_INT32 = static_cast<int_fast64_t>(NA_INTEGER);
 int_fast64_t NA_INT64 = std::numeric_limits<int_fast64_t>::min();
@@ -71,4 +72,73 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
 
   return civil_lookup_to_posix(cl_new, dst) + remainder;
 
+}
+
+cpp11::integers to_integers(SEXP x) {
+  if (TYPEOF(x) == INTSXP) {
+    return cpp11::as_cpp<cpp11::integers>(x);
+  } else if (TYPEOF(x) == LGLSXP) {
+    cpp11::logicals xn = cpp11::as_cpp<cpp11::logicals>(x);
+    R_xlen_t len = xn.size();
+    cpp11::writable::integers ret(len);
+    for (R_xlen_t i = 0; i < len; ++i) {
+      int el = xn[i];
+      if (cpp11::is_na(el)) {
+        ret[i] = cpp11::na<int>();
+      } else {
+        ret[i] = static_cast<bool>(el);
+      }
+    }
+    return ret;
+  } else if (TYPEOF(x) == REALSXP) {
+    cpp11::doubles xn = cpp11::as_cpp<cpp11::doubles>(x);
+    R_xlen_t len = xn.size();
+    cpp11::writable::integers ret(len);
+    for (R_xlen_t i = 0; i < len; ++i) {
+      double el = xn[i];
+      if (cpp11::is_na(el)) {
+        ret[i] = cpp11::na<int>();
+      } else if (is_convertable_without_loss_to_integer(el)) {
+        ret[i] = static_cast<int>(el);
+      } else {
+        throw std::runtime_error("All elements must be integer-like");
+      }
+    }
+    return ret;
+  }
+  throw cpp11::type_error(INTSXP, TYPEOF(x));
+}
+
+cpp11::doubles to_doubles(SEXP x) {
+  if (TYPEOF(x) == REALSXP) {
+    return cpp11::as_cpp<cpp11::doubles>(x);
+  } else if (TYPEOF(x) == LGLSXP) {
+    cpp11::logicals xn = cpp11::as_cpp<cpp11::logicals>(x);
+    R_xlen_t len = xn.size();
+    cpp11::writable::doubles ret(len);
+    for (R_xlen_t i = 0; i < len; ++i) {
+      int el = xn[i];
+      if (cpp11::is_na(el)) {
+        ret[i] = cpp11::na<double>();
+      } else {
+        ret[i] = static_cast<double>(el);
+      }
+    }
+    return ret;
+  } else if (TYPEOF(x) == INTSXP) {
+    cpp11::integers xn = cpp11::as_cpp<cpp11::integers>(x);
+    R_xlen_t len = xn.size();
+    cpp11::writable::doubles ret(len);
+    for (R_xlen_t i = 0; i < len; ++i) {
+      int el = xn[i];
+      if (cpp11::is_na(el)) {
+        ret[i] = cpp11::na<double>();
+      } else {
+        ret[i] = static_cast<double>(el);
+      }
+    }
+    return ret;
+  }
+
+  throw cpp11::type_error(REALSXP, TYPEOF(x));
 }

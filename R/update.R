@@ -58,6 +58,7 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
                 hour = hour, minute = minute,
                 second = second)
 
+  updates <- as.list(updates)
   for (nm in names(updts)) {
     if (!is.null(updts[[nm]]))
       if (is.null(updates[[nm]]))
@@ -67,11 +68,14 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
   }
   updates <- updates[!vapply(updates, is.null, TRUE)]
 
+  week_start <- as.integer(week_start)
+  exact <- as.logical(exact)
+
   if (is.POSIXct(time)) {
+    storage.mode(time) <- "double"
     C_time_update(time, updates, tz, roll_month, roll_dst, week_start, exact)
   } else if (is.Date(time)) {
     out <- date2posixct(time)
-    attr(out, "tzone") <- "UTC"
     out <- C_time_update(out, updates, tz, roll_month, roll_dst, week_start, exact)
     if (is.null(updates[["hour"]]) &&
         is.null(updates[["minute"]]) &&

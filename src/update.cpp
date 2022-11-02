@@ -1,6 +1,13 @@
 
 #include "common.h"
 
+#include "cpp11/doubles.hpp"
+#include "cpp11/function.hpp"
+#include "cpp11/integers.hpp"
+#include "cpp11/strings.hpp"
+#include "tzone.h"
+#include "R_ext/Print.h"
+
 // CIVIL TIME:
 // https://github.com/google/cctz/blob/master/include/cctz/civil_time.h
 // https://github.com/devjgm/papers/blob/master/d0215r1.md
@@ -17,38 +24,42 @@
 
 // C++20 date/calendar proposal: https://github.com/HowardHinnant/date
 
+[[cpp11::register]]
+cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
+                                       const cpp11::list updates,
+                                       const SEXP tz,
+                                       const std::string roll_month,
+                                       const cpp11::strings roll_dst,
+                                       const int week_start = 1,
+                                       const bool exact = false) {
 
-// [[Rcpp::export]]
-Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
-                                      const Rcpp::List& updates,
-                                      const SEXP tz,
-                                      const std::string roll_month,
-                                      const Rcpp::CharacterVector roll_dst,
-                                      const int week_start = 1,
-                                      const bool exact = false) {
+  if (dt.size() == 0)
+    // FIXME: ignored tz argument
+    return(posixct(tz_from_tzone_attr(dt)));
 
   RollMonth rmonth = parse_month_roll(roll_month);
   DST rdst(roll_dst);
 
-  bool do_year = updates.containsElementNamed("year"),
-    do_month = updates.containsElementNamed("month"),
-    do_yday = updates.containsElementNamed("yday"),
-    do_mday = updates.containsElementNamed("mday"),
-    do_wday = updates.containsElementNamed("wday"),
-    do_hour = updates.containsElementNamed("hour"),
-    do_minute = updates.containsElementNamed("minute"),
-    do_second = updates.containsElementNamed("second");
+  cpp11::integers year, month, yday, mday, wday, hour, minute;
+  cpp11::doubles second;
 
-  const IntegerVector& year = do_year ? updates["year"] : IntegerVector::create(0);
-  const IntegerVector& month = do_month ? updates["month"] : IntegerVector::create(0);
-  const IntegerVector& yday = do_yday ? updates["yday"] : IntegerVector::create(0);
-  const IntegerVector& mday = do_mday ? updates["mday"] : IntegerVector::create(0);
-  const IntegerVector& wday = do_wday ? updates["wday"] : IntegerVector::create(0);
-  const IntegerVector& hour = do_hour ? updates["hour"] : IntegerVector::create(0);
-  const IntegerVector& minute = do_minute ? updates["minute"] : IntegerVector::create(0);
-  const NumericVector& second = do_second ? updates["second"] : NumericVector::create(0);
+  bool do_year = updates.contains("year"),
+    do_month = updates.contains("month"),
+    do_yday = updates.contains("yday"),
+    do_mday = updates.contains("mday"),
+    do_wday = updates.contains("wday"),
+    do_hour = updates.contains("hour"),
+    do_minute = updates.contains("minute"),
+    do_second = updates.contains("second");
 
-  if (dt.size() == 0) return(newDatetimeVector(dt));
+  if (do_year) year = to_integers(updates["year"]);
+  if (do_month) month = to_integers(updates["month"]);
+  if (do_yday) yday = to_integers(updates["yday"]);
+  if (do_mday) mday = to_integers(updates["mday"]);
+  if (do_wday) wday = to_integers(updates["wday"]);
+  if (do_hour) hour = to_integers(updates["hour"]);
+  if (do_minute) minute = to_integers(updates["minute"]);
+  if (do_second) second = to_doubles(updates["second"]);
 
   std::vector<R_xlen_t> sizes {
     year.size(), month.size(), yday.size(), mday.size(),
@@ -64,29 +75,29 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
     loop_dt = dt.size() == N;
 
   // fixme: more informative message
-  if (do_year && sizes[0] != 1 && !loop_year) stop("time_update: Incompatible size of 'year' vector");
-  if (do_month && sizes[1] != 1 && !loop_month) stop("time_update: Incompatible size of 'month' vector");
-  if (do_yday && sizes[2] != 1 && !loop_yday) stop("time_update: Incompatible size of 'yday' vector");
-  if (do_mday && sizes[3] != 1 && !loop_mday) stop("time_update: Incompatible size of 'mday' vector");
-  if (do_wday && sizes[4] != 1 && !loop_wday) stop("time_update: Incompatible size of 'wday' vector");
-  if (do_hour && sizes[5] != 1 && !loop_hour) stop("time_update: Incompatible size of 'hour' vector");
-  if (do_minute && sizes[6] != 1 && !loop_minute) stop("time_update: Incompatible size of 'minute' vector");
-  if (do_second && sizes[7] != 1 && !loop_second) stop("time_update: Incompatible size of 'second' vector");
+  if (do_year && sizes[0] != 1 && !loop_year) cpp11::stop("time_update: Incompatible size of 'year' vector");
+  if (do_month && sizes[1] != 1 && !loop_month) cpp11::stop("time_update: Incompatible size of 'month' vector");
+  if (do_yday && sizes[2] != 1 && !loop_yday) cpp11::stop("time_update: Incompatible size of 'yday' vector");
+  if (do_mday && sizes[3] != 1 && !loop_mday) cpp11::stop("time_update: Incompatible size of 'mday' vector");
+  if (do_wday && sizes[4] != 1 && !loop_wday) cpp11::stop("time_update: Incompatible size of 'wday' vector");
+  if (do_hour && sizes[5] != 1 && !loop_hour) cpp11::stop("time_update: Incompatible size of 'hour' vector");
+  if (do_minute && sizes[6] != 1 && !loop_minute) cpp11::stop("time_update: Incompatible size of 'minute' vector");
+  if (do_second && sizes[7] != 1 && !loop_second) cpp11::stop("time_update: Incompatible size of 'second' vector");
 
   if (dt.size() > 1 && !loop_dt)
-    stop("time_update: length of dt vector must be 1 or match the length of updating vectors");
+    cpp11::stop("time_update: length of dt vector must be 1 or match the length of updating vectors");
 
   if (do_yday + do_mday + do_wday > 1)
-    stop("Conflicting days input, only one of yday, mday and wday must be supplied");
+    cpp11::stop("Conflicting days input, only one of yday, mday and wday must be supplied");
 
   if (do_yday && (do_month || do_mday))
-    stop("Setting `yday` in combination with `month` or `mday` is not supported");
+    cpp11::stop("Setting `yday` in combination with `month` or `mday` is not supported");
 
   if (do_wday && (do_year || do_month || do_mday))
-    stop("Setting `yday` in combination with `year`, `month` or `mday` is not supported");
+    cpp11::stop("Setting `yday` in combination with `year`, `month` or `mday` is not supported");
 
   if ((do_yday && do_wday))
-    stop("Setting both `yday` and `wday` is not supported");
+    cpp11::stop("Setting both `yday` and `wday` is not supported");
 
   std::string tzfrom = tz_from_tzone_attr(dt);
   cctz::time_zone otzone;
@@ -101,7 +112,8 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
   }
   load_tz_or_fail(tzto, ntzone, "CCTZ: Unrecognized tzone: \"%s\"");
 
-  NumericVector out(N);
+  cpp11::writable::doubles out(N);
+  init_posixct(out, tzto.c_str());
 
   // all vectors are either size N or 1
   for (R_xlen_t i = 0; i < N; i++)
@@ -258,36 +270,40 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
     }
 
 
-  return newDatetimeVector(out, tzto.c_str());
+  return out;
 }
 
-// [[Rcpp::export]]
-Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
-                                   const Rcpp::List& periods,
-                                   const std::string roll_month,
-                                   const Rcpp::CharacterVector roll_dst) {
+[[cpp11::register]]
+cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
+                                    const cpp11::list periods,
+                                    const std::string roll_month,
+                                    const cpp11::strings roll_dst) {
+  if (dt.size() == 0)
+    // FIXME: ignored tz argument
+    return(posixct(tz_from_tzone_attr(dt)));
 
   RollMonth rmonth = parse_month_roll(roll_month);
   DST rdst(roll_dst);
 
-  bool do_year = periods.containsElementNamed("year"),
-    do_month = periods.containsElementNamed("month"),
-    do_day = periods.containsElementNamed("day"),
-    do_week = periods.containsElementNamed("week"),
-    do_hour = periods.containsElementNamed("hour"),
-    do_minute = periods.containsElementNamed("minute"),
-    do_second = periods.containsElementNamed("second");
+  bool
+    do_year = periods.contains("year"),
+    do_month = periods.contains("month"),
+    do_day = periods.contains("day"),
+    do_week = periods.contains("week"),
+    do_hour = periods.contains("hour"),
+    do_minute = periods.contains("minute"),
+    do_second = periods.contains("second");
 
-  if (dt.size() == 0) return(newDatetimeVector(dt));
+  cpp11::integers year, month, week, day, hour, minute;
+  cpp11::doubles second;
 
-  const IntegerVector& year = do_year ? periods["year"] : IntegerVector::create(0);
-  const IntegerVector& month = do_month ? periods["month"] : IntegerVector::create(0);
-  const IntegerVector& week = do_week ? periods["week"] : IntegerVector::create(0);
-  const IntegerVector& day = do_day ? periods["day"] : IntegerVector::create(0);
-  const IntegerVector& hour = do_hour ? periods["hour"] : IntegerVector::create(0);
-  const IntegerVector& minute = do_minute ? periods["minute"] : IntegerVector::create(0);
-  const NumericVector& second = do_second ? periods["second"] : NumericVector::create(0);
-
+  if (do_year) year = to_integers(periods["year"]);
+  if (do_month) month = to_integers(periods["month"]);
+  if (do_week) week = to_integers(periods["week"]);
+  if (do_day) day = to_integers(periods["day"]);
+  if (do_hour) hour = to_integers(periods["hour"]);
+  if (do_minute) minute = to_integers(periods["minute"]);
+  if (do_second) second = to_doubles(periods["second"]);
 
   std::vector<R_xlen_t> sizes {
     year.size(), month.size(), week.size(), day.size(),
@@ -303,22 +319,23 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
     loop_second = second.size() == N, loop_dt = dt.size() == N;
 
   // fixme: provide vec size info in the message
-  if (do_year && year.size() != 1 && !loop_year) stop("time_add: Incompatible size of 'year' vector");
-  if (do_month && month.size() != 1 && !loop_month) stop("time_add: Incompatible size of 'month' vector");
-  if (do_week && week.size() != 1 && !loop_week) stop("time_add: Incompatible size of 'week' vector");
-  if (do_day && day.size() != 1 && !loop_day) stop("time_add: Incompatible size of 'day' or 'mday' vector");
-  if (do_hour && hour.size() != 1 && !loop_hour) stop("time_add: Incompatible size of 'hour' vector");
-  if (do_minute && minute.size() != 1 && !loop_minute) stop("time_add: Incompatible size of 'minute' vector");
-  if (do_second && second.size() != 1 && !loop_second) stop("time_add: Incompatible size of 'second' vector");
+  if (do_year && year.size() != 1 && !loop_year) cpp11::stop("time_add: Incompatible size of 'year' vector");
+  if (do_month && month.size() != 1 && !loop_month) cpp11::stop("time_add: Incompatible size of 'month' vector");
+  if (do_week && week.size() != 1 && !loop_week) cpp11::stop("time_add: Incompatible size of 'week' vector");
+  if (do_day && day.size() != 1 && !loop_day) cpp11::stop("time_add: Incompatible size of 'day' or 'mday' vector");
+  if (do_hour && hour.size() != 1 && !loop_hour) cpp11::stop("time_add: Incompatible size of 'hour' vector");
+  if (do_minute && minute.size() != 1 && !loop_minute) cpp11::stop("time_add: Incompatible size of 'minute' vector");
+  if (do_second && second.size() != 1 && !loop_second) cpp11::stop("time_add: Incompatible size of 'second' vector");
 
   if (dt.size() > 1 && !loop_dt)
-    stop("time_add: length of datetime vector must be 1 or match the length of updating vectors");
+    cpp11::stop("time_add: length of datetime vector must be 1 or match the length of updating vectors");
 
   std::string tz_name = tz_from_tzone_attr(dt);
   cctz::time_zone tz;
   load_tz_or_fail(tz_name, tz, "CCTZ: Invalid timezone of the input vector: \"%s\"");
 
-  NumericVector out(N);
+  cpp11::writable::doubles out(N);
+  init_posixct(out, tz_name.c_str());
 
   int y = 0, m = 0, w = 0, d = 0, H = 0, M = 0;
   double s = 0.0;
@@ -433,20 +450,20 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
 
     }
 
-  return newDatetimeVector(out, tz_name.c_str());
+  return out;
 }
 
-// [[Rcpp::export]]
-Rcpp::newDatetimeVector C_force_tz(const NumericVector dt,
-                                   const CharacterVector tz,
-                                   const CharacterVector roll_dst) {
+[[cpp11::register]]
+cpp11::writable::doubles C_force_tz(const cpp11::doubles dt,
+                                    const cpp11::strings tz,
+                                    const cpp11::strings roll_dst) {
   // roll: logical, if `true`, and `time` falls into the DST-break, assume the
   // next valid civil time, otherwise return NA
 
   DST rdst(roll_dst);
 
   if (tz.size() != 1)
-    stop("`tz` argument must be a single character string");
+    cpp11::stop("`tz` argument must be a single character string");
 
   std::string tzfrom_name = tz_from_tzone_attr(dt);
   std::string tzto_name(tz[0]);
@@ -458,7 +475,8 @@ Rcpp::newDatetimeVector C_force_tz(const NumericVector dt,
   /* std::cout << "TZ to:" << tzto.name() << std::endl; */
 
   size_t n = dt.size();
-  NumericVector out(n);
+  cpp11::writable::doubles out(n);
+  init_posixct(out, tzto_name.c_str());
 
   for (size_t i = 0; i < n; i++)
     {
@@ -473,25 +491,25 @@ Rcpp::newDatetimeVector C_force_tz(const NumericVector dt,
       out[i] = civil_lookup_to_posix(cl2, tzfrom, tpfrom, ct1, rdst, rem);
     }
 
-  return newDatetimeVector(out, tzto_name.c_str());
+    return out;
 }
 
 
-// [[Rcpp::export]]
-newDatetimeVector C_force_tzs(const NumericVector dt,
-                              const CharacterVector tzs,
-                              const CharacterVector tz_out,
-                              const CharacterVector roll_dst) {
+[[cpp11::register]]
+cpp11::writable::doubles C_force_tzs(const cpp11::doubles dt,
+                                     const cpp11::strings tzs,
+                                     const cpp11::strings tz_out,
+                                     const cpp11::strings roll_dst) {
   // roll: logical, if `true`, and `time` falls into the DST-break, assume the
   // next valid civil time, otherwise return NA
 
   DST rdst(roll_dst);
 
   if (tz_out.size() != 1)
-    stop("In 'tzout' argument must be of length 1");
+    cpp11::stop("In 'tzout' argument must be of length 1");
 
   if (tzs.size() != dt.size())
-    stop("In 'C_force_tzs' tzs and dt arguments must be of the same length");
+    cpp11::stop("In 'C_force_tzs' tzs and dt arguments must be of the same length");
 
   std::string tzfrom_name = tz_from_tzone_attr(dt);
   std::string tzout_name(tz_out[0]);
@@ -502,7 +520,8 @@ newDatetimeVector C_force_tzs(const NumericVector dt,
 
   std::string tzto_old_name("not-a-tz");
   size_t n = dt.size();
-  NumericVector out(n);
+  cpp11::writable::doubles out(n);
+  init_posixct(out, tzout_name.c_str());
 
   for (size_t i = 0; i < n; i++)
     {
@@ -524,22 +543,22 @@ newDatetimeVector C_force_tzs(const NumericVector dt,
 
     }
 
-  return newDatetimeVector(out, tzout_name.c_str());
+  return out;
 }
 
-// [[Rcpp::export]]
-NumericVector C_local_clock(const NumericVector dt,
-                            const CharacterVector tzs) {
+[[cpp11::register]]
+cpp11::writable::doubles C_local_clock(const cpp11::doubles dt,
+                                       const cpp11::strings tzs) {
 
   if (tzs.size() != dt.size())
-    stop("`tzs` and `dt` arguments must be of the same length");
+    cpp11::stop("`tzs` and `dt` arguments must be of the same length");
 
   std::string tzfrom_name = tz_from_tzone_attr(dt);
   std::string tzto_old_name("not-a-tz");
   cctz::time_zone tzto;
 
   size_t n = dt.size();
-  NumericVector out(n);
+  cpp11::writable::doubles out(n);
 
   for (size_t i = 0; i < n; i++)
     {

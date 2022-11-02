@@ -1,6 +1,6 @@
 Package: timechange
 Title: Efficient Changing of Date-Times
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: c(person("Vitalie", "Spinu", email = "spinuvit@gmail.com", role = c("aut", "cre")),
              person("Google Inc.", role = c("ctb", "cph")))
 Description: Efficient routines for manipulation of date-time objects while
@@ -13,10 +13,8 @@ Description: Efficient routines for manipulation of date-time objects while
 Depends: R (>= 3.3)
 License: GPL-3
 Encoding: UTF-8
-Imports:
-  Rcpp (>= 0.12)
 LinkingTo:
-  Rcpp
+    cpp11 (>= 0.2.7)
 Suggests:
   testthat,
   knitr

@@ -6,8 +6,6 @@
 ##' `roll_month` and `roll_dst` arguments.
 ##'
 ##' @author Vitalie Spinu (\email{spinuvit@gmail.com})
-##' @importFrom Rcpp sourceCpp
-##' @importFrom utils modifyList
 ##' @useDynLib timechange, .registration=TRUE
 "_PACKAGE"
 

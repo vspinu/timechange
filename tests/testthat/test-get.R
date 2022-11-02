@@ -7,7 +7,6 @@ test_that("time_get handles different date-time types correctly", {
   datetime_ct <- as.POSIXct("1970-01-01 01:02:03", tz = "America/New_York")
   datetime_lt <- as.POSIXlt(datetime_ct)
 
-
   expect_identical(time_get(date), data.frame(year = 1970L, month = 1L,
                                               yday = 1L, mday = 1L, wday = 3L,
                                               hour = 0L, minute = 0L, second = 0))

@@ -1,13 +1,12 @@
 context("Time Update")
 
 test_that("Non-finite date-times are handled correctly", {
-  expect_identical(unclass(time_update(.POSIXct(Inf), hour = 1)), Inf)
-  expect_identical(unclass(time_add(.POSIXct(-Inf), hour = 1)), -Inf)
-  expect_identical(unclass(time_add(.POSIXct(NA_real_), hour = 1)), NA_real_)
-
-  expect_identical(unclass(time_add(.Date(Inf), day = 1)), Inf)
-  expect_identical(unclass(time_add(.Date(-Inf), day = 1)), -Inf)
-  expect_identical(unclass(time_add(.POSIXct(NA_real_), day = 1)), NA_real_)
+  expect_equal(time_update(.POSIXct(Inf), hour = 1), .POSIXct(Inf))
+  expect_equal(time_add(.POSIXct(-Inf), hour = 1), .POSIXct(-Inf))
+  expect_equal(time_add(.POSIXct(NA_real_), hour = 1), .POSIXct(NA_real_))
+  expect_equal(time_add(.POSIXct(NA_real_), day = 1), .POSIXct(NA_real_))
+  expect_equal(time_add(.Date(Inf), day = 1), .Date(Inf))
+  expect_equal(time_add(.Date(-Inf), day = 1), .Date(-Inf))
 })
 
 ## most of the tests are borrowed from lubridate
@@ -522,4 +521,15 @@ test_that("update errors on empty unit vectors", {
 test_that("updating Dates with 0 hms units produces POSIXct.", {
   expect_equal(time_update(ymd("2020-03-03"), hour = 0, second = 0), ymd("2020-03-03", tz = "UTC"))
   expect_equal(time_update(ymd("2020-03-03"), hour = NULL), ymd("2020-03-03"))
+})
+
+
+test_that("NAs propagate in update", {
+  expect_equal(time_update(ymd("2020-03-03"), year = NA), NA_Date_)
+  expect_equal(time_update(ymd("2020-03-03"), year = NA, second = 1), NA_POSIXct_)
+  expect_equal(time_update(ymd("2020-03-03"), second = NA), NA_POSIXct_)
+  expect_equal(time_update(ymd("2020-03-03"), year = c(2021, NA), second = 1),
+               c(ymd_hms("2021-03-03 00:00:01 UTC", NA)))
+  expect_equal(time_update(ymd("2020-03-03"), year = c(2021, NA), second = c(NA, 10)),
+               c(NA_POSIXct_, NA_POSIXct_))
 })

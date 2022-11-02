@@ -5,18 +5,36 @@
 
 #include <cstdint>
 #include <limits>
-#include "cctz/civil_time.h"
-#include "tzone.h"
-#include <Rcpp.h>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
-using namespace Rcpp;
-using namespace std;
+#include "cctz/civil_time.h"
+#include "cctz/time_zone.h"
+#include "tzone.h"
+#include <cpp11.hpp>
+#include "Rinternals.h"
+
+/* using namespace std; */
+namespace chrono = std::chrono;
+using sys_seconds = chrono::duration<int_fast64_t>;
+using time_point = chrono::time_point<std::chrono::system_clock, sys_seconds>;
 
 extern int_fast64_t NA_INT32;
 extern int_fast64_t NA_INT64;
 extern double fINT64_MAX;
 extern double fINT64_MIN;
+
+inline void init_posixct(cpp11::writable::doubles& x, const char* tz) {
+  x.attr("class") = {"POSIXct", "POSIXt"};
+  x.attr("tzone") = tz;
+}
+
+inline cpp11::doubles posixct(const char* tz, R_xlen_t size = 0) {
+  cpp11::writable::doubles out(size);
+  init_posixct(out, tz);
+  return out;
+}
 
 int_fast64_t floor_to_int64(double x);
 
@@ -55,9 +73,9 @@ struct DST {
   DST(RollDST skipped, RollDST repeated): skipped(skipped), repeated(repeated) {}
   DST(std::string skipped, std::string repeated):
     skipped(parse_dst_roll(skipped)), repeated(parse_dst_roll(repeated)) {}
-  DST(const Rcpp::CharacterVector roll_dst) {
+  DST(const cpp11::strings roll_dst) {
     if (roll_dst.size() == 0 || roll_dst.size() > 2)
-      stop("roll_dst must be a character vector of length 1 or 2");
+      cpp11::stop("roll_dst must be a character vector of length 1 or 2");
     std::string dst_repeated(roll_dst[0]);
     skipped = parse_dst_roll(dst_repeated);
     if (roll_dst.size() > 1) {
@@ -80,6 +98,14 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
 
 double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
                              const DST& dst) noexcept;
+
+// Simplify these conversions when https://github.com/r-lib/cpp11/pull/265 is fixed
+inline bool is_convertable_without_loss_to_integer(double value) {
+  double int_part;
+  return std::modf(value, &int_part) == 0.0;
+}
+cpp11::integers to_integers(SEXP x);
+cpp11::doubles to_doubles(SEXP x);
 
 
 #endif // TIMECHANGE_COMMON_H

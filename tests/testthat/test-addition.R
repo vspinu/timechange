@@ -1,13 +1,12 @@
 context("Addition Operations")
 
 test_that("Non-finite date-times are handled correctly", {
-  expect_identical(unclass(time_add(.POSIXct(Inf), hours = 1)), Inf)
-  expect_identical(unclass(time_add(.POSIXct(-Inf), hours = 1)), -Inf)
-  expect_identical(unclass(time_add(.POSIXct(NA_real_), hours = 1)), NA_real_)
-
-  expect_identical(unclass(time_add(.Date(Inf), days = 1)), Inf)
-  expect_identical(unclass(time_add(.Date(-Inf), days = 1)), -Inf)
-  expect_identical(unclass(time_add(.POSIXct(NA_real_), days = 1)), NA_real_)
+  expect_equal(time_add(.POSIXct(Inf), hours = 1), .POSIXct(Inf, tz = ""))
+  expect_equal(time_add(.POSIXct(-Inf), hours = 1), .POSIXct(-Inf, tz = ""))
+  expect_equal(time_add(.POSIXct(NA_real_), hours = 1), .POSIXct(NA_real_, tz = ""))
+  expect_equal(time_add(.Date(Inf), days = 1), .Date(Inf))
+  expect_equal(time_add(.Date(-Inf), days = 1), .Date(-Inf))
+  expect_equal(time_add(.POSIXct(NA_real_), days = 1), .POSIXct(NA_real_, tz = ""))
 })
 
 test_that("addition handles daylight savings time", {

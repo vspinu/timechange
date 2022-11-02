@@ -1,5 +1,6 @@
 
 #include "common.h"
+#include "cpp11/data_frame.hpp"
 
 // CIVIL TIME:
 // https://github.com/google/cctz/blob/master/include/cctz/civil_time.h
@@ -15,16 +16,15 @@
 
 // C++20 date/calendar proposal: https://github.com/HowardHinnant/date
 
-bool charvec_contains(const CharacterVector vec, const std::string& elt) {
+bool charvec_contains(const cpp11::strings vec, const std::string& elt) {
   return std::find(vec.begin(), vec.end(), elt) != vec.end();
 }
 
-// [[Rcpp::export]]
-Rcpp::DataFrame C_time_get(const NumericVector& dt,
-                           const CharacterVector& components,
-                           const int week_start = 1) {
 
-  std::vector<std::string> comps = Rcpp::as<std::vector<std::string>>(components);
+[[cpp11::register]]
+cpp11::writable::list C_time_get(const cpp11::doubles& dt,
+                                 const cpp11::strings& components,
+                                 const int week_start = 1) {
 
   bool
     do_year = false, do_month = false, do_yday = false,
@@ -33,7 +33,7 @@ Rcpp::DataFrame C_time_get(const NumericVector& dt,
 
   R_xlen_t N = dt.size(), N_comps = components.size();
 
-  for (std::string comp: comps) {
+  for (std::string comp: components) {
     if (comp == "year") { do_year = true; continue; };
     if (comp == "month") { do_month = true; continue; };
     if (comp == "yday") { do_yday = true; continue; };
@@ -45,14 +45,14 @@ Rcpp::DataFrame C_time_get(const NumericVector& dt,
     Rf_error("Invalid datetime component '%s'", comp.c_str());
   }
 
-  IntegerVector year(do_year ? N : 0);
-  IntegerVector month(do_month ? N :0);
-  IntegerVector yday(do_yday ? N : 0);
-  IntegerVector mday(do_mday ? N : 0);
-  IntegerVector wday(do_wday ? N : 0);
-  IntegerVector hour(do_hour ? N : 0);
-  IntegerVector minute(do_minute ? N : 0);
-  NumericVector second(do_second ? N : 0);
+  cpp11::writable::integers year(do_year ? N : 0);
+  cpp11::writable::integers month(do_month ? N :0);
+  cpp11::writable::integers yday(do_yday ? N : 0);
+  cpp11::writable::integers mday(do_mday ? N : 0);
+  cpp11::writable::integers wday(do_wday ? N : 0);
+  cpp11::writable::integers hour(do_hour ? N : 0);
+  cpp11::writable::integers minute(do_minute ? N : 0);
+  cpp11::writable::doubles second(do_second ? N : 0);
 
   std::string tz = tz_from_tzone_attr(dt);
 
@@ -96,12 +96,12 @@ Rcpp::DataFrame C_time_get(const NumericVector& dt,
 
     }
 
-  List out(N_comps);
-  CharacterVector names(N_comps);
+  cpp11::writable::list out(N_comps);
+  cpp11::writable::strings names(N_comps);
 
   R_len_t pos = 0;
 
-  for (std::string comp: comps) {
+  for (std::string comp: components) {
     if (comp == "year") { out[pos] = year; names[pos] = "year"; pos++; };
     if (comp == "month") { out[pos] = month; names[pos] = "month"; pos++; };
     if (comp == "yday") { out[pos] = yday; names[pos] = "yday"; pos++; };
