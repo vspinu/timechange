@@ -481,13 +481,13 @@ test_that("update handles single vector of inputs", {
   expect_equal(day(time_update(date, day = c(1, 2, 3))), c(1, 2, 3))
 })
 
-test_that("update handles conformable vectors of inputs", {
+test_that("update follows vctrs replication rules", {
   poslt <- as.POSIXlt("2010-03-10 01:59:59", tz = "UTC", format = "%Y-%m-%d %H:%M:%S")
   posct <- as.POSIXct(poslt)
   date <- as.Date(poslt)
-  expect_equal(second(time_update(poslt, second = c(1, 2), minute = c(1, 2, 3, 4))), c(1, 2, 1, 2))
-  expect_equal(second(time_update(posct, second = c(1, 2), minute = c(1, 2, 3, 4))), c(1, 2, 1, 2))
-  expect_equal(day(time_update(date, day = c(1, 2), month = c(1, 2, 3, 4))), c(1, 2, 1, 2))
+  expect_error(time_update(poslt, second = c(1, 2), minute = c(1, 2, 3, 4)), "Incompatible")
+  expect_error(time_update(posct, second = c(1, 2), minute = c(1, 2, 3, 4)), "Incompatible")
+  expect_error(time_update(date, day = c(1, 2), month = c(1, 2, 3, 4)), "Incompatible")
 })
 
 test_that("update.POSIXct returns input of length zero when given input of length zero", {

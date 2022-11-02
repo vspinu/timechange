@@ -70,8 +70,6 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
     updates <- modifyList(as.list(updates), updates1)
   }
 
-  updates <- normalize_units_length(updates)
-
   if (is.POSIXct(time)) {
     C_time_update(time, updates, tz, roll_month, roll_dst, week_start, exact)
   } else if (is.Date(time)) {

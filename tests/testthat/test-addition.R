@@ -205,6 +205,7 @@ test_that("addition works correctly for DST transitions", {
   ref <- ymd("2017-10-01", tz = "Australia/Melbourne")
   expect_equal(time_add(ref, hours = 1:3, roll_dst = c("NA", "pre")),
                ref + c(1, NA, 2)*3600)
+
   ref <- ymd_hms(rep(c("2022-10-30 00:00:00", "2022-03-27 00:00:00"), each = 3), tz = "Europe/Amsterdam")
   expect_equal(time_add(ref, hours = rep(1:3, 2), roll_dst = c("NA", "pre")),
                ref + c(1, 2, 4, 1, NA, 2)*3600)

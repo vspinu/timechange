@@ -1,3 +1,11 @@
+Version 0.1.1
+=============
+
+## Changes
+
+ * Follow vctrs replication rules
+ * Change arguments of `time_add()` and `time_subtract()` to singulars
+
 Version 0.1.0
 =============
 

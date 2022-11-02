@@ -270,23 +270,23 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
   RollMonth rmonth = parse_month_roll(roll_month);
   DST rdst(roll_dst);
 
-  bool do_year = periods.containsElementNamed("years"),
-    do_month = periods.containsElementNamed("months"),
-    do_day = periods.containsElementNamed("days"),
-    do_week = periods.containsElementNamed("weeks"),
-    do_hour = periods.containsElementNamed("hours"),
-    do_minute = periods.containsElementNamed("minutes"),
-    do_second = periods.containsElementNamed("seconds");
+  bool do_year = periods.containsElementNamed("year"),
+    do_month = periods.containsElementNamed("month"),
+    do_day = periods.containsElementNamed("day"),
+    do_week = periods.containsElementNamed("week"),
+    do_hour = periods.containsElementNamed("hour"),
+    do_minute = periods.containsElementNamed("minute"),
+    do_second = periods.containsElementNamed("second");
 
   if (dt.size() == 0) return(newDatetimeVector(dt));
 
-  const IntegerVector& year = do_year ? periods["years"] : IntegerVector::create(0);
-  const IntegerVector& month = do_month ? periods["months"] : IntegerVector::create(0);
-  const IntegerVector& week = do_week ? periods["weeks"] : IntegerVector::create(0);
-  const IntegerVector& day = do_day ? periods["days"] : IntegerVector::create(0);
-  const IntegerVector& hour = do_hour ? periods["hours"] : IntegerVector::create(0);
-  const IntegerVector& minute = do_minute ? periods["minutes"] : IntegerVector::create(0);
-  const NumericVector& second = do_second ? periods["seconds"] : NumericVector::create(0);
+  const IntegerVector& year = do_year ? periods["year"] : IntegerVector::create(0);
+  const IntegerVector& month = do_month ? periods["month"] : IntegerVector::create(0);
+  const IntegerVector& week = do_week ? periods["week"] : IntegerVector::create(0);
+  const IntegerVector& day = do_day ? periods["day"] : IntegerVector::create(0);
+  const IntegerVector& hour = do_hour ? periods["hour"] : IntegerVector::create(0);
+  const IntegerVector& minute = do_minute ? periods["minute"] : IntegerVector::create(0);
+  const NumericVector& second = do_second ? periods["second"] : NumericVector::create(0);
 
 
   std::vector<R_xlen_t> sizes {
@@ -306,7 +306,7 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
   if (do_year && year.size() != 1 && !loop_year) stop("time_add: Incompatible size of 'year' vector");
   if (do_month && month.size() != 1 && !loop_month) stop("time_add: Incompatible size of 'month' vector");
   if (do_week && week.size() != 1 && !loop_week) stop("time_add: Incompatible size of 'week' vector");
-  if (do_day && day.size() != 1 && !loop_day) stop("time_add: Incompatible size of 'day' vector");
+  if (do_day && day.size() != 1 && !loop_day) stop("time_add: Incompatible size of 'day' or 'mday' vector");
   if (do_hour && hour.size() != 1 && !loop_hour) stop("time_add: Incompatible size of 'hour' vector");
   if (do_minute && minute.size() != 1 && !loop_minute) stop("time_add: Incompatible size of 'minute' vector");
   if (do_second && second.size() != 1 && !loop_second) stop("time_add: Incompatible size of 'second' vector");
