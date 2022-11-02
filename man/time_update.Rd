@@ -30,7 +30,8 @@ time_update(
 
 \item{year, month, yday, wday, mday, day, hour, minute, second}{components of the date-time
 to be updated. \code{day} is equivalent to \code{mday}. All components except \code{second} will
-be converted to integer.}
+be converted to integer. Components are replicated according to \code{vctrs} semantics,
+i.e. vectors must be either of length 1 or same length as \code{time} vector.}
 
 \item{tz}{time zone component (a singleton character vector)}
 

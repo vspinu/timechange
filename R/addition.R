@@ -7,8 +7,10 @@
 ##' @param time date-time object
 ##' @param periods string of units to add/subtract (not yet implemented) or a named list
 ##'   of the form `list(year = 1, month = 2, ...)`.
-##' @param year,month,week,day,hour,minute,second Units to be added to
-##'   `time`. Each unit except for seconds must be expressed as integer values.
+##' @param year,month,week,day,hour,minute,second Units to be added to `time`. Units
+##'   except for seconds are converted to integer values. Components are replicated
+##'   according to `vctrs` semantics, i.e vectors must be either of length 1 or same
+##'   length as `time` vector.
 ##' @param roll_month controls how addition of months and years behaves when standard
 ##'   arithmetic rules exceed limits of the resulting date's month. Possible values are
 ##'   "preday", "boundary", "postday", "full" and "NA". See "Details" or

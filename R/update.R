@@ -4,7 +4,8 @@
 #' @param updates a named list of components
 #' @param year,month,yday,wday,mday,day,hour,minute,second components of the date-time
 #'   to be updated. `day` is equivalent to `mday`. All components except `second` will
-#'   be converted to integer.
+#'   be converted to integer. Components are replicated according to `vctrs` semantics,
+#'   i.e. vectors must be either of length 1 or same length as `time` vector.
 #' @param tz time zone component (a singleton character vector)
 #' @param week_start first day of the week (default is 1, Monday). Set
 #'   `timechange.week_start` option to change this globally.

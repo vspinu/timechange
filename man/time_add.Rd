@@ -8,39 +8,43 @@
 time_add(
   time,
   periods = NULL,
-  years = NULL,
-  months = NULL,
-  weeks = NULL,
-  days = NULL,
-  hours = NULL,
-  minutes = NULL,
-  seconds = NULL,
+  year = NULL,
+  month = NULL,
+  week = NULL,
+  day = NULL,
+  hour = NULL,
+  minute = NULL,
+  second = NULL,
   roll_month = "preday",
-  roll_dst = c("post", "pre")
+  roll_dst = c("post", "pre"),
+  ...
 )
 
 time_subtract(
   time,
   periods = NULL,
-  years = NULL,
-  months = NULL,
-  weeks = NULL,
-  days = NULL,
-  hours = NULL,
-  minutes = NULL,
-  seconds = NULL,
+  year = NULL,
+  month = NULL,
+  week = NULL,
+  day = NULL,
+  hour = NULL,
+  minute = NULL,
+  second = NULL,
   roll_month = "preday",
-  roll_dst = c("pre", "post")
+  roll_dst = c("pre", "post"),
+  ...
 )
 }
 \arguments{
 \item{time}{date-time object}
 
 \item{periods}{string of units to add/subtract (not yet implemented) or a named list
-of the form \code{list(years = 1, months = 2, ...)}.}
+of the form \code{list(year = 1, month = 2, ...)}.}
 
-\item{years, months, weeks, days, hours, minutes, seconds}{Units to be added to
-\code{time}. Each unit except for seconds must be expressed as integer values.}
+\item{year, month, week, day, hour, minute, second}{Units to be added to \code{time}. Units
+except for seconds are converted to integer values. Components are replicated
+according to \code{vctrs} semantics, i.e vectors must be either of length 1 or same
+length as \code{time} vector.}
 
 \item{roll_month}{controls how addition of months and years behaves when standard
 arithmetic rules exceed limits of the resulting date's month. Possible values are
@@ -60,6 +64,8 @@ length of two. Possible values are:
 
 For example `roll_dst = c("pre", "NA") indicates that for repeated intervals
 return the time in the earlier interval and for skipped intervals return NA.}
+
+\item{...}{deprecated}
 }
 \description{
 Add periods to date-time objects. Periods track the change in the
@@ -68,7 +74,7 @@ units: years, months, days, hours, minutes, and seconds.
 }
 \details{
 Arithmetic operations with multiple period units (years, months etc) are
-applied in decreasing size order, from year to second. Thus \code{time_add(x, months = 1, days = 3)} first adds 1 month to \code{x}, then ads to the resulting date 3 days.
+applied in decreasing size order, from year to second. Thus \code{time_add(x, month = 1, days = 3)} first adds 1 month to \code{x}, then ads to the resulting date 3 days.
 
 Generally period arithmetic is undefined due to the irregular nature of
 civil time and complexities with DST transitions. \pkg{`timechange`} allows
@@ -85,7 +91,7 @@ kicks in. After the adjustment, the remaining 3 days are added.
 \itemize{
 \item \code{boundary} - if rolling over a month boundary occurred due to setting units
 smaller than month, the date is adjusted to the beginning of the month (the
-boundary). For example, \verb{2000-01-31 01:02:03 + month = 2000-03-01 00:00:00}.
+boundary). For example, \verb{2000-01-31 01:02:03 + 1 month = 2000-03-01 00:00:00}.
 \item \code{preday} - roll back to the last valid day of the previous month (pre-boundary
 day) preserving the H, M, S units. For example, \verb{2000-01-31 01:02:03 + 1 month = 2000-02-28 01:02:03}. This is the default.
 \item \code{postday} - roll to the first day post-boundary preserving the H, M, S units. For
@@ -106,45 +112,45 @@ lubridate works for historical reasons.
 
 ## Month gap
 x <- as.POSIXct("2000-01-31 01:02:03", tz = "America/Chicago")
-time_add(x, months = 1, roll_month = "postday")
-time_add(x, months = 1, roll_month = "preday")
-time_add(x, months = 1, roll_month = "boundary")
-time_add(x, months = 1, roll_month = "full")
-time_add(x, months = 1, roll_month = "NA")
-time_add(x, months = 1, days = 3,  roll_month = "postday")
-time_add(x, months = 1, days = 3,  roll_month = "preday")
-time_add(x, months = 1, days = 3,  roll_month = "boundary")
-time_add(x, months = 1, days = 3,  roll_month = "full")
-time_add(x, months = 1, days = 3,  roll_month = "NA")
+time_add(x, month = 1, roll_month = "postday")
+time_add(x, month = 1, roll_month = "preday")
+time_add(x, month = 1, roll_month = "boundary")
+time_add(x, month = 1, roll_month = "full")
+time_add(x, month = 1, roll_month = "NA")
+time_add(x, month = 1, day = 3,  roll_month = "postday")
+time_add(x, month = 1, day = 3,  roll_month = "preday")
+time_add(x, month = 1, day = 3,  roll_month = "boundary")
+time_add(x, month = 1, day = 3,  roll_month = "full")
+time_add(x, month = 1, day = 3,  roll_month = "NA")
 
 ## DST gap
 x <- as.POSIXlt("2010-03-14 01:02:03", tz = "America/Chicago")
-time_add(x, hours = 1, minutes = 50, roll_dst = "pre")
-time_add(x, hours = 1, minutes = 50, roll_dst = "boundary")
-time_add(x, hours = 1, minutes = 50, roll_dst = "post")
+time_add(x, hour = 1, minute = 50, roll_dst = "pre")
+time_add(x, hour = 1, minute = 50, roll_dst = "boundary")
+time_add(x, hour = 1, minute = 50, roll_dst = "post")
 ##' time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
 
 # SUBTRACTION
 
 ## Month gap
 x <- as.POSIXct("2000-03-31 01:02:03", tz = "America/Chicago")
-time_subtract(x, months = 1, roll_month = "postday")
-time_subtract(x, months = 1, roll_month = "preday")
-time_subtract(x, months = 1, roll_month = "boundary")
-time_subtract(x, months = 1, roll_month = "full")
-time_subtract(x, months = 1, roll_month = "NA")
-time_subtract(x, months = 1, days = 0,  roll_month = "postday")
-time_subtract(x, months = 1, days = 3,  roll_month = "postday")
-time_subtract(x, months = 1, days = 0,  roll_month = "preday")
-time_subtract(x, months = 1, days = 3,  roll_month = "preday")
-time_subtract(x, months = 1, days = 3,  roll_month = "boundary")
-time_subtract(x, months = 1, days = 3,  roll_month = "full")
-time_subtract(x, months = 1, days = 3,  roll_month = "NA")
+time_subtract(x, month = 1, roll_month = "postday")
+time_subtract(x, month = 1, roll_month = "preday")
+time_subtract(x, month = 1, roll_month = "boundary")
+time_subtract(x, month = 1, roll_month = "full")
+time_subtract(x, month = 1, roll_month = "NA")
+time_subtract(x, month = 1, day = 0,  roll_month = "postday")
+time_subtract(x, month = 1, day = 3,  roll_month = "postday")
+time_subtract(x, month = 1, day = 0,  roll_month = "preday")
+time_subtract(x, month = 1, day = 3,  roll_month = "preday")
+time_subtract(x, month = 1, day = 3,  roll_month = "boundary")
+time_subtract(x, month = 1, day = 3,  roll_month = "full")
+time_subtract(x, month = 1, day = 3,  roll_month = "NA")
 
 ## DST gap
 y <- as.POSIXlt("2010-03-15 01:02:03", tz = "America/Chicago")
-time_subtract(y, hours = 22, minutes = 50, roll_dst = "pre")
-time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary")
-time_subtract(y, hours = 22, minutes = 50, roll_dst = "post")
-time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA")
+time_subtract(y, hour = 22, minute = 50, roll_dst = "pre")
+time_subtract(y, hour = 22, minute = 50, roll_dst = "boundary")
+time_subtract(y, hour = 22, minute = 50, roll_dst = "post")
+time_subtract(y, hour = 22, minute = 50, roll_dst = "NA")
 }
