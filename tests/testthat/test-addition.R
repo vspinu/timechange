@@ -200,3 +200,26 @@ test_that("Subtracting months to March 1 produces correct results", {
   expect_equal(time_add(time, months = -1, days = -1, hours = -4, minutes = -1, seconds = -1),
                ymd("2022-03-01", tz = "America/New_York"))
 })
+
+test_that("addition works correctly for DST transitions", {
+  ref <- ymd("2017-10-01", tz = "Australia/Melbourne")
+  expect_equal(time_add(ref, hours = 1:3, roll_dst = c("NA", "pre")),
+               ref + c(1, NA, 2)*3600)
+  ref <- ymd_hms(rep(c("2022-10-30 00:00:00", "2022-03-27 00:00:00"), each = 3), tz = "Europe/Amsterdam")
+  expect_equal(time_add(ref, hours = rep(1:3, 2), roll_dst = c("NA", "pre")),
+               ref + c(1, 2, 4, 1, NA, 2)*3600)
+  expect_equal(time_add(ref, hours = rep(1:3, 2), minutes = 1:6, roll_dst = c("NA", "pre")),
+               ref + c(1, 2, 4, 1, NA, 2)*3600 + 1:6*60)
+  expect_equal(time_add(ref, hours = rep(1:3, 2), roll_dst = c("NA", "NA")),
+               ref + c(1, NA, 4, 1, NA, 2)*3600)
+  expect_equal(time_add(ref, hours = rep(1:3, 2), minutes = 1:6, roll_dst = c("NA", "NA")),
+               ref + c(1, NA, 4, 1, NA, 2)*3600 + 1:6*60)
+  expect_equal(time_add(ref, hours = rep(1:3, 2), roll_dst = c("pre", "NA")),
+               ref + c(1, NA, 4, 1, 1, 2)*3600)
+  expect_equal(time_add(ref, hours = rep(1:3, 2), minutes = 1:6, roll_dst = c("pre", "NA")),
+               ref + c(1, NA, 4, 1, 1, 2)*3600 + 1:6*60)
+  expect_equal(time_add(ref, hours = rep(1:3, 2), roll_dst = c("post", "NA")),
+               ref + c(1, NA, 4, 1, 2, 2)*3600)
+  expect_equal(time_add(ref, hours = rep(1:3, 2), minutes = 1:6, roll_dst = c("post", "NA")),
+               ref + c(1, NA, 4, 1, 2, 2)*3600 + 1:6*60)
+})
