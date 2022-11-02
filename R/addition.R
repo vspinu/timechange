@@ -149,6 +149,7 @@ time_add <- function(time, periods = NULL,
       else
         periods[[nm]] <- periods[[nm]] + prds[[nm]]
   }
+  periods <- periods[!vapply(periods, is.null, TRUE)]
 
   if (is.POSIXct(time)) {
     C_time_add(time, periods, roll_month, roll_dst)
@@ -156,7 +157,9 @@ time_add <- function(time, periods = NULL,
     out <- date2posixct(time)
     attr(out, "tzone") <- "UTC"
     out <- C_time_add(out, periods, roll_month, roll_dst)
-    if (is.null(hour) && is.null(minute) && is.null(second)) {
+    if (is.null(periods[["hour"]]) &&
+        is.null(periods[["minute"]]) &&
+        is.null(periods[["second"]])) {
       out <- as.Date(out, tz = "UTC")
     }
     out
@@ -203,6 +206,7 @@ time_subtract <- function(time, periods = NULL,
       else
         periods[[nm]] <- periods[[nm]] - prds[[nm]]
   }
+  periods <- periods[!vapply(periods, is.null, TRUE)]
 
   time_add(time, periods, roll_month = roll_month, roll_dst = roll_dst)
 

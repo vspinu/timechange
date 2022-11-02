@@ -2,10 +2,10 @@
 #'
 #' @param time a date-time object
 #' @param updates a named list of components
-#' @param year,month,yday,wday,mday,day,hour,minute,second components of the date-time
-#'   to be updated. `day` is equivalent to `mday`. All components except `second` will
-#'   be converted to integer. Components are replicated according to `vctrs` semantics,
-#'   i.e. vectors must be either of length 1 or same length as `time` vector.
+#' @param year,month,yday,wday,mday,hour,minute,second components of the date-time to be
+#'   updated. All components except `second` will be converted to integer. Components
+#'   are replicated according to `vctrs` semantics, i.e. vectors must be either of
+#'   length 1 or same length as `time` vector.
 #' @param tz time zone component (a singleton character vector)
 #' @param week_start first day of the week (default is 1, Monday). Set
 #'   `timechange.week_start` option to change this globally.
@@ -42,7 +42,7 @@
 #' time_update(time, second = 30,  tz = "America/New_York")
 #' @export
 time_update <- function(time, updates = NULL, year = NULL, month = NULL,
-                        yday = NULL, day = NULL, mday = NULL, wday = NULL,
+                        yday = NULL, mday = NULL, wday = NULL,
                         hour = NULL, minute = NULL, second = NULL,
                         tz = NULL,
                         roll_month = "preday",
@@ -53,23 +53,19 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
   if (length(time) == 0L)
     return(time)
 
-  if (!is.null(day)) {
-    if (!is.null(mday))
-      stop("both `mday` and `day` suplied")
-    mday <- day
-  }
+  updts <- list(year = year, month = month,
+                yday = yday, mday = mday, wday = wday,
+                hour = hour, minute = minute,
+                second = second)
 
-  updates1 <- list(year = year, month = month,
-                   yday = yday, mday = mday, wday = wday,
-                   hour = hour, minute = minute,
-                   second = second)
-  updates1 <- updates1[!vapply(updates1, is.null, FALSE)]
-
-  if (is.null(updates)) {
-    updates <- updates1
-  } else {
-    updates <- modifyList(as.list(updates), updates1)
+  for (nm in names(updts)) {
+    if (!is.null(updts[[nm]]))
+      if (is.null(updates[[nm]]))
+        updates[[nm]] <- updts[[nm]]
+      else
+        updates[[nm]] <- updates[[nm]] + updts[[nm]]
   }
+  updates <- updates[!vapply(updates, is.null, TRUE)]
 
   if (is.POSIXct(time)) {
     C_time_update(time, updates, tz, roll_month, roll_dst, week_start, exact)
@@ -77,7 +73,10 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
     out <- date2posixct(time)
     attr(out, "tzone") <- "UTC"
     out <- C_time_update(out, updates, tz, roll_month, roll_dst, week_start, exact)
-    if (is.null(hour) && is.null(minute) && is.null(second) && is.null(tz)) {
+    if (is.null(updates[["hour"]]) &&
+        is.null(updates[["minute"]]) &&
+        is.null(updates[["second"]]) &&
+        is.null(tz)) {
       out <- as.Date(out, tz = "UTC")
     }
     out
