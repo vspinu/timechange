@@ -186,8 +186,8 @@ test_that("addition works on 'strange' DST gaps", {
 
 test_that("addition errors on empty unit vectors", {
   y <- ymd_hms("2020-03-29 01:00:00", tz = "Asia/Beirut")
-  expect_error(time_add(y, minute = integer()), "Invalid size of 'minute' vector")
-  expect_error(time_add(y, hour = 1, minute = integer()), "Invalid size of 'minute' vector")
+  expect_error(time_add(y, minute = integer()), "Incompatible size of 'minute' vector")
+  expect_error(time_add(y, hour = 1, minute = integer()), "Incompatible size of 'minute' vector")
 })
 
 test_that("Subtracting months to March 1 produces correct results", {

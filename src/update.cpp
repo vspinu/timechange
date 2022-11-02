@@ -64,14 +64,14 @@ Rcpp::newDatetimeVector C_time_update(const Rcpp::NumericVector& dt,
     loop_dt = dt.size() == N;
 
   // fixme: more informative message
-  if (do_year && sizes[0] != 1 && !loop_year) stop("time_update: Invalid size of 'year' vector");
-  if (do_month && sizes[1] != 1 && !loop_month) stop("time_update: Invalid size of 'month' vector");
-  if (do_yday && sizes[2] != 1 && !loop_yday) stop("time_update: Invalid size of 'yday' vector");
-  if (do_mday && sizes[3] != 1 && !loop_mday) stop("time_update: Invalid size of 'mday' vector");
-  if (do_wday && sizes[4] != 1 && !loop_wday) stop("time_update: Invalid size of 'wday' vector");
-  if (do_hour && sizes[5] != 1 && !loop_hour) stop("time_update: Invalid size of 'hour' vector");
-  if (do_minute && sizes[6] != 1 && !loop_minute) stop("time_update: Invalid size of 'minute' vector");
-  if (do_second && sizes[7] != 1 && !loop_second) stop("time_update: Invalid size of 'second' vector");
+  if (do_year && sizes[0] != 1 && !loop_year) stop("time_update: Incompatible size of 'year' vector");
+  if (do_month && sizes[1] != 1 && !loop_month) stop("time_update: Incompatible size of 'month' vector");
+  if (do_yday && sizes[2] != 1 && !loop_yday) stop("time_update: Incompatible size of 'yday' vector");
+  if (do_mday && sizes[3] != 1 && !loop_mday) stop("time_update: Incompatible size of 'mday' vector");
+  if (do_wday && sizes[4] != 1 && !loop_wday) stop("time_update: Incompatible size of 'wday' vector");
+  if (do_hour && sizes[5] != 1 && !loop_hour) stop("time_update: Incompatible size of 'hour' vector");
+  if (do_minute && sizes[6] != 1 && !loop_minute) stop("time_update: Incompatible size of 'minute' vector");
+  if (do_second && sizes[7] != 1 && !loop_second) stop("time_update: Incompatible size of 'second' vector");
 
   if (dt.size() > 1 && !loop_dt)
     stop("time_update: length of dt vector must be 1 or match the length of updating vectors");
@@ -303,13 +303,13 @@ Rcpp::newDatetimeVector C_time_add(const Rcpp::NumericVector& dt,
     loop_second = second.size() == N, loop_dt = dt.size() == N;
 
   // fixme: provide vec size info in the message
-  if (do_year && year.size() != 1 && !loop_year) stop("time_add: Invalid size of 'year' vector");
-  if (do_month && month.size() != 1 && !loop_month) stop("time_add: Invalid size of 'month' vector");
-  if (do_week && week.size() != 1 && !loop_week) stop("time_add: Invalid size of 'week' vector");
-  if (do_day && day.size() != 1 && !loop_day) stop("time_add: Invalid size of 'day' vector");
-  if (do_hour && hour.size() != 1 && !loop_hour) stop("time_add: Invalid size of 'hour' vector");
-  if (do_minute && minute.size() != 1 && !loop_minute) stop("time_add: Invalid size of 'minute' vector");
-  if (do_second && second.size() != 1 && !loop_second) stop("time_add: Invalid size of 'second' vector");
+  if (do_year && year.size() != 1 && !loop_year) stop("time_add: Incompatible size of 'year' vector");
+  if (do_month && month.size() != 1 && !loop_month) stop("time_add: Incompatible size of 'month' vector");
+  if (do_week && week.size() != 1 && !loop_week) stop("time_add: Incompatible size of 'week' vector");
+  if (do_day && day.size() != 1 && !loop_day) stop("time_add: Incompatible size of 'day' vector");
+  if (do_hour && hour.size() != 1 && !loop_hour) stop("time_add: Incompatible size of 'hour' vector");
+  if (do_minute && minute.size() != 1 && !loop_minute) stop("time_add: Incompatible size of 'minute' vector");
+  if (do_second && second.size() != 1 && !loop_second) stop("time_add: Incompatible size of 'second' vector");
 
   if (dt.size() > 1 && !loop_dt)
     stop("time_add: length of datetime vector must be 1 or match the length of updating vectors");

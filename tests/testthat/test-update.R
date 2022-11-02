@@ -517,8 +517,8 @@ test_that("update correctly works for yday", {
 
 test_that("update errors on empty unit vectors", {
   y <- ymd_hms("2020-03-29 01:00:00", tz = "Asia/Beirut")
-  expect_error(time_update(y, minute = integer()), "Invalid size of 'minute' vector")
-  expect_error(time_update(y, hour = 1, minute = integer()), "Invalid size of 'minute' vector")
+  expect_error(time_update(y, minute = integer()), "Incompatible size of 'minute' vector")
+  expect_error(time_update(y, hour = 1, minute = integer()), "Incompatible size of 'minute' vector")
 })
 
 
