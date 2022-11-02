@@ -71,7 +71,7 @@ bool load_tz(std::string tzstr, cctz::time_zone& tz) {
 
 void load_tz_or_fail(std::string tzstr, cctz::time_zone& tz, std::string error_msg) {
   if (!load_tz(tzstr, tz)) {
-    cpp11::stop(error_msg.c_str(), tzstr);
+    Rf_error(error_msg.c_str(), tzstr);
   }
 }
 

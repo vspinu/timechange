@@ -75,29 +75,29 @@ cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
     loop_dt = dt.size() == N;
 
   // fixme: more informative message
-  if (do_year && sizes[0] != 1 && !loop_year) cpp11::stop("time_update: Incompatible size of 'year' vector");
-  if (do_month && sizes[1] != 1 && !loop_month) cpp11::stop("time_update: Incompatible size of 'month' vector");
-  if (do_yday && sizes[2] != 1 && !loop_yday) cpp11::stop("time_update: Incompatible size of 'yday' vector");
-  if (do_mday && sizes[3] != 1 && !loop_mday) cpp11::stop("time_update: Incompatible size of 'mday' vector");
-  if (do_wday && sizes[4] != 1 && !loop_wday) cpp11::stop("time_update: Incompatible size of 'wday' vector");
-  if (do_hour && sizes[5] != 1 && !loop_hour) cpp11::stop("time_update: Incompatible size of 'hour' vector");
-  if (do_minute && sizes[6] != 1 && !loop_minute) cpp11::stop("time_update: Incompatible size of 'minute' vector");
-  if (do_second && sizes[7] != 1 && !loop_second) cpp11::stop("time_update: Incompatible size of 'second' vector");
+  if (do_year && sizes[0] != 1 && !loop_year) Rf_error("time_update: Incompatible size of 'year' vector");
+  if (do_month && sizes[1] != 1 && !loop_month) Rf_error("time_update: Incompatible size of 'month' vector");
+  if (do_yday && sizes[2] != 1 && !loop_yday) Rf_error("time_update: Incompatible size of 'yday' vector");
+  if (do_mday && sizes[3] != 1 && !loop_mday) Rf_error("time_update: Incompatible size of 'mday' vector");
+  if (do_wday && sizes[4] != 1 && !loop_wday) Rf_error("time_update: Incompatible size of 'wday' vector");
+  if (do_hour && sizes[5] != 1 && !loop_hour) Rf_error("time_update: Incompatible size of 'hour' vector");
+  if (do_minute && sizes[6] != 1 && !loop_minute) Rf_error("time_update: Incompatible size of 'minute' vector");
+  if (do_second && sizes[7] != 1 && !loop_second) Rf_error("time_update: Incompatible size of 'second' vector");
 
   if (dt.size() > 1 && !loop_dt)
-    cpp11::stop("time_update: length of dt vector must be 1 or match the length of updating vectors");
+    Rf_error("time_update: length of dt vector must be 1 or match the length of updating vectors");
 
   if (do_yday + do_mday + do_wday > 1)
-    cpp11::stop("Conflicting days input, only one of yday, mday and wday must be supplied");
+    Rf_error("Conflicting days input, only one of yday, mday and wday must be supplied");
 
   if (do_yday && (do_month || do_mday))
-    cpp11::stop("Setting `yday` in combination with `month` or `mday` is not supported");
+    Rf_error("Setting `yday` in combination with `month` or `mday` is not supported");
 
   if (do_wday && (do_year || do_month || do_mday))
-    cpp11::stop("Setting `yday` in combination with `year`, `month` or `mday` is not supported");
+    Rf_error("Setting `yday` in combination with `year`, `month` or `mday` is not supported");
 
   if ((do_yday && do_wday))
-    cpp11::stop("Setting both `yday` and `wday` is not supported");
+    Rf_error("Setting both `yday` and `wday` is not supported");
 
   std::string tzfrom = tz_from_tzone_attr(dt);
   cctz::time_zone otzone;
@@ -319,16 +319,16 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
     loop_second = second.size() == N, loop_dt = dt.size() == N;
 
   // fixme: provide vec size info in the message
-  if (do_year && year.size() != 1 && !loop_year) cpp11::stop("time_add: Incompatible size of 'year' vector");
-  if (do_month && month.size() != 1 && !loop_month) cpp11::stop("time_add: Incompatible size of 'month' vector");
-  if (do_week && week.size() != 1 && !loop_week) cpp11::stop("time_add: Incompatible size of 'week' vector");
-  if (do_day && day.size() != 1 && !loop_day) cpp11::stop("time_add: Incompatible size of 'day' or 'mday' vector");
-  if (do_hour && hour.size() != 1 && !loop_hour) cpp11::stop("time_add: Incompatible size of 'hour' vector");
-  if (do_minute && minute.size() != 1 && !loop_minute) cpp11::stop("time_add: Incompatible size of 'minute' vector");
-  if (do_second && second.size() != 1 && !loop_second) cpp11::stop("time_add: Incompatible size of 'second' vector");
+  if (do_year && year.size() != 1 && !loop_year) Rf_error("time_add: Incompatible size of 'year' vector");
+  if (do_month && month.size() != 1 && !loop_month) Rf_error("time_add: Incompatible size of 'month' vector");
+  if (do_week && week.size() != 1 && !loop_week) Rf_error("time_add: Incompatible size of 'week' vector");
+  if (do_day && day.size() != 1 && !loop_day) Rf_error("time_add: Incompatible size of 'day' or 'mday' vector");
+  if (do_hour && hour.size() != 1 && !loop_hour) Rf_error("time_add: Incompatible size of 'hour' vector");
+  if (do_minute && minute.size() != 1 && !loop_minute) Rf_error("time_add: Incompatible size of 'minute' vector");
+  if (do_second && second.size() != 1 && !loop_second) Rf_error("time_add: Incompatible size of 'second' vector");
 
   if (dt.size() > 1 && !loop_dt)
-    cpp11::stop("time_add: length of datetime vector must be 1 or match the length of updating vectors");
+    Rf_error("time_add: length of datetime vector must be 1 or match the length of updating vectors");
 
   std::string tz_name = tz_from_tzone_attr(dt);
   cctz::time_zone tz;
@@ -463,7 +463,7 @@ cpp11::writable::doubles C_force_tz(const cpp11::doubles dt,
   DST rdst(roll_dst);
 
   if (tz.size() != 1)
-    cpp11::stop("`tz` argument must be a single character string");
+    Rf_error("`tz` argument must be a single character string");
 
   std::string tzfrom_name = tz_from_tzone_attr(dt);
   std::string tzto_name(tz[0]);
@@ -506,10 +506,10 @@ cpp11::writable::doubles C_force_tzs(const cpp11::doubles dt,
   DST rdst(roll_dst);
 
   if (tz_out.size() != 1)
-    cpp11::stop("In 'tzout' argument must be of length 1");
+    Rf_error("In 'tzout' argument must be of length 1");
 
   if (tzs.size() != dt.size())
-    cpp11::stop("In 'C_force_tzs' tzs and dt arguments must be of the same length");
+    Rf_error("In 'C_force_tzs' tzs and dt arguments must be of the same length");
 
   std::string tzfrom_name = tz_from_tzone_attr(dt);
   std::string tzout_name(tz_out[0]);
@@ -551,7 +551,7 @@ cpp11::writable::doubles C_local_clock(const cpp11::doubles dt,
                                        const cpp11::strings tzs) {
 
   if (tzs.size() != dt.size())
-    cpp11::stop("`tzs` and `dt` arguments must be of the same length");
+    Rf_error("`tzs` and `dt` arguments must be of the same length");
 
   std::string tzfrom_name = tz_from_tzone_attr(dt);
   std::string tzto_old_name("not-a-tz");

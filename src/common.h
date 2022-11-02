@@ -75,7 +75,7 @@ struct DST {
     skipped(parse_dst_roll(skipped)), repeated(parse_dst_roll(repeated)) {}
   DST(const cpp11::strings roll_dst) {
     if (roll_dst.size() == 0 || roll_dst.size() > 2)
-      cpp11::stop("roll_dst must be a character vector of length 1 or 2");
+      Rf_error("roll_dst must be a character vector of length 1 or 2");
     std::string dst_repeated(roll_dst[0]);
     skipped = parse_dst_roll(dst_repeated);
     if (roll_dst.size() > 1) {
