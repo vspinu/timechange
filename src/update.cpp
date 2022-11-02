@@ -85,7 +85,7 @@ cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
   if (do_second && sizes[7] != 1 && !loop_second) Rf_error("time_update: Incompatible size of 'second' vector");
 
   if (dt.size() > 1 && !loop_dt)
-    Rf_error("time_update: length of dt vector must be 1 or match the length of updating vectors");
+    Rf_error("time_update: Incompatible length of time and update vectors");
 
   if (do_yday + do_mday + do_wday > 1)
     Rf_error("Conflicting days input, only one of yday, mday and wday must be supplied");
