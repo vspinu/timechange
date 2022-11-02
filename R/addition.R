@@ -153,10 +153,10 @@ time_add <- function(time, periods = NULL,
   periods <- periods[!vapply(periods, is.null, TRUE)]
 
   if (is.POSIXct(time)) {
+    storage.mode(time) <- "double"
     C_time_add(time, periods, roll_month, roll_dst)
   } else if (is.Date(time)) {
     out <- date2posixct(time)
-    attr(out, "tzone") <- "UTC"
     out <- C_time_add(out, periods, roll_month, roll_dst)
     if (is.null(periods[["hour"]]) &&
         is.null(periods[["minute"]]) &&

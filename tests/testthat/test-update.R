@@ -1,5 +1,15 @@
 context("Time Update")
 
+test_that("Integer mode posixct input works", {
+  set.seed(100)
+  int <- seq(ymd("2020-08-13", tz = "UTC"), by = "hour", length.out = 50)
+  expect_true(storage.mode(int) == "integer")
+  dbl <- int
+  secs <- runif(length(int))
+  expect_equal(time_update(int, second = int), time_update(dbl, second = int))
+  expect_equal(time_update(int, second = as.integer(int)), time_update(dbl, second = as.integer(int)))
+})
+
 test_that("Non-finite date-times are handled correctly", {
   expect_equal(time_update(.POSIXct(Inf), hour = 1), .POSIXct(Inf))
   expect_equal(time_add(.POSIXct(-Inf), hour = 1), .POSIXct(-Inf))
