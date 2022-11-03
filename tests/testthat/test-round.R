@@ -580,8 +580,8 @@ test_that("round on week respects week_start", {
 })
 
 test_that("rounding works for dates < 1970", {
-  expect_equal(round_date(ymd_hms("1957-12-01 14:00:00 UTC"), "month"),
+  expect_equal(time_round(ymd_hms("1957-12-01 14:00:00 UTC"), "month"),
                ymd("1957-12-01", tz = "UTC"))
-  expect_equal(round_date(ymd_hms("1958-01-31 09:59:59 UTC"), "month"),
+  expect_equal(time_round(ymd_hms("1958-01-31 09:59:59 UTC"), "month"),
                ymd("1958-02-01", tz = "UTC"))
 })
