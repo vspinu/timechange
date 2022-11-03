@@ -53,7 +53,23 @@ from_posixct <- function(ct, time, force_date = FALSE) {
   } else if (is.POSIXlt(time)) {
     as.POSIXlt.POSIXct(ct)
   } else {
-    unsupported_date_time(ct)
+    ct
+  }
+}
+
+from_posixlt <- function(new, old, force_date = FALSE) {
+  if (is.POSIXlt(old))
+    new
+  else if (is.Date(old)) {
+    if (force_date) {
+      as.Date(new, tz = tz(old))
+    } else {
+      as.POSIXct.POSIXlt(new)
+    }
+  } else if (is.POSIXct(old)) {
+    as.POSIXct.POSIXlt(new)
+  } else {
+    as.POSIXct.POSIXlt(new)
   }
 }
 

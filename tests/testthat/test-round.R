@@ -197,6 +197,35 @@ test_that("time_ceiling works for fractional multi-units", {
   expect_equal(time_ceiling(ymd_hms("2009-08-03 00:56:00"), "7 mins"), ymd_hms("2009-08-03 01:07:00"))
 })
 
+test_that("time_ceiling works for fractional multi-units", {
+  x <- as.POSIXct("2009-08-03 12:01:59.230001", tz = "UTC")
+  expect_identical(time_ceiling(x, ".2 secs"), as.POSIXct("2009-08-03 12:01:59.4", tz = "UTC"))
+  expect_identical(time_ceiling(x, ".1s"), as.POSIXct("2009-08-03 12:01:59.3", tz = "UTC"))
+  expect_identical(time_ceiling(x, ".05s"), as.POSIXct("2009-08-03 12:01:59.25", tz = "UTC"))
+  expect_identical(time_ceiling(x, ".01s"), as.POSIXct("2009-08-03 12:01:59.24", tz = "UTC"))
+  expect_identical(time_ceiling(x, ".005s"), as.POSIXct("2009-08-03 12:01:59.235", tz = "UTC"))
+  expect_identical(time_ceiling(x, ".5 mins"), as.POSIXct("2009-08-03 12:02:00", tz = "UTC"))
+})
+
+test_that("time_floor works for fractional multi-units", {
+  x <- as.POSIXct("2009-08-03 12:01:59.230001", tz = "UTC")
+  expect_identical(time_floor(x, ".2 secs"), as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
+  expect_identical(time_floor(x, ".1s"), as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
+  expect_identical(time_floor(x, ".05s"), as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
+  expect_identical(time_floor(x, ".01s"), as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC"))
+  expect_identical(time_floor(x, ".005s"), as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC"))
+  expect_identical(time_floor(x, ".5 mins"), as.POSIXct("2009-08-03 12:01:30", tz = "UTC"))
+})
+
+test_that("time_floor works for fractional asecons", {
+  x <- as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC")
+  expect_identical(time_floor(x, ".2a"), as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
+  expect_identical(time_floor(x, ".1a"), as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
+  expect_identical(time_floor(x, ".05a"), as.POSIXct("2009-08-03 12:01:59.2", tz = "UTC"))
+  expect_identical(time_floor(x, ".01a"), as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC"))
+  expect_identical(time_floor(x, ".005a"), as.POSIXct("2009-08-03 12:01:59.23", tz = "UTC"))
+})
+
 test_that("time_ceiling fails with fractional multi-units", {
   x <- as.POSIXct("2009-08-03 12:01:59.23001", tz = "UTC")
   expect_error(time_ceiling(x, "10.2m"), "Rounding")
@@ -529,7 +558,6 @@ test_that("time_round and time_ceiling skip day time gap", {
 
 test_that("time rounding with hours works with repeated DST transitions", {
 
-  ## WAF? as.POSIXct returns EDT/EST randomly on ctus("2014-11-02 01:00:00")
   am1 <- .POSIXct(1414904400, tz = "America/New_York")
   expect_equal(time_floor(am1 + 3600, "hour"), am1 + 3600)
   ## rounding is done in civil time for units > seconds
@@ -553,12 +581,12 @@ test_that("time rounding with hours works with repeated DST transitions", {
   ## rounding is done in civil time for units > seconds
   expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), am1) ## EDT (30m)
   x <- time_add(am1, minutes = 35) ## EDT
-  expect_equal(as.numeric(difftime(time_round(x, "hour"), ctus(x), units = "min")), -35)
-  expect_equal(as.numeric(difftime(time_round(x, "3600a"), ctus(x), units = "min")), 25)
+  expect_equal(as.numeric(difftime(time_round(x, "hour"), x, units = "min")), 25)
+  expect_equal(as.numeric(difftime(time_round(x, "3600a"), x, units = "min")), 25)
   x <- ctus("2014-11-02 02:15:00")
   expect_equal(time_round(x, "hour"), ctus("2014-11-02 02:00:00")) ## EST (15m)
-  expect_equal(as.numeric(difftime(time_round(x, "hour"), ctus(x), units = "min")), -15)
-  expect_equal(as.numeric(difftime(time_round(x, "3600a"), ctus(x), units = "min")), -15)
+  expect_equal(as.numeric(difftime(time_round(x, "hour"), x, units = "min")), -15)
+  expect_equal(as.numeric(difftime(time_round(x, "3600a"), x, units = "min")), -15)
 
   ## rounding is done in civil time for units > seconds
   expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), am1) ## EDT (30m)

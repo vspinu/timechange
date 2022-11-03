@@ -5,12 +5,6 @@
 #'   as strings. All common abbreviations are supported - secs, min, mins, 2 minutes, 3
 #'   years, 2s, 1d etc.
 #'
-#' @details
-#'
-#' @section Rounding to fractional units
-#'
-#' Rounding
-#'
 #' @section Civil Time vs Absolute Time rounding:
 #'
 #' Rounding in civil time is done on actual clock time (ymdHMS) and is affected
@@ -28,7 +22,7 @@
 #' to large precision errors due to the floating point representation of the
 #' POSIXct objects.
 #'
-#' @section Note on `time_round()`
+#' @section Note on `time_round()`:
 #'
 #' For rounding date-times which is exactly halfway between two consecutive units,
 #' the convention is to round up. Note that this is in line with the behavior of R's
@@ -210,20 +204,26 @@ time_round <- function(time, unit = "second", week_start = getOption("timechange
   unit <- standardise_unit_name(parsed_unit$unit)
   validate_nunit(unit, n)
 
-  if (n == 1 && is.POSIXt(time) && unit == "second") {
-    ## special case for fast absolute time rounding
-    round.POSIXt(time, units = base_units[[unit]])
-  } else {
-    ct <- to_posixct(time)
-    above <- unclass(C_time_ceiling(ct, unit, n, week_start, TRUE))
-    mid <- unclass(ct)
-    below <- unclass(C_time_floor(ct, unit, n, week_start))
-    wabove <- (above - mid) <= (mid - below)
-    wabove <- !is.na(wabove) & wabove
-    below[wabove] <- above[wabove]
-    from_posixct(.POSIXct(below, tz = tz(time)), time,
-                 force_date = !unit %in% c("second", "minute", "hour"))
+  ct <- to_posixct(time)
+
+  ## special case for fast absolute time rounding
+  if (n == 1 && unit %in% c("day", "hour", "minute", "second", "asecond")) {
+    out <- round.POSIXt(ct, units = base_units[[unit]])
+    return(from_posixlt(out, time, force_date = unit != "hour"))
   }
+
+  ## FIXME: Behavior or this logic is likely slightly different from the above base
+  ## rounding around DST. It has to do with hard-coded post-pre values in ceiling and
+  ## floor.
+  above <- unclass(C_time_ceiling(ct, unit, n, week_start, TRUE))
+  mid <- unclass(ct)
+  below <- unclass(C_time_floor(ct, unit, n, week_start))
+  wabove <- (above - mid) <= (mid - below)
+  wabove <- !is.na(wabove) & wabove
+  below[wabove] <- above[wabove]
+
+  from_posixct(.POSIXct(below, tz = tz(time)), time,
+               force_date = !unit %in% c("hour", "minute", "second", "asecond"))
 }
 
 #' @name time_round
@@ -239,7 +239,7 @@ time_floor <- function(time, unit = "seconds", week_start = getOption("timechang
   validate_nunit(unit, n)
 
   from_posixct(C_time_floor(to_posixct(time), unit, n, week_start),
-               time, force_date = !unit %in% c("second", "minute", "hour"))
+               time, force_date = !unit %in% c("asecond", "second", "minute", "hour"))
 
 }
 

@@ -28,49 +28,44 @@ time_ceiling(
 \arguments{
 \item{time}{a date-time vector (\code{Date}, \code{POSIXct} or \code{POSIXlt})}
 
-\item{unit}{a character string specifying a time unit or a multiple of a
-unit. Valid base periods for civil time rounding are \code{second}, \code{minute},
-\code{hour}, \code{day}, \code{week}, \code{month}, \code{bimonth}, \code{quarter}, \code{season}, \code{halfyear}
-and \code{year}. The only unit for absolute time rounding is \code{asecond}. Other
-absolute units can be achieved with multiples of \code{asecond} ("60a", "3600a"
-etc). See "Details" and examples. Arbitrary unique English abbreviations
-are allowed. With one letter abbreviations are supported, including the
-\code{strptime} formats "y", "m", "d", "M", "H", "S". Multi-unit rounding of
-weeks is currently not supported.}
+\item{unit}{a character string specifying a time unit or a multiple of a unit. Valid
+base periods for civil time rounding are \code{second}, \code{minute}, \code{hour}, \code{day}, \code{week},
+\code{month}, \code{bimonth}, \code{quarter}, \code{season}, \code{halfyear} and \code{year}. The only unit for
+absolute time rounding is \code{asecond}. Other absolute units can be achieved with
+multiples of \code{asecond} ("60a", "3600a" etc). See "Details" and examples. Arbitrary
+unique English abbreviations are allowed. One letter abbreviations follow
+\code{strptime} formats "y", "m", "d", "M", "H", "S". Multi-unit rounding of weeks is
+currently not supported.
 
-\item{week_start}{When unit is \code{weeks}, this is the first day of the
-week. Defaults to 1 (Monday).}
+Rounding for a unit is performed from the parent's unit origin. For example when
+rounding to seconds origin is start of the minute. When rounding to days, origin is
+first date of the month. See examples.
 
-\item{change_on_boundary}{If NULL (the default) don't change instants on the
-boundary (\code{time_ceiling(ymd_hms('2000-01-01 00:00:00'))} is \verb{2000-01-01 00:00:00}), but round up \code{Date} objects to the next boundary
-(\code{time_ceiling(ymd("2000-01-01"), "month")} is \code{"2000-02-01"}). When
-\code{TRUE}, instants on the boundary are rounded up to the next boundary. When
-\code{FALSE}, date-time on the boundary are never rounded up (this was the
-default for \pkg{lubridate} prior to \code{v1.6.0}. See section \verb{Rounding Up Date Objects} below for more details.}
+With fractional sub-unit (unit < 1) rounding with child unit is performed
+instead. For example 0.5mins == 30secs, .2hours == 12min etc.
+
+Please note that for fractions which don't match exactly to integer number of the
+child units only the integer part is used for computation. For example .7days =
+16.8hours will use 16 hours during the computation.}
+
+\item{week_start}{When unit is \code{weeks}, this is the first day of the week. Defaults
+to 1 (Monday).}
+
+\item{change_on_boundary}{If NULL (the default) don't change instants on the boundary
+(\code{time_ceiling(ymd_hms('2000-01-01 00:00:00'))} is \verb{2000-01-01 00:00:00}), but
+round up \code{Date} objects to the next boundary (\code{time_ceiling(ymd("2000-01-01"), "month")} is \code{"2000-02-01"}). When \code{TRUE}, instants on the boundary are rounded up
+to the next boundary. When \code{FALSE}, date-time on the boundary are never rounded up
+(this was the default for \pkg{lubridate} prior to \code{v1.6.0}. See section \verb{Rounding Up Date Objects} below for more details.}
 }
 \value{
-An object of the same class as the input object. When input is a
-\code{Date} object and unit is smaller than \code{day} a \code{POSIXct} object is
-returned.
+An object of the same class as the input object. When input is a \code{Date}
+object and unit is smaller than \code{day} a \code{POSIXct} object is returned.
 }
 \description{
-\pkg{timechange} provides rounding to the nearest unit or
-multiple of a unit. Units can be specified flexibly as strings; all common
-abbreviations are supported - secs, min, mins, 2 minutes, 3 years, 2s, 1d
-etc.
-
-\code{time_round()} rounds a date-time to the nearest value of the
-specified time unit. For rounding date-times which is exactly halfway
-between two consecutive units, the convention is to round up. Note that
-this is in line with the behavior of R's \code{\link[base:round.POSIXt]{base::round.POSIXt()}} function
-but does not follow the convention of the base \code{\link[base:Round]{base::round()}} function
-which "rounds to the even digit" per IEC 60559.
-
-\code{time_floor} rounds down a date-time to the nearest lower
-boundary of the specified time unit.
-
-\code{time_ceiling()} rounds up the date-time to the nearest boundary
-of the specified time unit.
+\pkg{timechange} provides rounding to the nearest unit or multiple of a
+unit with fractional support whenever makes sense. Units can be specified flexibly
+as strings. All common abbreviations are supported - secs, min, mins, 2 minutes, 3
+years, 2s, 1d etc.
 }
 \section{Civil Time vs Absolute Time rounding}{
 
@@ -89,6 +84,15 @@ with the corresponding \verb{X aseconds}.
 Please note that absolute rounding to fractions smaller than 1ms will result
 to large precision errors due to the floating point representation of the
 POSIXct objects.
+}
+
+\section{Note on \code{time_round()}}{
+
+
+For rounding date-times which is exactly halfway between two consecutive units,
+the convention is to round up. Note that this is in line with the behavior of R's
+\code{\link[base:round.POSIXt]{base::round.POSIXt()}} function but does not follow the convention of the base
+\code{\link[base:Round]{base::round()}} function which "rounds to the even digit" per IEC 60559.
 }
 
 \section{Ceiling of \code{Date} objects}{
@@ -197,6 +201,31 @@ time_floor(x, "hour") # "2014-11-02 01:00:00 EST"
 difftime(time_floor(x, "hour"), x)
 time_floor(x, "3600a") # "2014-11-02 01:00:00 EST"  - 25m
 difftime(time_floor(x, "a"), x)
+
+## behavior on the boundary when rounding multi-units
+
+x <- as.POSIXct("2009-08-28 22:56:59.23", tz = "UTC")
+time_ceiling(x, "3.4 secs")  # "2009-08-28 22:57:03.4"
+time_ceiling(x, "50.5 secs")  # "2009-08-28 22:57:50.5"
+time_ceiling(x, "57 min")  # "2009-08-28 22:57:00"
+time_ceiling(x, "56 min")  # "2009-08-28 23:56:00"
+time_ceiling(x, "7h")  # "2009-08-29 07:00:00"
+time_ceiling(x, "7d")  # "2009-08-29 00:00:00"
+time_ceiling(x, "8d")  # "2009-09-09 00:00:00"
+time_ceiling(x, "8m")  # "2009-09-01 00:00:00"
+time_ceiling(x, "6m")  # "2010-01-01 00:00:00"
+time_ceiling(x, "7m")  # "2010-08-01 00:00:00"
+
+x <- as.POSIXct("2010-11-25 22:56:57", tz = "UTC")
+time_ceiling(x, "6sec") # "2010-11-25 22:57:00"
+time_ceiling(x, "60sec") # "2010-11-25 22:57:00"
+time_ceiling(x, "6min") # "2010-11-25 23:00:00"
+time_ceiling(x, "60min") # "2010-11-25 23:00:00"
+time_ceiling(x, "4h") # "2010-11-26 00:00:00"
+time_ceiling(x, "15d") # "2010-12-01 00:00:00"
+time_ceiling(x, "15d") # "2010-12-01 00:00:00"
+time_ceiling(x, "6m") # "2011-01-01 00:00:00"
+
 }
 \seealso{
 \code{\link[base:Round]{base::round()}}

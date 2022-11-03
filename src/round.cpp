@@ -41,9 +41,9 @@ inline double month_unit(const Unit unit, double N) {
 
 std::pair<Unit,double> adjust_rounding_unit(const Unit unit, double N) {
   switch (unit) {
-   case Unit::ASECOND: return std::make_pair(Unit::ASECOND, N);
+   case Unit::ASECOND:
+     return std::make_pair(Unit::ASECOND, N);
    case Unit::SECOND:
-     if (N < 1) return std::make_pair(Unit::ASECOND, N);
      if (N > 60) Rf_error("Rounding unit for seconds larger than 60");
      return std::make_pair(Unit::SECOND, N);
    case Unit::MINUTE:
@@ -265,24 +265,29 @@ cpp11::writable::doubles C_time_floor(const cpp11::doubles dt,
   cctz::weekday wday = static_cast<cctz::weekday>(week_start - 1);
 
   for (size_t i = 0; i < n; i++) {
+
     double dsecs = dt[i];
     int_fast64_t isecs = floor_to_int64(dsecs);
     if (isecs == NA_INT64) { out[i] = NA_REAL; continue; }
     sys_seconds ss(isecs);
     time_point tp(ss);
     cctz::civil_second cs = cctz::convert(tp, tz);
+
     switch(UN.first) {
      case Unit::ASECOND : {
        // absolute seconds: rounding from origin. No restrictions on units.
-       out[i] = floor_multi_unit(dsecs, nunits); break;
+       out[i] = floor_multi_unit(dsecs, nunits);
+       break;
      }
      case Unit::SECOND : {
        double rem = dsecs - isecs;
        double ds = floor_multi_unit(cs.second() + rem, N);
        int_fast64_t is = static_cast<int_fast64_t>(ds);
        rem = ds - is;
+       /* Rprintf("dsec:%f isec%f rem:%f ds:%f is:%ld\n", dsecs, isecs, ds, is); */
        cctz::civil_second ct = cctz::civil_second(cctz::civil_minute(cs)) + is;
-       out[i] = ct2posix4floor(ct, tz, tp, cs, rem); break;
+       out[i] = ct2posix4floor(ct, tz, tp, cs, rem);
+       break;
      }
      case Unit::MINUTE : {
        cctz::civil_minute ct = cctz::civil_minute(cctz::civil_hour(cs)) + floor_multi_unit(cs.minute(), N);
