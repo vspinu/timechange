@@ -5,6 +5,7 @@
 #include <Rinternals.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #define ALPHA(X) (((X) >= 'a' && (X) <= 'z') || ((X) >= 'A' && (X) <= 'Z'))
 #define DIGIT(X) ((X) >= '0' && (X) <= '9')
@@ -154,7 +155,7 @@ fractionUnit parse_period_unit (const char **c) {
 }
 
 
-void parse_period_1 (const char **c, double ret[N_PERIOD_UNITS]){
+void parse_period_1 (const char **c, double ret[N_PERIOD_UNITS], bool frac_to_second){
   int P = 0; // ISO period flag
   int parsed1 = 0;
   while (**c) {
@@ -172,8 +173,12 @@ void parse_period_1 (const char **c, double ret[N_PERIOD_UNITS]){
         parsed1 = 1;
         ret[fu.unit] += fu.val;
         if (fu.fraction > 0) {
-          if (fu.unit == 0) ret[fu.unit] += fu.fraction;
-          else ret[0] += fu.fraction * SECONDS_IN_ONE[fu.unit];
+          if (frac_to_second) {
+            if (fu.unit == 0) ret[fu.unit] += fu.fraction;
+            else ret[0] += fu.fraction * SECONDS_IN_ONE[fu.unit];
+          } else {
+            ret[fu.unit] += fu.fraction;
+          }
         }
       }
     } else {
@@ -208,7 +213,7 @@ SEXP C_parse_period(SEXP str) {
   for (int i = 0; i < n; i++) {
     const char *c = CHAR(STRING_ELT(str, i));
     double ret[N_PERIOD_UNITS] = {0};
-    parse_period_1(&c, ret);
+    parse_period_1(&c, ret, false);
     int j = i * N_PERIOD_UNITS;
     for(int k = 0; k < N_PERIOD_UNITS; k++) {
       data[j + k] = ret[k];

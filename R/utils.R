@@ -78,7 +78,7 @@ standardise_unit_name <- function(x) {
 parse_units <- function(unit) {
 
   if (length(unit) > 1) {
-    warning("Unit argument longer than 1. Taking first element.")
+    warning("'unit' argument has length larger than 1. Using first element.")
     unit <- unit[[1]]
   }
 
@@ -90,9 +90,7 @@ parse_units <- function(unit) {
 
     wp <- which(p > 0)
     if (length(wp) > 1) {
-      ## Fractional units are actually supported but only when it leads to one
-      ## final unit.
-      stop("Cannot't parse heterogenuous or fractional units larger than one minute.")
+      stop("Heterogeneous units are not supported in rounding operations.")
     }
 
     list(n = p[wp], unit = units[wp])
