@@ -238,7 +238,10 @@ time_floor <- function(time, unit = "seconds", week_start = getOption("timechang
   unit <- standardise_unit_name(parsed_unit$unit)
   validate_nunit(unit, n)
 
-  from_posixct(C_time_floor(to_posixct(time), unit, n, week_start),
+  from_posixct(C_time_floor(to_posixct(time),
+                            unit,
+                            n,
+                            as.integer(week_start)),
                time, force_date = !unit %in% c("asecond", "second", "minute", "hour"))
 
 }
@@ -257,7 +260,11 @@ time_ceiling <- function(time, unit = "seconds",
   unit <- standardise_unit_name(parsed_unit$unit)
   validate_nunit(unit, n)
 
-  from_posixct(C_time_ceiling(to_posixct(time), unit, n, week_start, change_on_boundary),
+  from_posixct(C_time_ceiling(to_posixct(time),
+                              unit,
+                              n,
+                              as.integer(week_start),
+                              as.logical(change_on_boundary)),
                time, force_date = !unit %in% c("second", "minute", "hour"))
 }
 
