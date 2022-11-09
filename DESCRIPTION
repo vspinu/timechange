@@ -16,7 +16,7 @@ Encoding: UTF-8
 LinkingTo:
     cpp11 (>= 0.2.7)
 Suggests:
-  testthat,
+  testthat (>= 0.7.1.99),
   knitr
 SystemRequirements: A system with zoneinfo data (e.g. /usr/share/zoneinfo) as
     well as a recent-enough C++11 compiler (such as g++-4.8 or later). On
