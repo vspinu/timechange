@@ -90,9 +90,9 @@ struct DST {
 // Helper for conversion functions. Get seconds from civil_lookup, but relies on
 // original time pre/post time if cl_new falls in repeated interval.
 double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new lookup
-                             const cctz::time_zone& tz_orig,              // original time zone
-                             const time_point& tp_orig,                   // original time point
-                             const cctz::civil_second& cs_orig,           // original time in secs
+                             const cctz::time_zone& tz_old,               // original time zone
+                             const time_point& tp_old,                    // original time point
+                             const cctz::civil_second& cs_old,            // original time in secs
                              const DST& dst,
                              const double remainder) noexcept;
 
