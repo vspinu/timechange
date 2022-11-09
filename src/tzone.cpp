@@ -52,7 +52,7 @@ const char* local_tz() {
 
 bool load_tz(std::string tzstr, cctz::time_zone& tz) {
   // return `true` if loaded, else false
-  if (tzstr.size() == 0) {
+  if (tzstr.empty()) {
     // CCTZ doesn't work on windows https://github.com/google/cctz/issues/53
     /* std::cout << "Local TZ: " << local_tz() << std::endl; */
     return cctz::load_time_zone(local_tz(), &tz);
