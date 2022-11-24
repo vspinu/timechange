@@ -33,7 +33,7 @@ cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
                                        const int week_start = 1,
                                        const bool exact = false) {
 
-  if (dt.size() == 0)
+  if (dt.empty())
     // FIXME: ignored tz argument
     return(posixct(tz_from_tzone_attr(dt)));
 
