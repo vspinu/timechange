@@ -4,12 +4,12 @@ C_time_get <- function(dt, components, week_start) {
   .Call(`_timechange_C_time_get`, dt, components, week_start)
 }
 
-C_time_ceiling <- function(dt, unit_name, nunits, week_start, change_on_boundary) {
-  .Call(`_timechange_C_time_ceiling`, dt, unit_name, nunits, week_start, change_on_boundary)
+C_time_ceiling <- function(dt, unit_name, nunits, week_start, change_on_boundary, origin) {
+  .Call(`_timechange_C_time_ceiling`, dt, unit_name, nunits, week_start, change_on_boundary, origin)
 }
 
-C_time_floor <- function(dt, unit_name, nunits, week_start) {
-  .Call(`_timechange_C_time_floor`, dt, unit_name, nunits, week_start)
+C_time_floor <- function(dt, unit_name, nunits, week_start, origin) {
+  .Call(`_timechange_C_time_floor`, dt, unit_name, nunits, week_start, origin)
 }
 
 C_local_tz <- function() {

@@ -13,17 +13,17 @@ extern "C" SEXP _timechange_C_time_get(SEXP dt, SEXP components, SEXP week_start
   END_CPP11
 }
 // round.cpp
-cpp11::writable::doubles C_time_ceiling(const cpp11::doubles dt, const std::string unit_name, const double nunits, const int week_start, const bool change_on_boundary);
-extern "C" SEXP _timechange_C_time_ceiling(SEXP dt, SEXP unit_name, SEXP nunits, SEXP week_start, SEXP change_on_boundary) {
+cpp11::writable::doubles C_time_ceiling(const cpp11::doubles dt, const std::string unit_name, const double nunits, const int week_start, const bool change_on_boundary, const cpp11::doubles origin);
+extern "C" SEXP _timechange_C_time_ceiling(SEXP dt, SEXP unit_name, SEXP nunits, SEXP week_start, SEXP change_on_boundary, SEXP origin) {
   BEGIN_CPP11
-    return cpp11::as_sexp(C_time_ceiling(cpp11::as_cpp<cpp11::decay_t<const cpp11::doubles>>(dt), cpp11::as_cpp<cpp11::decay_t<const std::string>>(unit_name), cpp11::as_cpp<cpp11::decay_t<const double>>(nunits), cpp11::as_cpp<cpp11::decay_t<const int>>(week_start), cpp11::as_cpp<cpp11::decay_t<const bool>>(change_on_boundary)));
+    return cpp11::as_sexp(C_time_ceiling(cpp11::as_cpp<cpp11::decay_t<const cpp11::doubles>>(dt), cpp11::as_cpp<cpp11::decay_t<const std::string>>(unit_name), cpp11::as_cpp<cpp11::decay_t<const double>>(nunits), cpp11::as_cpp<cpp11::decay_t<const int>>(week_start), cpp11::as_cpp<cpp11::decay_t<const bool>>(change_on_boundary), cpp11::as_cpp<cpp11::decay_t<const cpp11::doubles>>(origin)));
   END_CPP11
 }
 // round.cpp
-cpp11::writable::doubles C_time_floor(const cpp11::doubles dt, const std::string unit_name, const double nunits, const int week_start);
-extern "C" SEXP _timechange_C_time_floor(SEXP dt, SEXP unit_name, SEXP nunits, SEXP week_start) {
+cpp11::writable::doubles C_time_floor(const cpp11::doubles dt, const std::string unit_name, const double nunits, const int week_start, const cpp11::doubles origin);
+extern "C" SEXP _timechange_C_time_floor(SEXP dt, SEXP unit_name, SEXP nunits, SEXP week_start, SEXP origin) {
   BEGIN_CPP11
-    return cpp11::as_sexp(C_time_floor(cpp11::as_cpp<cpp11::decay_t<const cpp11::doubles>>(dt), cpp11::as_cpp<cpp11::decay_t<const std::string>>(unit_name), cpp11::as_cpp<cpp11::decay_t<const double>>(nunits), cpp11::as_cpp<cpp11::decay_t<const int>>(week_start)));
+    return cpp11::as_sexp(C_time_floor(cpp11::as_cpp<cpp11::decay_t<const cpp11::doubles>>(dt), cpp11::as_cpp<cpp11::decay_t<const std::string>>(unit_name), cpp11::as_cpp<cpp11::decay_t<const double>>(nunits), cpp11::as_cpp<cpp11::decay_t<const int>>(week_start), cpp11::as_cpp<cpp11::decay_t<const cpp11::doubles>>(origin)));
   END_CPP11
 }
 // tzone.cpp
@@ -87,8 +87,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_timechange_C_local_clock",  (DL_FUNC) &_timechange_C_local_clock,  2},
     {"_timechange_C_local_tz",     (DL_FUNC) &_timechange_C_local_tz,     0},
     {"_timechange_C_time_add",     (DL_FUNC) &_timechange_C_time_add,     4},
-    {"_timechange_C_time_ceiling", (DL_FUNC) &_timechange_C_time_ceiling, 5},
-    {"_timechange_C_time_floor",   (DL_FUNC) &_timechange_C_time_floor,   4},
+    {"_timechange_C_time_ceiling", (DL_FUNC) &_timechange_C_time_ceiling, 6},
+    {"_timechange_C_time_floor",   (DL_FUNC) &_timechange_C_time_floor,   5},
     {"_timechange_C_time_get",     (DL_FUNC) &_timechange_C_time_get,     3},
     {"_timechange_C_time_update",  (DL_FUNC) &_timechange_C_time_update,  7},
     {"_timechange_C_valid_tz",     (DL_FUNC) &_timechange_C_valid_tz,     1},

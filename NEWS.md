@@ -1,6 +1,10 @@
 Version 0.1.1.9000
 =================
 
+## New Features
+
+ - Rounding gain new `origin` parameter with respect to which to round with "absolute" units.
+
 ## Bug Fixes
 
  - [#16](https://github.com/vspinu/timechange/issues/16) Rounding unit parser is now conformant to R numeric parser

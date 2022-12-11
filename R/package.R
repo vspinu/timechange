@@ -10,6 +10,8 @@
 "_PACKAGE"
 
 
+unix_origin <- origin <- .POSIXct(0, tz = "UTC")
+
 .onLoad <- function(libname, pkgname) {
   ## CCTZ needs zoneinfo. On windows we set it to R's own zoneinfo. On unix-like
   ## it's in "/usr/share/zoneinfo" where CCTZ looks by default. On some systems

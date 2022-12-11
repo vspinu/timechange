@@ -9,20 +9,23 @@
 time_round(
   time,
   unit = "second",
-  week_start = getOption("timechange.week_start", 1)
+  week_start = getOption("timechange.week_start", 1),
+  origin = unix_origin
 )
 
 time_floor(
   time,
   unit = "seconds",
-  week_start = getOption("timechange.week_start", 1)
+  week_start = getOption("timechange.week_start", 1),
+  origin = unix_origin
 )
 
 time_ceiling(
   time,
   unit = "seconds",
   change_on_boundary = inherits(time, "Date"),
-  week_start = getOption("timechange.week_start", 1)
+  week_start = getOption("timechange.week_start", 1),
+  origin = unix_origin
 )
 }
 \arguments{
@@ -50,6 +53,10 @@ child units only the integer part is used for computation. For example .7days =
 
 \item{week_start}{When unit is \code{weeks}, this is the first day of the week. Defaults
 to 1 (Monday).}
+
+\item{origin}{Origin with respect to which to perform the rounding operation. For
+\code{unit = "aseconds"} only. Can be a vector of the same length as the input \code{time}
+vector. Defaults to the Unix origin "1970-01-01 UTC".}
 
 \item{change_on_boundary}{If NULL (the default) don't change instants on the boundary
 (\code{time_ceiling(ymd_hms('2000-01-01 00:00:00'))} is \verb{2000-01-01 00:00:00}), but
@@ -225,6 +232,17 @@ time_ceiling(x, "4h") # "2010-11-26 00:00:00"
 time_ceiling(x, "15d") # "2010-12-01 00:00:00"
 time_ceiling(x, "15d") # "2010-12-01 00:00:00"
 time_ceiling(x, "6m") # "2011-01-01 00:00:00"
+
+
+## custom origin
+x <- as.POSIXct(c("2010-10-01 01:00:01", "2010-11-02 02:00:01"), tz = "America/New_York")
+# 50 minutes from the day or month start
+time_floor(x, "3000a")
+time_floor(x, "3000a", origin = time_floor(x, "day"))
+time_floor(x, "3000a", origin = time_floor(x, "month"))
+time_ceiling(x, "3000a")
+time_ceiling(x, "3000a", origin = time_floor(x, "day"))
+time_ceiling(x, "3000a", origin = time_floor(x, "month"))
 
 }
 \seealso{

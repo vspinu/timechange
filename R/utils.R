@@ -77,7 +77,7 @@ standardise_unit_name <- function(x) {
   parse_unit(x)$unit
 }
 
-#' @return list(n=nr_units, unit="unit-name")
+# @return list(n=nr_units, unit="unit-name")
 parse_unit <- function(unit) {
   .Call(C_parse_unit, as.character(unit))
 }

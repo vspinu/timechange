@@ -83,6 +83,9 @@
 #'   Up Date Objects` below for more details.
 #' @param week_start When unit is `weeks`, this is the first day of the week. Defaults
 #'   to 1 (Monday).
+#' @param origin Origin with respect to which to perform the rounding operation. For
+#'   `unit = "aseconds"` only. Can be a vector of the same length as the input `time`
+#'   vector. Defaults to the Unix origin "1970-01-01 UTC".
 #' @return An object of the same class as the input object. When input is a `Date`
 #'   object and unit is smaller than `day` a `POSIXct` object is returned.
 #' @seealso [base::round()]
@@ -194,8 +197,21 @@
 #' time_ceiling(x, "15d") # "2010-12-01 00:00:00"
 #' time_ceiling(x, "6m") # "2011-01-01 00:00:00"
 #'
+#'
+#' ## custom origin
+#' x <- as.POSIXct(c("2010-10-01 01:00:01", "2010-11-02 02:00:01"), tz = "America/New_York")
+#' # 50 minutes from the day or month start
+#' time_floor(x, "3000a")
+#' time_floor(x, "3000a", origin = time_floor(x, "day"))
+#' time_floor(x, "3000a", origin = time_floor(x, "month"))
+#' time_ceiling(x, "3000a")
+#' time_ceiling(x, "3000a", origin = time_floor(x, "day"))
+#' time_ceiling(x, "3000a", origin = time_floor(x, "month"))
+#'
 #' @export
-time_round <- function(time, unit = "second", week_start = getOption("timechange.week_start", 1)) {
+time_round <- function(time, unit = "second",
+                       week_start = getOption("timechange.week_start", 1),
+                       origin = unix_origin) {
   if (length(time) == 0L)
     return(time)
 
@@ -206,7 +222,10 @@ time_round <- function(time, unit = "second", week_start = getOption("timechange
   ct <- to_posixct(time)
 
   ## special case for fast absolute time rounding
-  if (n == 1 && unit %in% c("day", "hour", "minute", "second", "asecond")) {
+  if (n == 1 && (
+    unit %in% c("day", "hour", "minute", "second") ||
+    (unit == "asecond" && identical(origin, unix_origin))
+  )) {
     out <- round.POSIXt(ct, units = base_units[[unit]])
     return(from_posixlt(out, time, force_date = unit != "hour"))
   }
@@ -214,9 +233,9 @@ time_round <- function(time, unit = "second", week_start = getOption("timechange
   ## FIXME: Behavior or this logic is likely slightly different from the above base
   ## rounding around DST. It has to do with hard-coded post-pre values in ceiling and
   ## floor.
-  above <- unclass(C_time_ceiling(ct, unit, n, week_start, TRUE))
+  above <- unclass(C_time_ceiling(ct, unit, n, week_start, TRUE, origin))
   mid <- unclass(ct)
-  below <- unclass(C_time_floor(ct, unit, n, week_start))
+  below <- unclass(C_time_floor(ct, unit, n, week_start, origin))
   wabove <- (above - mid) <= (mid - below)
   wabove <- !is.na(wabove) & wabove
   below[wabove] <- above[wabove]
@@ -227,14 +246,16 @@ time_round <- function(time, unit = "second", week_start = getOption("timechange
 
 #' @name time_round
 #' @export
-time_floor <- function(time, unit = "seconds", week_start = getOption("timechange.week_start", 1)) {
+time_floor <- function(time, unit = "seconds",
+                       week_start = getOption("timechange.week_start", 1),
+                       origin = unix_origin) {
 
   if (length(time) == 0)
     return(time)
 
   nu <- parse_rounding_unit(unit)
 
-  from_posixct(C_time_floor(to_posixct(time), nu$unit, nu$n, as.integer(week_start)),
+  from_posixct(C_time_floor(to_posixct(time), nu$unit, nu$n, as.integer(week_start), origin),
                time, force_date = !nu$unit %in% c("asecond", "second", "minute", "hour"))
 
 }
@@ -243,7 +264,8 @@ time_floor <- function(time, unit = "seconds", week_start = getOption("timechang
 #' @export
 time_ceiling <- function(time, unit = "seconds",
                          change_on_boundary = inherits(time, "Date"),
-                         week_start = getOption("timechange.week_start", 1)) {
+                         week_start = getOption("timechange.week_start", 1),
+                         origin = unix_origin) {
 
   if (length(time) == 0)
     return(time)
@@ -251,7 +273,7 @@ time_ceiling <- function(time, unit = "seconds",
   nu <- parse_rounding_unit(unit)
 
   from_posixct(C_time_ceiling(to_posixct(time), nu$unit, nu$n, as.integer(week_start),
-                              as.logical(change_on_boundary)),
+                              as.logical(change_on_boundary), origin),
                time, force_date = !nu$unit %in% c("second", "minute", "hour"))
 }
 
