@@ -78,10 +78,10 @@ extern "C" SEXP _timechange_C_local_clock(SEXP dt, SEXP tzs) {
 
 extern "C" {
 /* .Call calls */
-extern SEXP C_parse_period(SEXP);
+extern SEXP C_parse_unit(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"C_parse_period",             (DL_FUNC) &C_parse_period,             1},
+    {"C_parse_unit",               (DL_FUNC) &C_parse_unit,               1},
     {"_timechange_C_force_tz",     (DL_FUNC) &_timechange_C_force_tz,     3},
     {"_timechange_C_force_tzs",    (DL_FUNC) &_timechange_C_force_tzs,    4},
     {"_timechange_C_local_clock",  (DL_FUNC) &_timechange_C_local_clock,  2},

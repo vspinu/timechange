@@ -73,66 +73,13 @@ from_posixlt <- function(new, old, force_date = FALSE) {
   }
 }
 
-
-## utilities copied from lubridate
-
 standardise_unit_name <- function(x) {
-  dates <- c("second", "minute", "hour", "day", "week", "month", "year",
-             ## these ones are used for rounding only
-             "asecond", "bimonth", "quarter", "halfyear", "season")
-  y <- gsub("(.)s$", "\\1", x)
-  y <- substr(y, 1, 3)
-  res <- dates[pmatch(y, dates)]
-  if (any(is.na(res))) {
-    stop("Invalid unit name: ", paste(x[is.na(res)], collapse = ", "),
-         call. = FALSE)
-  }
-  res
+  parse_unit(x)$unit
 }
 
-## return list(n=nr_units, unit="unit_name")
-parse_units <- function(unit) {
-
-  if (length(unit) > 1) {
-    warning("'unit' argument has length larger than 1. Using first element.")
-    unit <- unit[[1]]
-  }
-
-  p <- .Call(C_parse_period, as.character(unit))
-
-  if (!is.na(p[[1]])) {
-
-    units <- c("second", "minute", "hour", "day", "week", "month", "year")
-
-    wp <- which(p > 0)
-    if (length(wp) > 1) {
-      stop("Heterogeneous units are not supported in rounding operations.")
-    }
-
-    list(n = p[wp], unit = units[wp])
-
-  } else {
-    ## allow for bimonth, halfyear, quarter, season and asecond
-
-    m <- regexpr(" *(?<n>[0-9.,]+)? *(?<unit>[^ \t\n]+)", unit[[1]], perl = T)
-    if (m > 0) {
-      ## should always match
-      nms <- attr(m, "capture.names")
-      nms <- nms[nzchar(nms)]
-      start <- attr(m, "capture.start")
-      end <- start + attr(m, "capture.length") - 1L
-      n <- if (end[[1]] >= start[[1]]) {
-             as.numeric(substring(unit, start[[1]], end[[1]]))
-           } else {
-             1
-           }
-      unit <- substring(unit, start[[2]], end[[2]])
-      list(n = n, unit = unit)
-    } else {
-      stop(sprintf("Invalid unit specification '%s'", unit))
-    }
-
-  }
+#' @return list(n=nr_units, unit="unit-name")
+parse_unit <- function(unit) {
+  .Call(C_parse_unit, as.character(unit))
 }
 
 # Because `as.POSIXct.Date()` always uses local timezone

@@ -1,21 +1,32 @@
+Version 0.1.1.9000
+=================
+
+## Bug Fixes
+
+ - [#16](https://github.com/vspinu/timechange/issues/16) Rounding unit parser is now conformant to R numeric parser
+
+## Internals
+
+ - [#17](https://github.com/vspinu/timechange/issues/17) Simplified and refactored unit parser.
+
 Version 0.1.1
 =============
 
 ## Changes
 
- * Follow vctrs replication rules
- * Change arguments of `time_add()` and `time_subtract()` to singulars
- * Build on top of cpp11 instead of Rcpp
+ - Follow vctrs replication rules
+ - Change arguments of `time_add()` and `time_subtract()` to singulars
+ - Build on top of cpp11 instead of Rcpp
 
 Version 0.1.0
 =============
 
 ## New Features:
 
- * Refactor `roll_month` and `roll_dst` parameterisation
+ - Refactor `roll_month` and `roll_dst` parameterisation
    + more intuitive names
    + full control over the behavior of repeated and skipped DST intervals
- * `time_update()` gains new argument `exact = FALSE` in order to enforce very strict updating rules
+ - `time_update()` gains new argument `exact = FALSE` in order to enforce very strict updating rules
 
 Version 0.0.2
 =============

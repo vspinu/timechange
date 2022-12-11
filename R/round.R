@@ -199,10 +199,9 @@ time_round <- function(time, unit = "second", week_start = getOption("timechange
   if (length(time) == 0L)
     return(time)
 
-  parsed_unit <- parse_units(unit)
-  n <- parsed_unit$n
-  unit <- standardise_unit_name(parsed_unit$unit)
-  validate_nunit(unit, n)
+  nu <- parse_rounding_unit(unit)
+  n <- nu$n
+  unit <- nu$unit
 
   ct <- to_posixct(time)
 
@@ -233,16 +232,10 @@ time_floor <- function(time, unit = "seconds", week_start = getOption("timechang
   if (length(time) == 0)
     return(time)
 
-  parsed_unit <- parse_units(unit)
-  n <- parsed_unit$n
-  unit <- standardise_unit_name(parsed_unit$unit)
-  validate_nunit(unit, n)
+  nu <- parse_rounding_unit(unit)
 
-  from_posixct(C_time_floor(to_posixct(time),
-                            unit,
-                            n,
-                            as.integer(week_start)),
-               time, force_date = !unit %in% c("asecond", "second", "minute", "hour"))
+  from_posixct(C_time_floor(to_posixct(time), nu$unit, nu$n, as.integer(week_start)),
+               time, force_date = !nu$unit %in% c("asecond", "second", "minute", "hour"))
 
 }
 
@@ -255,17 +248,11 @@ time_ceiling <- function(time, unit = "seconds",
   if (length(time) == 0)
     return(time)
 
-  parsed_unit <- parse_units(unit)
-  n <- parsed_unit$n
-  unit <- standardise_unit_name(parsed_unit$unit)
-  validate_nunit(unit, n)
+  nu <- parse_rounding_unit(unit)
 
-  from_posixct(C_time_ceiling(to_posixct(time),
-                              unit,
-                              n,
-                              as.integer(week_start),
+  from_posixct(C_time_ceiling(to_posixct(time), nu$unit, nu$n, as.integer(week_start),
                               as.logical(change_on_boundary)),
-               time, force_date = !unit %in% c("second", "minute", "hour"))
+               time, force_date = !nu$unit %in% c("second", "minute", "hour"))
 }
 
 
@@ -277,7 +264,21 @@ base_units <- list(second = "secs", minute = "mins", hour = "hours", day = "days
 trunc_multi_limits <- c(asecond = Inf, second = 60, minute = 60, hour = 24, day = 31, year = Inf, week = 1,
                         month = 12, bimonth = 6, quarter = 4, season = 4, halfyear = 2)
 
-validate_nunit <- function(unit, n) {
-  if (n > trunc_multi_limits[[unit]])
-    stop(sprintf("Rounding with %s > %d is not supported. Use aseconds for arbitrary units.", unit, trunc_multi_limits[[unit]]))
+parse_rounding_unit <- function(unit) {
+  if (length(unit) > 1) {
+    warning("'unit' argument has length larger than 1. Using first element.")
+    unit <- unit[[1]]
+  }
+  validate_rounding_nunit(.Call(C_parse_unit, as.character(unit)))
+}
+
+# cOmpat: TODO: remove once lubridate no longer uses .normalize_multi_week_unit
+# https://github.com/tidyverse/lubridate/blob/8c67d9ceca5315ef636d4727348d8914aa5552ea/R/round.r#L206
+parse_units <- parse_rounding_unit
+
+validate_rounding_nunit <- function(nunit) {
+  if (nunit$n > trunc_multi_limits[[nunit$unit]])
+    stop(sprintf("Rounding with %s > %d is not supported. Use aseconds for arbitrary units.",
+                 nunit$unit, trunc_multi_limits[[nunit$unit]]))
+  nunit
 }
