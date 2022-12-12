@@ -26,14 +26,39 @@ test_that("addition handles daylight savings time", {
 
   expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "post"), ctus("2010-03-14 03:52:03"))
   expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "pre"), ctus("2010-03-14 01:52:03"))
+  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "xlast"), ctus("2010-03-14 03:52:03"))
+  expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "xfirst"), ctus("2010-03-14 01:52:03"))
   expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "boundary"), ctus("2010-03-14 03:00:00"))
   expect_equal(time_add(x, hours = 1, minutes = 50, roll_dst = "NA"), NAam)
+  expect_equal(time_add(y, hours = -22, minutes = -50, roll_dst = "xfirst"), ctus("2010-03-14 03:12:03"))
+  expect_equal(time_add(y, hours = -22, minutes = -50, roll_dst = "xlast"), ctus("2010-03-14 01:12:03"))
+  expect_equal(time_add(y, hours = -23, minutes = 10, roll_dst = "xfirst"), ctus("2010-03-14 03:12:03"))
+  expect_equal(time_add(y, hours = -23, minutes = 10, roll_dst = "xlast"), ctus("2010-03-14 01:12:03"))
+
+  ## negative period even though minutes is crossing the boundary from below
+  expect_equal(time_add(x, hours = -1, minutes = 170, roll_dst = "xfirst"), ctus("2010-03-14 03:52:03"))
+  expect_equal(time_add(x, hours = -1, minutes = 170, roll_dst = "xlast"), ctus("2010-03-14 01:52:03"))
 
   expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "post"), ctus("2010-03-14 03:12:03"))
   expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "pre"), ctus("2010-03-14 01:12:03"))
+  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "xfirst"), ctus("2010-03-14 03:12:03"))
+  expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "xlast"), ctus("2010-03-14 01:12:03"))
   expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "boundary"), ctus("2010-03-14 03:00:00"))
   expect_equal(time_subtract(y, hours = 22, minutes = 50, roll_dst = "NA"), NAam)
   expect_equal(time_subtract(y, days = 1), x)
+
+  tt <- ymd_hms(c("2014-11-02 00:15:00", "2014-11-02 02:15:00"), tz = "America/New_York")
+  expect_equal(time_add(tt, hours = c(1, -1), roll_dst = "pre"), tt + c(3600, -2*3600))
+  expect_equal(time_add(tt, hours = c(1, -1), roll_dst = "post"), tt + c(2*3600, -3600))
+  expect_equal(time_add(tt, hours = c(1, -1), roll_dst = "xfirst"), tt + c(3600, -3600))
+  expect_equal(time_add(tt, hours = c(1, -1), roll_dst = "xlast"), tt + c(2*3600, -2*3600))
+
+  tt <- ymd_hms(c("2021-04-04 01:15:00", "2021-04-04 03:15:00"), tz = "Pacific/Auckland")
+  expect_equal(time_add(tt, hours = c(1, -1), roll_dst = "pre"), tt + c(3600, -2*3600))
+  expect_equal(time_add(tt, hours = c(1, -1), roll_dst = "post"), tt + c(2*3600, -3600))
+  expect_equal(time_add(tt, hours = c(1, -1), roll_dst = "xfirst"), tt + c(3600, -3600))
+  expect_equal(time_add(tt, hours = c(1, -1), roll_dst = "xlast"), tt + c(2*3600, -2*3600))
+
 })
 
 test_that("addition works as expected for instants", {

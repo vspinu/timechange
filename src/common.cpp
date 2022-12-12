@@ -19,25 +19,33 @@ int_fast64_t floor_to_int64(double x) {
 }
 
 double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
-                             const DST& dst) noexcept {
+                             const DST& dst,
+                             const bool is_negative) noexcept {
   time_point tp;
-  if (cl.kind == cctz::time_zone::civil_lookup::SKIPPED) {
-    // meaning of pre/post in CCTZ is not the same as here. It's inverted.
-    switch (dst.skipped) {
-     case RollDST::PRE: tp = cl.post; break;
-     case RollDST::BOUNDARY: tp = cl.trans; break;
-     case RollDST::POST: tp = cl.pre; break;
-     case RollDST::NA: return NA_REAL;
-    }
-  } else if (cl.kind == cctz::time_zone::civil_lookup::REPEATED) {
-    switch (dst.repeated) {
-     case RollDST::PRE: tp = cl.pre; break;
-     case RollDST::BOUNDARY: tp = cl.trans; break;
-     case RollDST::POST: tp = cl.post; break;
-     case RollDST::NA: return NA_REAL;
-    }
-  } else {
-    tp = cl.pre;
+  switch (cl.kind) {
+   case cctz::time_zone::civil_lookup::SKIPPED:
+     // meaning of pre/post in CCTZ is not the same as here. It's inverted.
+     switch (dst.skipped) {
+      case RollDST::PRE: tp = cl.post; break;
+      case RollDST::BOUNDARY: tp = cl.trans; break;
+      case RollDST::POST: tp = cl.pre; break;
+      case RollDST::XFIRST: tp = is_negative ? cl.pre : cl.post; break;
+      case RollDST::XLAST: tp = is_negative ? cl.post : cl.pre; break;
+      case RollDST::NA: return NA_REAL;
+     }
+     break;
+   case cctz::time_zone::civil_lookup::REPEATED:
+     switch (dst.repeated) {
+      case RollDST::PRE: tp = cl.pre; break;
+      case RollDST::BOUNDARY: tp = cl.trans; break;
+      case RollDST::POST: tp = cl.post; break;
+      case RollDST::XFIRST: tp = is_negative ? cl.post : cl.pre; break;
+      case RollDST::XLAST: tp = is_negative ? cl.pre : cl.post; break;
+      case RollDST::NA: return NA_REAL;
+     }
+     break;
+   case cctz::time_zone::civil_lookup::UNIQUE:
+     tp = cl.pre;
   }
   return tp.time_since_epoch().count();
 }

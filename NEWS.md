@@ -3,6 +3,7 @@ Version 0.1.1.9000
 
 ## New Features
 
+ - [#23](https://github.com/vspinu/timechange/issues/23) Implement new `roll_dst` parameters `xfirst` and `xlast` to allow for directional crossing of the DST gap
  - Rounding gain new `origin` parameter with respect to which to round with "absolute" units.
 
 ## Bug Fixes

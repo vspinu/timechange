@@ -1,13 +1,3 @@
-
-#include "common.h"
-
-#include "cpp11/doubles.hpp"
-#include "cpp11/function.hpp"
-#include "cpp11/integers.hpp"
-#include "cpp11/strings.hpp"
-#include "tzone.h"
-#include "R_ext/Print.h"
-
 // CIVIL TIME:
 // https://github.com/google/cctz/blob/master/include/cctz/civil_time.h
 // https://github.com/devjgm/papers/blob/master/d0215r1.md
@@ -23,6 +13,18 @@
 // https://github.com/SurajGupta/r-source/blob/master/src/extra/tzone/registryTZ.c
 
 // C++20 date/calendar proposal: https://github.com/HowardHinnant/date
+
+#include "common.h"
+
+#include "cpp11/doubles.hpp"
+#include "cpp11/function.hpp"
+#include "cpp11/integers.hpp"
+#include "cpp11/strings.hpp"
+#include "tzone.h"
+#include "R_ext/Print.h"
+
+#define SET_NEGATIVE(x) if (do_negative) { is_negative = x < 0; do_negative = false; }
+
 
 [[cpp11::register]]
 cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
@@ -283,7 +285,7 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
     return(posixct(tz_from_tzone_attr(dt)));
 
   RollMonth rmonth = parse_month_roll(roll_month);
-  DST rdst(roll_dst);
+  DST rdst(roll_dst, true);
 
   bool
     do_year = periods.contains("year"),
@@ -352,6 +354,9 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
   // all vectors are either size N or 1
   for (R_xlen_t i = 0; i < N; i++)
     {
+      bool is_negative = false;
+      bool do_negative = true;
+
       double dti = loop_dt ? dt[i] : dt[0];
       int_fast64_t secs = floor_to_int64(dti);
 
@@ -380,12 +385,14 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
       if (do_year) {
         y = loop_year ? year[i] : year[0];
         if (y == NA_INT32) { out[i] = NA_REAL; continue; }
+        SET_NEGATIVE(y)
         cy += y;
       }
       cm = cctz::civil_month(cy) + (tm -1);
       if (do_month) {
         m = loop_month ? month[i] : month[0];
         if (m == NA_INT32) { out[i] = NA_REAL; continue; }
+        SET_NEGATIVE(m)
         cm += m;
       }
       cd = cctz::civil_day(cm) + (td - 1);
@@ -412,12 +419,13 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
       if (do_week) {
         w = loop_week ? week[i] : week[0];
         if (w == NA_INT32) { out[i] = NA_REAL; continue; }
+        SET_NEGATIVE(w)
         cd += w * 7;
       }
       if (do_day) {
         d = loop_day ? day[i] : day[0];
         if (d == NA_INT32) { out[i] = NA_REAL; continue; }
-        /* Rprintf("tm:%d m:%d cd.month():%d cd.day():%d td:%d d:%d\n", tm, m, cd.month(), cd.day(), td, d); */
+        SET_NEGATIVE(d)
         cd += d;
       }
       cH = cctz::civil_hour(cd);
@@ -425,13 +433,16 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
       if (do_hour) {
         H = loop_hour ? hour[i] : hour[0];
         if (H == NA_INT32) { out[i] = NA_REAL; continue; }
+        SET_NEGATIVE(H)
         cH += H;
       }
       cM = cctz::civil_minute(cH);
-      if (add_my_hms) cM += tM;
+      if (add_my_hms)
+        cM += tM;
       if (do_minute) {
         M = loop_minute ? minute[i] : minute[0];
         if (M == NA_INT32) { out[i] = NA_REAL; continue; }
+        SET_NEGATIVE(M)
         cM += M;
       }
       cS = cctz::civil_second(cM);
@@ -441,11 +452,12 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
         if (ISNAN(s)) { out[i] = NA_REAL; continue; }
         S = floor_to_int64(s);
         if (S == NA_INT64) { out[i] = NA_REAL; continue; }
+        SET_NEGATIVE(S)
         rem += s - S;
         cS += S;
       }
 
-      s = civil_lookup_to_posix(tz.lookup(cS), rdst);
+      s = civil_lookup_to_posix(tz.lookup(cS), rdst, is_negative);
       out[i] = s + rem;
 
     }

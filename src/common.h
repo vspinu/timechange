@@ -54,13 +54,21 @@ inline RollMonth parse_month_roll(const std::string& roll) {
   Rf_error("Invalid roll_month type (%s)", roll.c_str());
 }
 
-enum class RollDST { PRE, BOUNDARY, POST, NA };
+enum class RollDST { PRE, BOUNDARY, POST, NA, XFIRST, XLAST};
 
-inline RollDST parse_dst_roll(const std::string& roll) {
+inline RollDST parse_dst_roll(const std::string& roll, bool allow_x = false) {
   if (roll == "boundary") return RollDST::BOUNDARY;
   if (roll == "post") return RollDST::POST;
   if (roll == "pre") return RollDST::PRE;
   if (roll == "NA") return RollDST::NA;
+  if (roll == "xfirst") {
+    if (allow_x) return RollDST::XFIRST;
+    else Rf_error("'xfirst' dst_roll is not meaningful here");
+  }
+  if (roll == "xlast") {
+    if (allow_x) return RollDST::XLAST;
+    else Rf_error("'xlast' dst_roll is not meaningful here");
+  }
   // backward compatibility
   if (roll == "first") return RollDST::POST;
   if (roll == "last") return RollDST::PRE;
@@ -71,16 +79,14 @@ struct DST {
   RollDST skipped;
   RollDST repeated;
   DST(RollDST skipped, RollDST repeated): skipped(skipped), repeated(repeated) {}
-  DST(std::string skipped, std::string repeated):
-    skipped(parse_dst_roll(skipped)), repeated(parse_dst_roll(repeated)) {}
-  DST(const cpp11::strings roll_dst) {
+  DST(const cpp11::strings roll_dst, bool allow_x = false) {
     if (roll_dst.empty() || roll_dst.size() > 2)
       Rf_error("roll_dst must be a character vector of length 1 or 2");
     std::string dst_repeated(roll_dst[0]);
-    skipped = parse_dst_roll(dst_repeated);
+    skipped = parse_dst_roll(dst_repeated, allow_x);
     if (roll_dst.size() > 1) {
       std::string dst_skipped(roll_dst[1]);
-      repeated = parse_dst_roll(dst_skipped);
+      repeated = parse_dst_roll(dst_skipped, allow_x);
     } else {
       repeated = skipped;
     }
@@ -97,7 +103,8 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
                              const double remainder) noexcept;
 
 double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl,
-                             const DST& dst) noexcept;
+                             const DST& dst,
+                             const bool is_negative = false) noexcept;
 
 // Simplify these conversions when https://github.com/r-lib/cpp11/pull/265 is fixed
 inline bool is_convertable_without_loss_to_integer(double value) {

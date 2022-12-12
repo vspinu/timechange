@@ -38,8 +38,7 @@ time_subtract(
 \arguments{
 \item{time}{date-time object}
 
-\item{periods}{string of units to add/subtract (not yet implemented) or a named list
-of the form \code{list(year = 1, month = 2, ...)}.}
+\item{periods}{a named list of the form \code{list(year = 1, month = 2, ...)}.}
 
 \item{year, month, week, day, hour, minute, second}{Units to be added to \code{time}. Units
 except for seconds are converted to integer values. Components are replicated
@@ -53,17 +52,30 @@ arithmetic rules exceed limits of the resulting date's month. Possible values ar
 
 \item{roll_dst}{is a string vector of length one or two. When two values are
 supplied they specify how to roll date-times when they fall into "skipped" and
-"repeated" DST transitions respectively. Singleton strings is replicated to the
+"repeated" DST transitions respectively. A single value is replicated to the
 length of two. Possible values are:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{* `pre` - Use the time before the transition boundary.
 * `boundary` - Use the time exactly at the boundary transition.
 * `post` - Use the time after the boundary transition.
+* `xfirst` - crossed-first: First time which occurred when crossing the
+   boundary. For addition with positive units pre interval is crossed first and
+   post interval last. With negative units post interval is crossed first, pre -
+   last. For subtraction the logic is reversed.
+* `xlast` - crossed-last.
 * `NA` - Produce NAs when the resulting time falls inside the problematic interval.
 }\if{html}{\out{</div>}}
 
-For example `roll_dst = c("pre", "NA") indicates that for repeated intervals
-return the time in the earlier interval and for skipped intervals return NA.}
+For example `roll_dst = c("NA", "pre") indicates that for skiped intervals
+return NA and for repeated times return the earlier time.
+
+When multiple units are supplied the meaning of "negative period" is determined by
+the largest unit. For example \code{time_add(t, days = -1, hours = 2, roll_dst = "xfirst")} would operate as if with negative period, thus crossing the boundary
+from the "post" to "pre" side and "xfirst" and hence resolving to "post"
+time. As this might result in confusing behavior. See examples.
+
+"xfirst" and "xlast" make sense for addition and subtraction only. An error is
+raised if an attempt is made to use them with other functions.}
 
 \item{...}{deprecated}
 }
@@ -130,6 +142,28 @@ time_add(x, hour = 1, minute = 50, roll_dst = "boundary")
 time_add(x, hour = 1, minute = 50, roll_dst = "post")
 ##' time_add(x, hours = 1, minutes = 50, roll_dst = "NA")
 
+## DST repeated time with cross-first and cross-last
+(tt <- as.POSIXct(c("2014-11-02 00:15:00", "2014-11-02 02:15:00"), tz = "America/New_York"))
+time_add(tt, hours = c(1, -1), roll_dst = "pre")
+time_add(tt, hours = c(1, -1), roll_dst = "post")
+time_add(tt, hours = c(1, -1), roll_dst = "xfirst")
+time_add(tt, hours = c(1, -1), roll_dst = "xlast")
+
+## DST skip with cross-first and cross-last
+cst <- as.POSIXlt("2010-03-14 01:02:03", tz = "America/Chicago")
+cdt <- as.POSIXlt("2010-03-14 03:02:03", tz = "America/Chicago")
+time_add(cst, hour = 1, roll_dst = "xfirst")
+time_add(cst, hour = 1, roll_dst = "xlast")
+time_add(cdt, hour = -1, roll_dst = "xfirst")
+time_add(cdt, hour = -1, roll_dst = "xlast")
+
+# WARNING:
+# In the following example the overall period is treated as a negative period
+# because the largest unit (hour) is negative. Thus `xfirst` roll_dst results in the
+# "post" time. To avoid such confusing behavior either avoid supplying multiple
+# units with heterogeneous sign.
+time_add(cst, hour = -1, minute = 170, roll_dst = "xfirst")
+
 # SUBTRACTION
 
 ## Month gap
@@ -139,13 +173,13 @@ time_subtract(x, month = 1, roll_month = "preday")
 time_subtract(x, month = 1, roll_month = "boundary")
 time_subtract(x, month = 1, roll_month = "full")
 time_subtract(x, month = 1, roll_month = "NA")
-time_subtract(x, month = 1, day = 0,  roll_month = "postday")
-time_subtract(x, month = 1, day = 3,  roll_month = "postday")
-time_subtract(x, month = 1, day = 0,  roll_month = "preday")
-time_subtract(x, month = 1, day = 3,  roll_month = "preday")
-time_subtract(x, month = 1, day = 3,  roll_month = "boundary")
-time_subtract(x, month = 1, day = 3,  roll_month = "full")
-time_subtract(x, month = 1, day = 3,  roll_month = "NA")
+time_subtract(x, month = 1, day = 0, roll_month = "postday")
+time_subtract(x, month = 1, day = 3, roll_month = "postday")
+time_subtract(x, month = 1, day = 0, roll_month = "preday")
+time_subtract(x, month = 1, day = 3, roll_month = "preday")
+time_subtract(x, month = 1, day = 3, roll_month = "boundary")
+time_subtract(x, month = 1, day = 3, roll_month = "full")
+time_subtract(x, month = 1, day = 3, roll_month = "NA")
 
 ## DST gap
 y <- as.POSIXlt("2010-03-15 01:02:03", tz = "America/Chicago")
@@ -153,4 +187,6 @@ time_subtract(y, hour = 22, minute = 50, roll_dst = "pre")
 time_subtract(y, hour = 22, minute = 50, roll_dst = "boundary")
 time_subtract(y, hour = 22, minute = 50, roll_dst = "post")
 time_subtract(y, hour = 22, minute = 50, roll_dst = "NA")
+
+
 }
