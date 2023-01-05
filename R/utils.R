@@ -33,7 +33,7 @@ to_posixct <- function(time) {
     storage.mode(time) <- "double"
     time
   } else if (is.Date(time))
-    date_to_posixct(time)
+    date_to_posixct(time, tz = tz(time))
   else if (is.POSIXlt(time)) {
     as.POSIXct.POSIXlt(time, tz = tz(time))
   } else {
