@@ -69,6 +69,7 @@ std::pair<Unit,double> adjust_rounding_unit(const Unit unit, double N) {
    case Unit::SEASON:
      if (N != 1)
        Rf_error("Rounding with fractional or multi-unit seasons not supported");
+     [[fallthrough]];
    case Unit::HALFYEAR:
    case Unit::BIMONTH:
    case Unit::QUARTER:
@@ -179,6 +180,8 @@ cpp11::writable::doubles C_time_ceiling(const cpp11::doubles dt,
     cctz::civil_second cs = cctz::convert(tp, tz);
 
     switch(UN.first) {
+     case Unit::AHOUR:
+     case Unit::AMINUTE:
      case Unit::ASECOND : {
        // Absolute seconds are duration in seconds. Rounding is performed with respect
        // with the origin. Thus, fractional nunits and units > 60 are supported.
@@ -297,7 +300,9 @@ cpp11::writable::doubles C_time_floor(const cpp11::doubles dt,
     cctz::civil_second cs = cctz::convert(tp, tz);
 
     switch(UN.first) {
-     case Unit::ASECOND : {
+     case Unit::AHOUR:
+     case Unit::AMINUTE:
+     case Unit::ASECOND: {
        // Absolute seconds rounding from the origin. No restrictions on units.
        double orig = loop_origin ? origin[i] : origin[0];
        out[i] =  orig + floor_multi_unit(dsecs - orig, N);
