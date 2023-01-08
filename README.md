@@ -19,8 +19,3 @@ Currently implemented:
  - __`time_add`__,__`time_subtract`__: fast period arithmetic
 
 When it makes sense functions provide a refined control of what happens in ambiguous situations through `roll_month` and `roll_dst` arguments.
-
-
-### Stability
-
-Package is in beta state. API changes are possible.
