@@ -12,7 +12,17 @@ unsupported_date_time <- function(x) {
 date_to_posixct <- function(date, tz = "UTC") {
   utc <- .POSIXct(unclass(date) * 86400, tz = "UTC")
   if (tz == "UTC") utc
-  else time_force_tz(utc, tz)
+  else C_force_tz(utc, tz, c("boundary", "post"))
+}
+
+posixct_to_date <- function(x) {
+  tz <- tz(x)
+  if (tz == "UTC") {
+    structure(floor(unclass(x)/86400), class = "Date", tzone = NULL)
+  } else {
+    x <- C_force_tz(x, "UTC", c("boundary", "post"))
+    structure(floor(unclass(x)/86400), class = "Date", tzone = tz)
+  }
 }
 
 tz <- function(x) {
@@ -33,7 +43,7 @@ to_posixct <- function(time) {
     storage.mode(time) <- "double"
     time
   } else if (is.Date(time))
-    date_to_posixct(time, tz = tz(time))
+    date_to_posixct(time, tz(time))
   else if (is.POSIXlt(time)) {
     as.POSIXct.POSIXlt(time, tz = tz(time))
   } else {
@@ -46,7 +56,7 @@ from_posixct <- function(ct, time, force_date = FALSE) {
     ct
   else if (is.Date(time)) {
     if (force_date) {
-      as.Date(ct, tz = tz(time))
+      posixct_to_date(ct)
     } else {
       ct
     }
@@ -62,7 +72,7 @@ from_posixlt <- function(new, old, force_date = FALSE) {
     new
   else if (is.Date(old)) {
     if (force_date) {
-      as.Date(new, tz = tz(old))
+      as.Date.POSIXlt(new, tz = tz(old))
     } else {
       as.POSIXct.POSIXlt(new)
     }
@@ -80,11 +90,4 @@ standardise_unit_name <- function(x) {
 # @return list(n=nr_units, unit="unit-name")
 parse_unit <- function(unit) {
   .Call(C_parse_unit, as.character(unit))
-}
-
-# Because `as.POSIXct.Date()` always uses local timezone
-date2posixct <- function(x) {
-  structure(unclass(x) * 86400,
-            tzone = "UTC",
-            class = c("POSIXct", "POSIXt"))
 }

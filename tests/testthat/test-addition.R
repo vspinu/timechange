@@ -258,3 +258,13 @@ test_that("addition works correctly for DST transitions", {
   expect_equal(time_add(ref, hours = rep(1:3, 2), minutes = 1:6, roll_dst = c("post", "NA")),
                ref + c(1, NA, 4, 1, 2, 2)*3600 + 1:6*60)
 })
+
+test_that("tzone attributes of Dates is preserved", {
+  d <- ymd("2020-01-01")
+  tzone <- "America/New_York"
+  attr(d, "tzone") <- tzone
+  expect_is(time_add(d, month = 2), "Date")
+  expect_is(time_add(d, hour = 2), "POSIXct")
+  expect_identical(time_add(d, month = 1), structure(ymd("2020-02-01"), tzone = tzone))
+  expect_identical(time_add(d, hour = 1), ymd_hms("2020-01-01 01:00:00", tz = tzone))
+})

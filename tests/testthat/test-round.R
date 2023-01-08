@@ -722,3 +722,17 @@ test_that("rounding with custom origin respects change_on_boundary", {
   expect_equal(time_ceiling(x, "3000a", change_on_boundary = TRUE, origin = time_floor(x, "day")),
                ymd_hms(c("2010-10-01 02:30:00", "2010-11-02 03:20:00"), tz = "America/New_York"))
 })
+
+
+test_that("tzone attributes of Dates is preserved", {
+  #23
+  d <- ymd("2020-01-01")
+  tzone <- "America/New_York"
+  attr(d, "tzone") <- tzone
+  expect_is(time_floor(d, "month"), "Date")
+  expect_is(time_floor(d, "hour"), "POSIXct")
+  expect_identical(time_floor(d, "month"), structure(ymd("2020-01-01"), tzone = tzone))
+  expect_identical(time_floor(d, "hour"), ymd("2020-01-01", tz = tzone))
+  expect_identical(time_ceiling(d, "hour"), ymd_hms("2020-01-01 01:00:00", tz = tzone))
+  expect_identical(time_ceiling(d, "hour", change_on_boundary = FALSE), ymd_hms("2020-01-01 00:00:00", tz = tzone))
+})

@@ -32,7 +32,7 @@ time_get <- function(time,
     if (is.POSIXct(time)) {
       C_time_get(time, components, week_start)
     } else if (is.Date(time)) {
-      time <- date2posixct(time)
+      time <- date_to_posixct(time, "UTC")
       C_time_get(time, components, week_start)
     } else if (is.POSIXlt(time)) {
       unique_components <- unique(components)

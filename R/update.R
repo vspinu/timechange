@@ -75,13 +75,13 @@ time_update <- function(time, updates = NULL, year = NULL, month = NULL,
     storage.mode(time) <- "double"
     C_time_update(time, updates, tz, roll_month, roll_dst, week_start, exact)
   } else if (is.Date(time)) {
-    out <- date2posixct(time)
+    out <- date_to_posixct(time, tz(time))
     out <- C_time_update(out, updates, tz, roll_month, roll_dst, week_start, exact)
     if (is.null(updates[["hour"]]) &&
         is.null(updates[["minute"]]) &&
         is.null(updates[["second"]]) &&
         is.null(tz)) {
-      out <- as.Date(out, tz = "UTC")
+      out <- posixct_to_date(out)
     }
     out
   } else if (is.POSIXlt(time)) {

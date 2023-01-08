@@ -141,7 +141,7 @@ time_clock_at_tz <- function(time, tz = NULL, units = "secs") {
     time
   } else {
     time <-
-      if (is.Date(time)) date2posixct(time)
+      if (is.Date(time)) date_to_posixct(time, tz(time))
       else as.POSIXct(time)
     .clock_at_tz(time, tz, units)
   }

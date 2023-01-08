@@ -30,6 +30,16 @@ test_that("time_get handles different date-time types correctly", {
 
 })
 
+test_that("tzone attributes of Dates is preserved", {
+  d <- ymd("2020-01-01")
+  tzone <- "America/New_York"
+  attr(d, "tzone") <- tzone
+  time_get(d, "month")
+  expect_is(time_update(d, hour = 2), "POSIXct")
+  expect_identical(time_update(d, month = 2), structure(ymd("2020-02-01"), tzone = tzone))
+  expect_identical(time_update(d, hour = 1), ymd_hms("2020-01-01 01:00:00", tz = tzone))
+})
+
 ## speed tests
 
 ## library(microbenchmark)

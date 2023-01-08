@@ -193,12 +193,12 @@ time_add <- function(time, periods = NULL,
     storage.mode(time) <- "double"
     C_time_add(time, periods, roll_month, roll_dst)
   } else if (is.Date(time)) {
-    out <- date2posixct(time)
+    out <- date_to_posixct(time, tz(time))
     out <- C_time_add(out, periods, roll_month, roll_dst)
     if (is.null(periods[["hour"]]) &&
         is.null(periods[["minute"]]) &&
         is.null(periods[["second"]])) {
-      out <- as.Date(out, tz = "UTC")
+      out <- posixct_to_date(out)
     }
     out
   } else if (is.POSIXlt(time)) {

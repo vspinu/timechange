@@ -9,6 +9,7 @@ Version 0.1.1.9000
 ## Bug Fixes
 
  - [#16](https://github.com/vspinu/timechange/issues/16) Rounding unit parser is now conformant to R numeric parser
+ - [#23](https://github.com/vspinu/timechange/pull/24) Respect `tzone` attributes of Date objects.
 
 ## Internals
 
