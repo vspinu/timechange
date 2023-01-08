@@ -28,6 +28,9 @@ test_that("parse_unit works as expected", {
          unit = c("hour", "halfyear", "second", "season")))
 
   expect_identical(parse_unit("asecs"), list(n = 1, unit = "asecond"))
+  expect_identical(parse_unit("102.300003 amins"), list(n = 102.300003, unit = "aminute"))
+  expect_identical(parse_unit("ahours"), list(n = 1, unit = "ahour"))
+  expect_identical(parse_unit("2.3 ahours"), list(n = 2.3, unit = "ahour"))
 
 })
 

@@ -709,6 +709,12 @@ test_that("rounding works with custom origin", {
                ymd_hms(c("2010-10-01 00:50:00", "2010-11-02 01:50:00"), tz = "America/New_York"))
   expect_equal(time_ceiling(x, "3000a", origin = time_floor(x, "month")),
                ymd_hms(c("2010-10-01 01:40:00", "2010-11-02 02:40:00"), tz = "America/New_York"))
+  expect_equal(time_ceiling(x, "50AM", origin = time_floor(x, "month")),
+               ymd_hms(c("2010-10-01 01:40:00", "2010-11-02 02:40:00"), tz = "America/New_York"))
+  expect_equal(time_ceiling(x, "50AM", origin = time_floor(x, "month")),
+               time_ceiling(x, "50amins", origin = time_floor(x, "month")))
+  expect_equal(time_ceiling(x, "30amins", origin = time_floor(x, "month")),
+               time_ceiling(x, ".5ahours", origin = time_floor(x, "month")))
   expect_equal(time_round(x, "3000a", origin = time_floor(x, "month")),
                ymd_hms(c("2010-10-01 00:50:00", "2010-11-02 01:50:00"), tz = "America/New_York"))
   expect_equal(time_round(x, "3000a", origin = time_floor(x, "month")),
@@ -719,7 +725,7 @@ test_that("rounding with custom origin respects change_on_boundary", {
   x <- ymd_hms(c("2010-10-01 01:40:00", "2010-11-02 02:30:00"), tz = "America/New_York")
   expect_equal(time_ceiling(x, "3000a", change_on_boundary = FALSE, origin = time_floor(x, "day")),
                ymd_hms(c("2010-10-01 01:40:00", "2010-11-02 02:30:00"), tz = "America/New_York"))
-  expect_equal(time_ceiling(x, "3000a", change_on_boundary = TRUE, origin = time_floor(x, "day")),
+  expect_equal(time_ceiling(x, "50amins", change_on_boundary = TRUE, origin = time_floor(x, "day")),
                ymd_hms(c("2010-10-01 02:30:00", "2010-11-02 03:20:00"), tz = "America/New_York"))
 })
 

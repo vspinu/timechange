@@ -64,7 +64,9 @@ int parse_alphanum(const char **c, const char **strings, const int strings_len,
 // Latter values have precedence.
 static const char *UNITS[] = {
   "bimonths", "quarters", "halfyears", "seasons",
-  "asecs", "aseconds",
+  "AH", "ahours",
+  "AM", "amins", "aminutes",
+  "AS", "asecs", "aseconds",
   "S", "secs", "seconds",
   "M", "mins", "minutes",
   "H", "hours",
@@ -75,7 +77,9 @@ static const char *UNITS[] = {
 };
 static const char *CANONICAL_UNITS[] = {
   "bimonth", "quarter", "halfyear", "season",
-  "asecond", "asecond",
+  "ahour", "ahour",
+  "aminute", "aminute", "aminute",
+  "asecond", "asecond", "asecond",
   "second", "second", "second",
   "minute", "minute", "minute",
   "hour", "hour",
@@ -84,7 +88,7 @@ static const char *CANONICAL_UNITS[] = {
   "month",
   "year", "year"
 };
-#define N_UNITS 21
+#define N_UNITS 27
 
 SEXP C_parse_unit(SEXP str) {
 

@@ -12,11 +12,11 @@
 #' time rounding is that floor (ceiling) does not produce civil times that are
 #' bigger (smaller) than the rounded civil time.
 #'
-#' Absolute time rounding (with `aseconds`) is done on the absolute time (number
-#' of seconds since origin), Thus, rounding of `aseconds` allows for fractional
-#' seconds and multi-units larger than 60. See examples of rounding around DST
-#' transition where rounding in civil time does not give same result as rounding
-#' with the corresponding `X aseconds`.
+#' Absolute time rounding (with `aseconds`, `aminutes` and `ahours`) is done on the
+#' absolute time (number of seconds since origin), thus, allowing for fractional seconds
+#' and arbitrary multi-units. See examples of rounding around DST transition where
+#' rounding in civil time does not give the same result as rounding with the
+#' corresponding `X aseconds`.
 #'
 #' Please note that absolute rounding to fractions smaller than 1ms will result
 #' to large precision errors due to the floating point representation of the
@@ -56,12 +56,12 @@
 #' @param time a date-time vector (`Date`, `POSIXct` or `POSIXlt`)
 #' @param unit a character string specifying a time unit or a multiple of a unit. Valid
 #'   base periods for civil time rounding are `second`, `minute`, `hour`, `day`, `week`,
-#'   `month`, `bimonth`, `quarter`, `season`, `halfyear` and `year`. The only unit for
-#'   absolute time rounding is `asecond`. Other absolute units can be achieved with
-#'   multiples of `asecond` ("60a", "3600a" etc). See "Details" and examples. Arbitrary
-#'   unique English abbreviations are allowed. One letter abbreviations follow
-#'   `strptime` formats "y", "m", "d", "M", "H", "S". Multi-unit rounding of weeks is
-#'   currently not supported.
+#'   `month`, `bimonth`, `quarter`, `season`, `halfyear` and `year`. The only units for
+#'   absolute time rounding are `asecond`, `aminute` and `ahour`. Other absolute units
+#'   can be achieved with multiples of `asecond` (e.g. "24ah"). See "Details" and
+#'   examples. Arbitrary unique English abbreviations are allowed. One letter
+#'   abbreviations follow `strptime` formats "y", "m", "d", "M", "H", "S". Multi-unit
+#'   rounding of weeks is currently not supported.
 #'
 #'   Rounding for a unit is performed from the parent's unit origin. For example when
 #'   rounding to seconds origin is start of the minute. When rounding to days, origin is
@@ -84,7 +84,7 @@
 #' @param week_start When unit is `weeks`, this is the first day of the week. Defaults
 #'   to 1 (Monday).
 #' @param origin Origin with respect to which to perform the rounding operation. For
-#'   `unit = "aseconds"` only. Can be a vector of the same length as the input `time`
+#'   absolute units only. Can be a vector of the same length as the input `time`
 #'   vector. Defaults to the Unix origin "1970-01-01 UTC".
 #' @return An object of the same class as the input object. When input is a `Date`
 #'   object and unit is smaller than `day` a `POSIXct` object is returned.
@@ -119,6 +119,7 @@
 #' time_floor(x, "minute")
 #' time_floor(x, "M")
 #' time_floor(x, "hour")
+#' time_floor(x, ".2 ahour")
 #' time_floor(x, "day")
 #' time_floor(x, "week")
 #' time_floor(x, "m")
@@ -135,6 +136,7 @@
 #' time_ceiling(x, "minute")
 #' time_ceiling(x, "5 mins")
 #' time_ceiling(x, "hour")
+#' time_ceiling(x, ".2 ahour")
 #' time_ceiling(x, "day")
 #' time_ceiling(x, "week")
 #' time_ceiling(x, "month")
@@ -161,17 +163,14 @@
 #' time_ceiling(x, "hour") # "2014-11-02 02:00:00 EST"
 #' time_ceiling(x, "minute")
 #' time_ceiling(x, "sec")
-#' difftime(time_ceiling(x, "s"), x)
-#' time_ceiling(x, "1a") # "2014-11-02 01:00:00 EST"
-#' difftime(time_ceiling(x, "a"), x)
+#' time_ceiling(x, "1ahour") # "2014-11-02 01:00:00 EST"
+#' time_ceiling(x, "1asec")
 #'
-#' # "2014-11-02 01:00:00.5 EST" after 1h backroll at 2AM
+#' # "2014-11-02 01:00:00.5 EST" .5s after 1h backroll at 2AM
 #' x <- .POSIXct(1414908000.5, tz = "America/New_York")
 #' x
 #' time_floor(x, "hour") # "2014-11-02 01:00:00 EST"
-#' difftime(time_floor(x, "hour"), x)
-#' time_floor(x, "3600a") # "2014-11-02 01:00:00 EST"  - 25m
-#' difftime(time_floor(x, "a"), x)
+#' time_floor(x, "ahour") # "2014-11-02 01:00:00 EST"
 #'
 #' ## behavior on the boundary when rounding multi-units
 #'
@@ -201,12 +200,12 @@
 #' ## custom origin
 #' x <- as.POSIXct(c("2010-10-01 01:00:01", "2010-11-02 02:00:01"), tz = "America/New_York")
 #' # 50 minutes from the day or month start
-#' time_floor(x, "3000a")
-#' time_floor(x, "3000a", origin = time_floor(x, "day"))
-#' time_floor(x, "3000a", origin = time_floor(x, "month"))
-#' time_ceiling(x, "3000a")
-#' time_ceiling(x, "3000a", origin = time_floor(x, "day"))
-#' time_ceiling(x, "3000a", origin = time_floor(x, "month"))
+#' time_floor(x, "50amin")
+#' time_floor(x, "50amin", origin = time_floor(x, "day"))
+#' time_floor(x, "50amin", origin = time_floor(x, "month"))
+#' time_ceiling(x, "50amin")
+#' time_ceiling(x, "50amin", origin = time_floor(x, "day"))
+#' time_ceiling(x, "50amin", origin = time_floor(x, "month"))
 #'
 #' @export
 time_round <- function(time, unit = "second",
@@ -254,7 +253,6 @@ time_floor <- function(time, unit = "seconds",
     return(time)
 
   nu <- parse_rounding_unit(unit)
-
   from_posixct(C_time_floor(to_posixct(time), nu$unit, nu$n, as.integer(week_start), origin),
                time, force_date = !nu$unit %in% c("asecond", "second", "minute", "hour"))
 
@@ -283,7 +281,8 @@ time_ceiling <- function(time, unit = "seconds",
 
 base_units <- list(second = "secs", minute = "mins", hour = "hours", day = "days")
 
-trunc_multi_limits <- c(asecond = Inf, second = 60, minute = 60, hour = 24, day = 31, year = Inf, week = 1,
+trunc_multi_limits <- c(asecond = Inf, aminute = Inf, ahour = Inf,
+                        second = 60, minute = 60, hour = 24, day = 31, year = Inf, week = 1,
                         month = 12, bimonth = 6, quarter = 4, season = 4, halfyear = 2)
 
 parse_rounding_unit <- function(unit) {

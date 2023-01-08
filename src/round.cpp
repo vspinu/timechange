@@ -23,7 +23,8 @@ inline double ceil_multi_unit1(double x, double n) noexcept {
 }
 
 enum class Unit {YEAR, HALFYEAR, QUARTER, SEASON, BIMONTH, MONTH,
-  WEEK, DAY, HOUR, MINUTE, SECOND, ASECOND};
+                 WEEK, DAY, HOUR, MINUTE, SECOND,
+                 AHOUR, AMINUTE, ASECOND};
 
 void check_fractional_unit(const double N, const char * unit_str) {
   int_fast64_t fN = floor_to_int64(N);
@@ -43,6 +44,10 @@ std::pair<Unit,double> adjust_rounding_unit(const Unit unit, double N) {
   switch (unit) {
    case Unit::ASECOND:
      return std::make_pair(Unit::ASECOND, N);
+   case Unit::AMINUTE:
+     return std::make_pair(Unit::ASECOND, N*60);
+   case Unit::AHOUR:
+     return std::make_pair(Unit::ASECOND, N*3600);
    case Unit::SECOND:
      if (N > 60) Rf_error("Rounding unit for seconds larger than 60");
      return std::make_pair(Unit::SECOND, N);
@@ -87,6 +92,8 @@ std::pair<Unit,double> adjust_rounding_unit(const Unit unit, double N) {
 
 Unit name2unit(std::string unit_name) {
   if (unit_name == "asecond") return Unit::ASECOND;
+  if (unit_name == "aminute") return Unit::AMINUTE;
+  if (unit_name == "ahour") return Unit::AHOUR;
   if (unit_name == "second") return Unit::SECOND;
   if (unit_name == "minute") return Unit::MINUTE;
   if (unit_name == "hour") return Unit::HOUR;
@@ -176,8 +183,8 @@ cpp11::writable::doubles C_time_ceiling(const cpp11::doubles dt,
        // Absolute seconds are duration in seconds. Rounding is performed with respect
        // with the origin. Thus, fractional nunits and units > 60 are supported.
        double orig = loop_origin ? origin[i] : origin[0];
-       double posix = orig + ceil_multi_unit(dsecs - orig, nunits);
-       if (check_boundary && (posix - nunits) == dsecs)
+       double posix = orig + ceil_multi_unit(dsecs - orig, N);
+       if (check_boundary && (posix - N) == dsecs)
          out[i] = dsecs;
        else
          out[i] = posix;
@@ -293,7 +300,7 @@ cpp11::writable::doubles C_time_floor(const cpp11::doubles dt,
      case Unit::ASECOND : {
        // Absolute seconds rounding from the origin. No restrictions on units.
        double orig = loop_origin ? origin[i] : origin[0];
-       out[i] =  orig + floor_multi_unit(dsecs - orig, nunits);
+       out[i] =  orig + floor_multi_unit(dsecs - orig, N);
        break;
      }
      case Unit::SECOND : {
