@@ -32,8 +32,19 @@ test_that("parse_unit works as expected", {
   expect_identical(parse_unit("ahours"), list(n = 1, unit = "ahour"))
   expect_identical(parse_unit("2.3 ahours"), list(n = 2.3, unit = "ahour"))
 
+  expect_identical(parse_unit("as"), list(n = 1, unit = "asecond"))
+  expect_identical(parse_unit("am"), list(n = 1, unit = "aminute"))
+  expect_identical(parse_unit("ah"), list(n = 1, unit = "ahour"))
+
+  expect_identical(parse_unit("0H 3M 0S"), list(n = 3, unit = "minute"))
+  expect_identical(parse_unit("3M 0S 0mon"), list(n = 3, unit = "minute"))
 })
 
 test_that("parse_unit errors on invalid unit", {
   expect_error(parse_unit("1 blabla"), "Invalid unit.*blabla")
+  expect_error(parse_unit("1 mm"), "Invalid unit.*mm")
+  expect_error(parse_unit("1"), "Invalid unit.*1")
+  expect_error(parse_unit("1 2"), "Invalid unit.*1 2")
+  expect_error(parse_unit("1 m m"), "Heterogeneous unit.*m m")
+  expect_error(parse_unit("3M 0S 1M"), "Heterogeneous unit.*1M")
 })

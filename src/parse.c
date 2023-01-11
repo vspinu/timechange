@@ -17,7 +17,7 @@
 // - *c: pointer to a character in a C string (incremented by side effect)
 // - *stings: pointer to an array of C strings to be matched to
 // - strings_len: length of strings array
-int parse_alphanum(const char **c, const char **strings, const int strings_len,
+int parse_alphanum(char **c, const char **strings, const int strings_len,
                    const bool ignore_case){
 
   // tracking array: all valid objects are marked with 1, invalid with 0
@@ -90,6 +90,29 @@ static const char *CANONICAL_UNITS[] = {
 };
 #define N_UNITS 27
 
+typedef struct {
+  int ix;
+  double n;
+} Unit ;
+
+Unit parse_unit(const char *el, char **c) {
+  Unit unit = {-1, -1};
+  double v = strtod(el, c);
+  bool parsed_n = false;
+  if (*c != el) {
+    unit.n = v;
+    parsed_n = true;
+  }
+  if (**c) {
+    unit.ix = parse_alphanum(c, UNITS, N_UNITS, false);
+    if (unit.ix >=0 && !parsed_n)
+      unit.n = 1; // units without numeric (like "month")
+  }
+  if (parsed_n && unit.ix < 0)
+    Rf_error("Invalid unit specification '%s'\n", el);
+  return unit;
+}
+
 SEXP C_parse_unit(SEXP str) {
 
   if (TYPEOF(str) != STRSXP)
@@ -102,27 +125,33 @@ SEXP C_parse_unit(SEXP str) {
   SEXP out = PROTECT(mkNamed(VECSXP, names));
   SEXP val = PROTECT(allocVector(REALSXP, n));
   SEXP unit = PROTECT(allocVector(STRSXP, n));
-
   double *real_val = REAL(val);
+
   for (int i = 0; i < n; i++) {
-    const char *el = CHAR(STRING_ELT(str, i));
+    const char *el0 = CHAR(STRING_ELT(str, i));
+    const char *el = el0;
     char *c;
-    double v = strtod(el, &c);
-    if (c == el)
-      real_val[i] = 1;
-    else
-      real_val[i] = v;
-    if (*c) {
-      int ix = parse_alphanum((const char **)&c, UNITS, N_UNITS, false);
-      if (ix < 0) {
-        SET_STRING_ELT(unit, i, NA_STRING);
-      } else {
-        SET_STRING_ELT(unit, i, mkChar(CANONICAL_UNITS[ix]));
+    Unit u = {-1, -1};
+    Unit tu = parse_unit(el, &c);
+    while (el != c) {
+      /* Rprintf("0:el:'%s' c:'%s' tu:%f/%d u:%f/%d\n", el, c, tu.n, tu.ix, u.n, u.ix); */
+      el = c;
+      // ignore 0 units as in "2d 0H 0S" which is lubridate's string representation of periods
+      if (tu.ix >= 0 && tu.n != 0) {
+        if (u.n !=0 && u.ix >= 0)
+          Rf_error("Heterogeneous unit in '%s'\n", el0);
+        u = tu;
       }
+      // enforce non-alpha separators (avoid monthmonth)
+      if (*c && ALPHA(*c))
+        Rf_error("Invalid unit specification '%s' (at %s)\n", el0, c);
+      tu = parse_unit(el, &c);
     }
-    while (*c && !ALPHA(*c) && !DIGIT(*c)) c++;
-    if (*c) {
-      Rf_error("Invalid unit specification '%s' (element %d)\n", el, i + 1);
+    if (u.ix < 0) {
+      Rf_error("Invalid unit specification '%s'\n", el0);
+    } else {
+      SET_STRING_ELT(unit, i, mkChar(CANONICAL_UNITS[u.ix]));
+      real_val[i] = u.n;
     }
   }
 
