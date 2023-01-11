@@ -1,6 +1,6 @@
 Package: timechange
 Title: Efficient Manipulation of Date-Times
-Version: 0.1.1.9000
+Version: 0.2.0
 Authors@R: c(person("Vitalie", "Spinu", email = "spinuvit@gmail.com", role = c("aut", "cre")),
              person("Google Inc.", role = c("ctb", "cph")))
 Description: Efficient routines for manipulation of date-time objects while
@@ -14,7 +14,7 @@ Depends: R (>= 3.3)
 License: GPL-3
 Encoding: UTF-8
 LinkingTo:
-    cpp11 (>= 0.2.7)
+  cpp11 (>= 0.2.7)
 Suggests:
   testthat (>= 0.7.1.99),
   knitr
