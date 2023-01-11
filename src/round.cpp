@@ -69,7 +69,7 @@ std::pair<Unit,double> adjust_rounding_unit(const Unit unit, double N) {
    case Unit::SEASON:
      if (N != 1)
        Rf_error("Rounding with fractional or multi-unit seasons not supported");
-     [[fallthrough]];
+     /* [[fallthrough]]; // cpp++17 extension */
    case Unit::HALFYEAR:
    case Unit::BIMONTH:
    case Unit::QUARTER:
