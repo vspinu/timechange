@@ -67,6 +67,14 @@ from_posixct <- function(ct, time, force_date = FALSE) {
   }
 }
 
+## as.POSIXct.POSIXlt does not treat Inf values correctly
+lt2ct <- function(lt) {
+    out <- as.POSIXct.POSIXlt(lt)
+    isinf <- is.infinite(lt$sec)
+    out[isinf] <- lt$sec[isinf]
+    out
+}
+
 from_posixlt <- function(new, old, force_date = FALSE) {
   if (is.POSIXlt(old))
     new
@@ -74,12 +82,10 @@ from_posixlt <- function(new, old, force_date = FALSE) {
     if (force_date) {
       as.Date.POSIXlt(new, tz = tz(old))
     } else {
-      as.POSIXct.POSIXlt(new)
+      lt2ct(new)
     }
-  } else if (is.POSIXct(old)) {
-    as.POSIXct.POSIXlt(new)
   } else {
-    as.POSIXct.POSIXlt(new)
+    lt2ct(new)
   }
 }
 

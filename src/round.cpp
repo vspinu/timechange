@@ -1,4 +1,5 @@
 
+#include "R_ext/Arith.h"
 #include "R_ext/Print.h"
 #include "common.h"
 #include "cpp11/doubles.hpp"
@@ -171,10 +172,11 @@ cpp11::writable::doubles C_time_ceiling(const cpp11::doubles dt,
 
   for (size_t i = 0; i < n; i++) {
     double dsecs = dt[i];
+    if (dsecs == R_PosInf || dsecs == R_NegInf) { out[i] = dsecs; continue; }
     int_fast64_t secs = floor_to_int64(dsecs);
+    if (secs == NA_INT64) { out[i] = NA_REAL; continue; }
     double rem = dsecs - secs;
     bool check_boundary = rem == 0 && !change_on_boundary;
-    if (secs == NA_INT64) { out[i] = NA_REAL; continue; }
     sys_seconds ss(secs);
     time_point tp(ss);
     cctz::civil_second cs = cctz::convert(tp, tz);
@@ -293,6 +295,7 @@ cpp11::writable::doubles C_time_floor(const cpp11::doubles dt,
   for (size_t i = 0; i < n; i++) {
 
     double dsecs = dt[i];
+    if (dsecs == R_PosInf || dsecs == R_NegInf) { out[i] = dsecs; continue; }
     int_fast64_t isecs = floor_to_int64(dsecs);
     if (isecs == NA_INT64) { out[i] = NA_REAL; continue; }
     sys_seconds ss(isecs);

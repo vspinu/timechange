@@ -572,16 +572,17 @@ test_that("time rounding with hours works with repeated DST transitions", {
   expect_equal(as.numeric(difftime(time_ceiling(x, "hour"), ctus(x), units = "min")), 45)
 
   ## rounding is done in absolute time for seconds
-  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "3600a"), am1) ## EDT (.5h)
+  expect_equal(time_ceiling(ctus("2014-11-02 00:30:00"), "ahour"), am1) ## EDT (.5h)
   x <- ctus("2014-11-02 00:30:00")
-  expect_equal(as.numeric(difftime(time_ceiling(x, "3600a"), ctus(x), units = "min")), 30)
+  expect_equal(as.numeric(difftime(time_ceiling(x, "ahour"), ctus(x), units = "min")), 30)
   x <- time_add(am1, minutes = 30) ## EDT
-  expect_equal(as.numeric(difftime(time_ceiling(x, "3600a"), ctus(x), units = "min")), 30)
+  expect_equal(as.numeric(difftime(time_ceiling(x, "ahour"), ctus(x), units = "min")), 30)
 
   ## rounding is done in civil time for units > seconds
   expect_equal(time_round(ctus("2014-11-02 00:30:00"), "hour"), am1) ## EDT (30m)
   x <- time_add(am1, minutes = 35) ## EDT
-  expect_equal(as.numeric(difftime(time_round(x, "hour"), x, units = "min")), 25)
+  expect_equal(as.numeric(difftime(time_round(x, "hour"), x, units = "min")), -35)
+  expect_equal(as.numeric(difftime(time_round(x, "ahour"), x, units = "min")), 25)
   expect_equal(as.numeric(difftime(time_round(x, "3600a"), x, units = "min")), 25)
   x <- ctus("2014-11-02 02:15:00")
   expect_equal(time_round(x, "hour"), ctus("2014-11-02 02:00:00")) ## EST (15m)
@@ -741,4 +742,38 @@ test_that("tzone attributes of Dates is preserved", {
   expect_identical(time_floor(d, "hour"), ymd("2020-01-01", tz = tzone))
   expect_identical(time_ceiling(d, "hour"), ymd_hms("2020-01-01 01:00:00", tz = tzone))
   expect_identical(time_ceiling(d, "hour", change_on_boundary = FALSE), ymd_hms("2020-01-01 00:00:00", tz = tzone))
+})
+
+
+test_that("Rounding infinite dates works as expected",  {
+  tinf <- .POSIXct(c(Inf, -Inf))
+  dinf <- as.Date(c(Inf, -Inf))
+  expect_equal(time_floor(tinf), tinf)
+  expect_equal(as.numeric(time_floor(tinf)), floor(as.numeric(tinf)))
+  expect_equal(time_ceiling(tinf), tinf)
+  expect_equal(as.numeric(time_ceiling(tinf)), ceiling(as.numeric(tinf)))
+  expect_equal(time_round(tinf), tinf)
+  expect_equal(as.numeric(time_round(tinf)), round(as.numeric(tinf)))
+
+  expect_equal(time_floor(tinf, "month"), tinf)
+  expect_equal(as.numeric(time_floor(tinf)), floor(as.numeric(tinf)))
+  expect_equal(time_ceiling(tinf, "month"), tinf)
+  expect_equal(as.numeric(time_ceiling(tinf, "month")), ceiling(as.numeric(tinf)))
+  expect_equal(time_round(tinf, "month"), tinf)
+  expect_equal(as.numeric(time_round(tinf, "month")), round(as.numeric(tinf)))
+
+  expect_equal(time_floor(dinf, "day"), dinf)
+  expect_equal(as.numeric(time_floor(dinf, "day")), floor(as.numeric(dinf)))
+  expect_equal(time_ceiling(dinf, "day"), dinf)
+  expect_equal(as.numeric(time_ceiling(dinf, "day")), ceiling(as.numeric(dinf)))
+  expect_equal(time_round(dinf, "day"), dinf)
+  expect_equal(as.numeric(time_round(dinf, "day")), round(as.numeric(dinf)))
+
+  expect_equal(time_floor(dinf, "month"), dinf)
+  expect_equal(as.numeric(time_floor(dinf)), floor(as.numeric(dinf)))
+  expect_equal(time_ceiling(dinf, "month"), dinf)
+  expect_equal(as.numeric(time_ceiling(dinf, "month")), ceiling(as.numeric(dinf)))
+  expect_equal(time_round(dinf, "month"), dinf)
+  expect_equal(as.numeric(time_round(dinf, "month")), round(as.numeric(dinf)))
+
 })
