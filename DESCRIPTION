@@ -11,7 +11,7 @@ Description: Efficient routines for manipulation of date-time objects while
    2.0 License, are included in this package. See
    <https://github.com/google/cctz> for more details.
 Depends: R (>= 3.3)
-License: GPL-3
+License: GPL (>= 3)
 Encoding: UTF-8
 LinkingTo:
   cpp11 (>= 0.2.7)
