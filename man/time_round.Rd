@@ -80,17 +80,17 @@ years, 2s, 1d etc.
 Rounding in civil time is done on actual clock time (ymdHMS) and is affected
 by civil time irregularities like DST. One important characteristic of civil
 time rounding is that floor (ceiling) does not produce civil times that are
-bigger (smaller) than the rounded civil time.
+bigger (smaller) than the original civil time.
 
 Absolute time rounding (with \code{aseconds}, \code{aminutes} and \code{ahours}) is done on the
 absolute time (number of seconds since origin), thus, allowing for fractional seconds
 and arbitrary multi-units. See examples of rounding around DST transition where
 rounding in civil time does not give the same result as rounding with the
-corresponding \verb{X aseconds}.
+corresponding absolute units. Also note that \code{round.POSIXt()} rounds on absolute
+time.
 
-Please note that absolute rounding to fractions smaller than 1ms will result
-to large precision errors due to the floating point representation of the
-POSIXct objects.
+Please note that absolute rounding to fractions smaller than 1ms will result in large
+precision errors due to the floating point representation of the POSIXct objects.
 }
 
 \section{Note on \code{time_round()}}{
@@ -187,7 +187,7 @@ x <- as.Date("2000-01-01")
 time_ceiling(x, "month")
 time_ceiling(x, "month", change_on_boundary = FALSE)
 
-## As of R 3.4.2 POSIXct printing of fractional numbers is wrong
+## As of R 3.4.2 POSIXct printing of fractional seconds is wrong
 as.POSIXct("2009-08-03 12:01:59.3", tz = "UTC") ## -> "2009-08-03 12:01:59.2 UTC"
 time_ceiling(x, ".1 asec") ## -> "2009-08-03 12:01:59.2 UTC"
 
@@ -196,11 +196,16 @@ time_ceiling(x, ".1 asec") ## -> "2009-08-03 12:01:59.2 UTC"
 # "2014-11-02 01:59:59.5 EDT" before 1h backroll at 2AM
 x <- .POSIXct(1414907999.5, tz = "America/New_York")
 x
-time_ceiling(x, "hour") # "2014-11-02 02:00:00 EST"
+time_ceiling(x, "hour")    # "2014-11-02 02:00:00 EST"
+time_ceiling(x, "ahour")   # "2014-11-02 01:00:00 EST"
 time_ceiling(x, "minute")
+time_ceiling(x, "aminute")
 time_ceiling(x, "sec")
-time_ceiling(x, "1ahour") # "2014-11-02 01:00:00 EST"
-time_ceiling(x, "1asec")
+time_ceiling(x, "asec")
+
+time_round(x, "hour")   # "2014-11-02 01:00:00 EDT" !!
+time_round(x, "ahour")  # "2014-11-02 01:00:00 EST"
+round.POSIXt(x, "hour") # "2014-11-02 01:00:00 EST"
 
 # "2014-11-02 01:00:00.5 EST" .5s after 1h backroll at 2AM
 x <- .POSIXct(1414908000.5, tz = "America/New_York")
@@ -208,7 +213,7 @@ x
 time_floor(x, "hour") # "2014-11-02 01:00:00 EST"
 time_floor(x, "ahour") # "2014-11-02 01:00:00 EST"
 
-## behavior on the boundary when rounding multi-units
+## Behavior on the boundary when rounding multi-units
 
 x <- as.POSIXct("2009-08-28 22:56:59.23", tz = "UTC")
 time_ceiling(x, "3.4 secs")  # "2009-08-28 22:57:03.4"

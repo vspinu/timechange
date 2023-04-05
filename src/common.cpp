@@ -58,7 +58,6 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
                              const cctz::civil_second& cs_old,           // original time in secs
                              const DST& dst,
                              double remainder) noexcept {
-
   if (cl_new.kind == cctz::time_zone::civil_lookup::REPEATED) {
     if (dst.repeated == RollDST::BOUNDARY)
       remainder = 0.0;
