@@ -3,6 +3,7 @@ Version 0.2.0.9000
 
 ### Bug fixes
 
+ - [lubridate#1122](https://github.com/tidyverse/lubridate/issues/1122) Implement force_tz fallback for GMT on system where GMT is missing in zoneinfo.
  - [lubridate#1114](https://github.com/tidyverse/lubridate/issues/1114) Fix rounding of infinite times
 
 ### Breaking Changes

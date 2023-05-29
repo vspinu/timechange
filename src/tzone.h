@@ -8,6 +8,7 @@
 #include <cpp11.hpp>
 
 const std::unordered_map<std::string, int> TZMAP {
+  {"GMT", 0},
   {"CEST", 2}, {"CET", 1}, {"EDT", -4}, {"EEST", 3}, {"EET", 2}, {"EST", -5},
   {"PDT", -7}, {"PST", -8}, {"WEST", 1}, {"WET", 0}
 };
