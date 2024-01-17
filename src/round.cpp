@@ -162,7 +162,7 @@ cpp11::writable::doubles C_time_ceiling(const cpp11::doubles dt,
 
   bool loop_origin = origin.size() != 1;
   if (loop_origin && origin.size() != dt.size()) {
-    Rf_error("`origin` length (%ld) must be either 1 or the same as the length of the input date-time (%ld)\n",
+    Rf_error("`origin` length (%lld) must be either 1 or the same as the length of the input date-time (%lld)\n",
              origin.size(), dt.size());
   }
 
@@ -284,7 +284,7 @@ cpp11::writable::doubles C_time_floor(const cpp11::doubles dt,
 
   bool loop_origin = origin.size() != 1;
   if (loop_origin && origin.size() != dt.size()) {
-    Rf_error("`origin` length (%ld) must be either 1 or the same as the length of the input date-time (%ld)\n",
+    Rf_error("`origin` length (%lld) must be either 1 or the same as the length of the input date-time (%lld)\n",
              origin.size(), dt.size());
   }
 
@@ -316,7 +316,7 @@ cpp11::writable::doubles C_time_floor(const cpp11::doubles dt,
        double ds = floor_multi_unit(cs.second() + rem, N);
        int_fast64_t is = static_cast<int_fast64_t>(ds);
        rem = ds - is;
-       /* Rprintf("dsec:%f isec%f rem:%f ds:%f is:%ld\n", dsecs, isecs, ds, is); */
+       /* Rprintf("dsec:%f isec%f rem:%f ds:%f is:%lld\n", dsecs, isecs, ds, is); */
        cctz::civil_second ct = cctz::civil_second(cctz::civil_minute(cs)) + is;
        out[i] = ct2posix4floor(ct, tz, tp, cs, rem);
        break;

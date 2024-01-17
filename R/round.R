@@ -234,12 +234,13 @@ time_round <- function(time, unit = "second",
   ##   return(from_posixlt(out, time, force_date = unit != "hour"))
   ## }
 
-  ## Behavior or this logic is different from the base rounding for repeated times
-  ## because timechange operates on clock time but round.POSIXt on absolute time. Thus
+  ## Behavior here is different from the base rounding for repeated times because
+  ## timechange operates on clock time but round.POSIXt on absolute time. Thus
   ## time_ceiling("2014-11-02 01:35:00 EDT", "hour") is "2014-11-02 02:00:00 EST", 1h25m
   ## difference. But round.POSIXt("2014-11-02 01:35:00 EDT", "hour") is "2014-11-02
-  ## 01:00:00 EST" which always results in clock hour <= than the original clock hour.
-  ## Rounding on absolute time can be achieved with absolute units - asec, amin, ahour.
+  ## 01:00:00 EST" which always results in clock hour <= than the original clock
+  ## hour. Rounding on absolute time can be achieved with absolute units - asec, amin,
+  ## ahour.
   above <- unclass(C_time_ceiling(ct, unit, n, week_start, TRUE, origin))
   mid <- unclass(ct)
   below <- unclass(C_time_floor(ct, unit, n, week_start, origin))
