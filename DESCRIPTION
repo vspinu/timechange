@@ -1,6 +1,6 @@
 Package: timechange
 Title: Efficient Manipulation of Date-Times
-Version: 0.2.0.9000
+Version: 0.3.0
 Authors@R: c(person("Vitalie", "Spinu", email = "spinuvit@gmail.com", role = c("aut", "cre")),
              person("Google Inc.", role = c("ctb", "cph")))
 Description: Efficient routines for manipulation of date-time objects while
