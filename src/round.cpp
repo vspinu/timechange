@@ -163,7 +163,7 @@ cpp11::writable::doubles C_time_ceiling(const cpp11::doubles dt,
   bool loop_origin = origin.size() != 1;
   if (loop_origin && origin.size() != dt.size()) {
     Rf_error("`origin` length (%lld) must be either 1 or the same as the length of the input date-time (%lld)\n",
-             origin.size(), dt.size());
+             static_cast<long long>(origin.size()), static_cast<long long>(dt.size()));
   }
 
   auto UN = adjust_rounding_unit(unit, nunits);
@@ -285,7 +285,7 @@ cpp11::writable::doubles C_time_floor(const cpp11::doubles dt,
   bool loop_origin = origin.size() != 1;
   if (loop_origin && origin.size() != dt.size()) {
     Rf_error("`origin` length (%lld) must be either 1 or the same as the length of the input date-time (%lld)\n",
-             origin.size(), dt.size());
+             static_cast<long long>(origin.size()), static_cast<long long>(dt.size()));
   }
 
   auto UN = adjust_rounding_unit(unit, nunits);
