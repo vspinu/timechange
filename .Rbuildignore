@@ -18,3 +18,10 @@
 ^README-.*\.png$
 ^docs$
 ^_pkgdown\.yml$
+^\.github$
+^CRAN-RELEASE$
+cran-comments.md
+^CRAN-SUBMISSION$
+^cran-comments\.md$
+^LICENSE\.md$
+src/cctz/LICENSE\.md$

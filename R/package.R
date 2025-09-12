@@ -6,11 +6,11 @@
 ##' `roll_month` and `roll_dst` arguments.
 ##'
 ##' @author Vitalie Spinu (\email{spinuvit@gmail.com})
-##' @importFrom Rcpp sourceCpp
-##' @importFrom utils modifyList
 ##' @useDynLib timechange, .registration=TRUE
 "_PACKAGE"
 
+
+unix_origin <- origin <- .POSIXct(0, tz = "UTC")
 
 .onLoad <- function(libname, pkgname) {
   ## CCTZ needs zoneinfo. On windows we set it to R's own zoneinfo. On unix-like

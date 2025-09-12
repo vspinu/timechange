@@ -28,34 +28,34 @@ time_get <- function(time,
     return(components_empty_template(length(time)))
   }
 
-  if (is.POSIXct(time)) {
-    C_time_get(time, components, week_start)
-  } else if (is.Date(time)) {
-    time <- date2posixct(time)
-    C_time_get(time, components, week_start)
-  } else if (is.POSIXlt(time)) {
-    unique_components <- unique(components)
-    compslt <- timechange2posixlt[unique_components]
-    out <- unclass(time)[compslt]
+  out <-
+    if (is.POSIXct(time)) {
+      C_time_get(time, components, week_start)
+    } else if (is.Date(time)) {
+      time <- date_to_posixct(time, "UTC")
+      C_time_get(time, components, week_start)
+    } else if (is.POSIXlt(time)) {
+      unique_components <- unique(components)
+      compslt <- timechange2posixlt[unique_components]
+      out <- unclass(time)[compslt]
 
-    if (!is.null(out$year))
-      out$year <- out$year + 1900L
-    if (!is.null(out$yday))
-      out$yday <- out$yday + 1L
-    if (!is.null(out$mon))
-      out$mon <- out$mon + 1L
-    if (!is.null(out$wday))
-      out$wday <- 1L + (out$wday + (6L - week_start)) %% 7L
+      if (!is.null(out$year))
+        out$year <- out$year + 1900L
+      if (!is.null(out$yday))
+        out$yday <- out$yday + 1L
+      if (!is.null(out$mon))
+        out$mon <- out$mon + 1L
+      if (!is.null(out$wday))
+        out$wday <- 1L + (out$wday + (6L - week_start)) %% 7L
 
-    out_names <- names(compslt)
-    names(out) <- out_names
+      out_names <- names(compslt)
+      names(out) <- out_names
 
-    out <- out[components]
-
-    as.data.frame(out)
-  } else {
-    unsupported_date_time(time)
-  }
+      out[components]
+    } else {
+      unsupported_date_time(time)
+    }
+  as.data.frame(out)
 }
 
 timechange2posixlt <- c("year" = "year",

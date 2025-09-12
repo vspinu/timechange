@@ -1,6 +1,6 @@
 Package: timechange
-Title: Efficient Changing of Date-Times
-Version: 0.0.1
+Title: Efficient Manipulation of Date-Times
+Version: 0.3.0.9000
 Authors@R: c(person("Vitalie", "Spinu", email = "spinuvit@gmail.com", role = c("aut", "cre")),
              person("Google Inc.", role = c("ctb", "cph")))
 Description: Efficient routines for manipulation of date-time objects while
@@ -11,20 +11,17 @@ Description: Efficient routines for manipulation of date-time objects while
    2.0 License, are included in this package. See
    <https://github.com/google/cctz> for more details.
 Depends: R (>= 3.3)
-License: GPL-3
+License: GPL (>= 3)
 Encoding: UTF-8
-Imports:
-  Rcpp (>= 0.12)
 LinkingTo:
-  Rcpp
+  cpp11 (>= 0.2.7)
 Suggests:
-  testthat,
+  testthat (>= 0.7.1.99),
   knitr
-LazyData: true
 SystemRequirements: A system with zoneinfo data (e.g. /usr/share/zoneinfo) as
     well as a recent-enough C++11 compiler (such as g++-4.8 or later). On
     Windows the zoneinfo included with R is used.
 BugReports: https://github.com/vspinu/timechange/issues
 URL: https://github.com/vspinu/timechange/
-RoxygenNote: 7.0.1
+RoxygenNote: 7.2.1
 Roxygen: list(markdown = TRUE)

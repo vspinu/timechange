@@ -1,18 +1,14 @@
-
-
 #ifndef TIMECHANGE_TZONE_H
 #define TIMECHANGE_TZONE_H
 
 #include <unordered_map>
-#include "time_zone.h"
-#include <Rcpp.h>
 
-namespace chrono = std::chrono;
-using sys_seconds = chrono::duration<int_fast64_t>;
-using time_point = chrono::time_point<std::chrono::system_clock, sys_seconds>;
+#include "cctz/time_zone.h"
 
+#include <cpp11.hpp>
 
 const std::unordered_map<std::string, int> TZMAP {
+  {"GMT", 0},
   {"CEST", 2}, {"CET", 1}, {"EDT", -4}, {"EEST", 3}, {"EET", 2}, {"EST", -5},
   {"PDT", -7}, {"PST", -8}, {"WEST", 1}, {"WET", 0}
 };

@@ -24,13 +24,21 @@
 #' time_force_tz(x, "UTC")
 #' time_force_tz(x, "Europe/Amsterdam")
 #'
+#'
 #' ## DST skip:
 #'
 #' y <- as.POSIXct("2010-03-14 02:05:05", tz = "UTC")
 #' time_force_tz(y, "America/New_York", roll = "boundary")
-#' time_force_tz(y, "America/New_York", roll = "first")
-#' time_force_tz(y, "America/New_York", roll = "last")
+#' time_force_tz(y, "America/New_York", roll = "post")
+#' time_force_tz(y, "America/New_York", roll = "pre")
 #' time_force_tz(y, "America/New_York", roll = "NA")
+#'
+#'
+#' ## DST skipped and repeated
+#'
+#' y <- as.POSIXct(c("2010-03-14 02:05:05 UTC", "2014-11-02 01:35:00"), tz = "UTC")
+#' time_force_tz(y, "America/New_York", roll_dst = c("NA", "pre"))
+#' time_force_tz(y, "America/New_York", roll_dst = c("boundary", "post"))
 #'
 #' ## Heterogeneous time-zones:
 #'
@@ -42,7 +50,6 @@
 #' time_force_tz(x, tz = c("America/New_York", "Europe/Amsterdam"))
 #'
 #' ## Local clock:
-#'
 #' x <- as.POSIXct(c("2009-08-07 01:02:03", "2009-08-07 10:20:30"), tz = "UTC")
 #' time_clock_at_tz(x, units = "secs")
 #' time_clock_at_tz(x, units = "hours")
@@ -83,13 +90,13 @@ time_at_tz <- function(time, tz = "UTC") {
 #'   date-time. Computation is vectorized over both `time` and `tz` arguments.
 #'
 #' @param roll_dst same as in `time_add` which see.
-#' @param tzout timezone of the output date-time vector. Meaningfull only when
+#' @param tzout timezone of the output date-time vector. Meaningful only when
 #'   `tz` argument is a vector of heterogenuous time-zones. This argument is
 #'   necessary because R date-time vectors cannot hold elements with different
 #'   time-zones.
 #' @name time-zones
 #' @export
-time_force_tz <- function(time, tz = "UTC", tzout = tz[[1]], roll_dst = "boundary") {
+time_force_tz <- function(time, tz = "UTC", tzout = tz[[1]], roll_dst = c("boundary", "post")) {
   if (is.list(time) && !is.POSIXlt(time)) {
     for (nm in names(time)) {
       if (is.instant(time[[nm]])) {
@@ -103,7 +110,6 @@ time_force_tz <- function(time, tz = "UTC", tzout = tz[[1]], roll_dst = "boundar
 }
 
 .force_tz <- function(time, tz, tzout, roll_dst) {
-  roll_dst <- match.arg(roll_dst, .roll_types)
   if (length(tz) == 1L && tz == tzout) {
     from_posixct(C_force_tz(to_posixct(time), tz, roll_dst), time)
   } else {
@@ -135,7 +141,7 @@ time_clock_at_tz <- function(time, tz = NULL, units = "secs") {
     time
   } else {
     time <-
-      if (is.Date(time)) date2posixct(time)
+      if (is.Date(time)) date_to_posixct(time, tz(time))
       else as.POSIXct(time)
     .clock_at_tz(time, tz, units)
   }
@@ -144,6 +150,8 @@ time_clock_at_tz <- function(time, tz = NULL, units = "secs") {
 .clock_at_tz <- function(time, tz, units) {
   if (is.null(tz))
     tz <- tz(time)
+  ## FIXME: don't replicate tz when len == 1; follow vctrs and lubridate replication
+  ## convention
   if (length(tz) < length(time))
     tz <- rep_len(tz, length(time))
   else if (length(tz) > length(time)) {
@@ -151,6 +159,8 @@ time_clock_at_tz <- function(time, tz = NULL, units = "secs") {
     time <- rep_len(time, length(tz))
     attributes(time) <- attr
   }
+  # Catch rare integer POSIXct, retaining attributes
+  storage.mode(time) <- "double"
   secs <- C_local_clock(time, tz)
   out <- structure(secs, units = "secs", class = "difftime")
   units(out) <- units

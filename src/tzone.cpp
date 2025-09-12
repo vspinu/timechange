@@ -1,5 +1,7 @@
 
 #include "tzone.h"
+#include "cpp11/logicals.hpp"
+namespace chrono = std::chrono;
 
 const char* tz_from_R_tzone(SEXP tz) {
   if (Rf_isNull(tz)) {
@@ -21,20 +23,8 @@ const char* tz_from_tzone_attr(SEXP x){
   return tz_from_R_tzone(Rf_getAttrib(x, Rf_install("tzone")));
 }
 
-/*
-const char* get_current_tz() {
-  // ugly workaround to get local time zone (abbreviation) as seen by R
-  Rcpp::NumericVector origin = Rcpp::NumericVector::create(0);
-  origin.attr("class") = Rcpp::CharacterVector::create("POSIXct", "POSIXt");
-  Rcpp::Environment base = Rcpp::Environment::base_namespace();
-  Rcpp::Function as_posixlt(base["as.POSIXlt.POSIXct"]);
-  return tz_from_R_tzone(as_posixlt(origin));
-}
-*/
-
 const char* system_tz() {
-  Rcpp::Environment base = Rcpp::Environment::base_namespace();
-  Rcpp::Function sys_timezone(base["Sys.timezone"]);
+  auto sys_timezone = cpp11::package("base")["Sys.timezone"];
   SEXP sys_tz = STRING_ELT(sys_timezone(), 0);
   if (sys_tz == NA_STRING || strlen(CHAR(sys_tz)) == 0) {
     Rf_warning("System timezone name is unknown. Please set environment variable TZ. Using UTC.");
@@ -62,7 +52,7 @@ const char* local_tz() {
 
 bool load_tz(std::string tzstr, cctz::time_zone& tz) {
   // return `true` if loaded, else false
-  if (tzstr.size() == 0) {
+  if (tzstr.empty()) {
     // CCTZ doesn't work on windows https://github.com/google/cctz/issues/53
     /* std::cout << "Local TZ: " << local_tz() << std::endl; */
     return cctz::load_time_zone(local_tz(), &tz);
@@ -81,17 +71,17 @@ bool load_tz(std::string tzstr, cctz::time_zone& tz) {
 
 void load_tz_or_fail(std::string tzstr, cctz::time_zone& tz, std::string error_msg) {
   if (!load_tz(tzstr, tz)) {
-    Rcpp::stop(error_msg.c_str(), tzstr);
+    Rf_error(error_msg.c_str(), tzstr.c_str());
   }
 }
 
-// [[Rcpp::export]]
-Rcpp::CharacterVector C_local_tz() {
+[[cpp11::register]]
+cpp11::strings C_local_tz() {
     return Rf_mkString(local_tz());
 }
 
-// [[Rcpp::export]]
-Rcpp::LogicalVector C_valid_tz(const Rcpp::CharacterVector& tz_name) {
+[[cpp11::register]]
+bool C_valid_tz(const cpp11::strings tz_name) {
   cctz::time_zone tz;
   std::string tzstr(tz_name[0]);
   return load_tz(tzstr, tz);
