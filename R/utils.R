@@ -5,19 +5,21 @@ is.POSIXct <- function(x) "POSIXct" %in% class(x)
 is.Date <- function(x) "Date" %in% class(x)
 is.instant <- function(x) any(c("POSIXt", "Date") %in% class(x))
 
+is.utc <- function(tz) tz %in% c('UTC', 'GMT', 'Etc/UTC', 'Etc/GMT', 'GMT-0', 'GMT+0', 'GMT0')
+
 unsupported_date_time <- function(x) {
   stop(sprintf("Unsupported date-time class '%s'", paste(class(x), sep = "/")))
 }
 
 date_to_posixct <- function(date, tz = "UTC") {
   utc <- .POSIXct(unclass(date) * 86400, tz = "UTC")
-  if (tz == "UTC") utc
+  if (is.utc(tz)) utc
   else C_force_tz(utc, tz, c("boundary", "post"))
 }
 
 posixct_to_date <- function(x) {
   tz <- tz(x)
-  if (tz == "UTC") {
+  if (is.utc(tz)) {
     structure(floor(unclass(x)/86400), class = "Date", tzone = NULL)
   } else {
     x <- C_force_tz(x, "UTC", c("boundary", "post"))
