@@ -554,3 +554,27 @@ test_that("tzone attributes of Dates is preserved", {
   expect_identical(time_update(d, month = 2), structure(ymd("2020-02-01"), tzone = tzone))
   expect_identical(time_update(d, hour = 1), ymd_hms("2020-01-01 01:00:00", tz = tzone))
 })
+
+
+test_that("NaN updates work correctly",  {
+  d <- ymd("2020-01-01")
+  expect_true(is.na(time_update(d, mday = NA)))
+  expect_true(is.na(time_update(d, mday = NaN)))
+  expect_equal(time_update(d, mday = c(2, NA)), c(ymd("2020-01-02",  NA)))
+  expect_equal(time_update(d, mday = c(2, NaN)), c(ymd("2020-01-02",  NA)))
+  expect_equal(time_add(d, day = c(2, NaN)), c(ymd("2020-01-03",  NA)))
+
+  x <- ymd("2020-01-01", tz = "UTC")
+  expect_true(is.na(time_update(x, mday = NA)))
+  expect_true(is.na(time_update(x, mday = NaN)))
+  expect_equal(time_update(x, mday = c(2, NA)), ymd(c("2020-01-02",  NA), tz = "UTC"))
+  expect_equal(time_update(x, mday = c(2, NaN)), ymd(c("2020-01-02",  NA), tz = "UTC"))
+  expect_equal(time_add(x, day = c(2, NaN)), ymd(c("2020-01-03",  NA), tz = "UTC"))
+})
+
+
+test_that("Fractional updates error",  {
+  d <- ymd("2020-01-01")
+  expect_error(time_update(d, mday = 3.3), "must be integer-like")
+  expect_error(time_add(d, day = 3.3), "must be integer-like")
+})

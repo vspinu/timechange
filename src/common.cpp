@@ -107,6 +107,8 @@ cpp11::integers to_integers(SEXP x) {
         ret[i] = cpp11::na<int>();
       } else if (is_convertable_without_loss_to_integer(el)) {
         ret[i] = static_cast<int>(el);
+      } else if (ISNAN(el)) {
+        ret[i] = NA_INTEGER;
       } else {
         throw std::runtime_error("All elements must be integer-like");
       }

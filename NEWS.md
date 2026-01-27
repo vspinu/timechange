@@ -1,6 +1,11 @@
 Version 0.3.0.9000 (dev)
 =============
 
+### Bug Fixes
+
+ - [#33](https://github.com/vspinu/timechange/issues/33) Allow NaN in updates
+
+
 Version 0.3.0
 =============
 
