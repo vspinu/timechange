@@ -1,5 +1,3 @@
-
-
 #ifndef TIMECHANGE_COMMON_H
 #define TIMECHANGE_COMMON_H
 
@@ -111,8 +109,9 @@ inline bool is_convertable_without_loss_to_integer(double value) {
   double int_part;
   return std::modf(value, &int_part) == 0.0;
 }
-cpp11::integers to_integers(SEXP x);
-cpp11::doubles to_doubles(SEXP x);
+
+cpp11::doubles to_doubles(SEXP x, bool allow_fractional = true);
+cpp11::doubles to_float_integers(SEXP x);
 
 
 #endif // TIMECHANGE_COMMON_H

@@ -14,6 +14,7 @@
 
 // C++20 date/calendar proposal: https://github.com/HowardHinnant/date
 
+#include "R_ext/Arith.h"
 #include "common.h"
 
 #include "cpp11/doubles.hpp"
@@ -23,6 +24,7 @@
 #include "tzone.h"
 #include "R_ext/Print.h"
 
+#define SET_IF_FINITE_OR_CONTINUE(x) if (!R_FINITE(tt)) { out[i] = tt; continue; } else { x = tt; }
 #define SET_NEGATIVE(x) if (do_negative) { is_negative = x < 0; do_negative = false; }
 
 
@@ -42,8 +44,7 @@ cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
   RollMonth rmonth = parse_month_roll(roll_month);
   DST rdst(roll_dst);
 
-  cpp11::integers year, month, yday, mday, wday, hour, minute;
-  cpp11::doubles second;
+  cpp11::doubles year, month, yday, mday, wday, hour, minute, second;
 
   bool do_year = updates.contains("year"),
     do_month = updates.contains("month"),
@@ -54,13 +55,13 @@ cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
     do_minute = updates.contains("minute"),
     do_second = updates.contains("second");
 
-  if (do_year) year = to_integers(updates["year"]);
-  if (do_month) month = to_integers(updates["month"]);
-  if (do_yday) yday = to_integers(updates["yday"]);
-  if (do_mday) mday = to_integers(updates["mday"]);
-  if (do_wday) wday = to_integers(updates["wday"]);
-  if (do_hour) hour = to_integers(updates["hour"]);
-  if (do_minute) minute = to_integers(updates["minute"]);
+  if (do_year) year = to_float_integers(updates["year"]);
+  if (do_month) month = to_float_integers(updates["month"]);
+  if (do_yday) yday = to_float_integers(updates["yday"]);
+  if (do_mday) mday = to_float_integers(updates["mday"]);
+  if (do_wday) wday = to_float_integers(updates["wday"]);
+  if (do_hour) hour = to_float_integers(updates["hour"]);
+  if (do_minute) minute = to_float_integers(updates["minute"]);
   if (do_second) second = to_doubles(updates["second"]);
 
   std::vector<R_xlen_t> sizes {
@@ -138,6 +139,7 @@ cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
       time_point otp(ss);
       cctz::civil_second ocs = cctz::convert(otp, otzone);
 
+      double tt;
       int_fast64_t
         y = ocs.year(), m = ocs.month(), d = ocs.day(),
         H = ocs.hour(), M = ocs.minute(), S = ocs.second();
@@ -145,18 +147,21 @@ cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
       /* Rprintf("dti: %f sec:%ld H:%d M:%d S:%d\n", dti, secs, H, M, S); */
 
       if (do_year) {
-        y = loop_year ? year[i] : year[0];
-        if (y == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt  = loop_year ? year[i] : year[0];
+        if (!R_FINITE(tt)) { out[i] = tt; continue; }
+        y = tt;
       }
 
       if (do_month) {
-        m = loop_month ? month[i] : month[0];
-        if (m == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_month ? month[i] : month[0];
+        if (!R_FINITE(tt)) { out[i] = tt; continue; }
+        m = tt;
       }
 
       if (do_mday) {
-        d = loop_mday ? mday[i] : mday[0];
-        if (d == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_mday ? mday[i] : mday[0];
+        if (!R_FINITE(tt)) { out[i] = tt; continue; }
+        d = tt;
       }
 
       cctz::civil_month cm = cctz::civil_month(y, m);
@@ -175,29 +180,35 @@ cpp11::writable::doubles C_time_update(const cpp11::doubles dt,
         if (do_yday) {
           // yday and d are 1 based
           d = d - cctz::get_yearday(cd);
-          if (loop_yday) d += yday[i]; else d += yday[0];
+          tt = loop_yday ? yday[i] : yday[0];
+          if (!R_FINITE(tt)) { out[i] = tt; continue; }
+          d += tt;
         }
         if (do_wday) {
           // wday is 1 based and starts on week_start
           int cur_wday = (static_cast<int>(cctz::get_weekday(cd)) + 8 - week_start) % 7;
           d = d - cur_wday - 1;
-          if (loop_wday) d += wday[i]; else d += wday[0];
+          tt = loop_wday ? wday[i] : wday[0];
+          if (!R_FINITE(tt)) { out[i] = tt; continue; }
+          d += tt;
         }
       }
 
       if (do_hour) {
-        H = loop_hour ? hour[i] : hour[0];
-        if (H == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_hour ? hour[i] : hour[0];
+        if (!R_FINITE(tt)) { out[i] = tt; continue; }
+        H = tt;
       }
 
       if (do_minute) {
-        M = loop_minute ? minute[i] : minute[0];
-        if (M == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_minute ? minute[i] : minute[0];
+        if (!R_FINITE(tt)) { out[i] = tt; continue; }
+        M = tt;
       }
 
       if (do_second) {
         double s = loop_second ? second[i] : second[0];
-        if (ISNAN(s)) { out[i] = NA_REAL; continue; }
+        if (!R_FINITE(s)) { out[i] = s; continue; } // Propagate +-Inf and NaN
         S = floor_to_int64(s);
         if (S == NA_INT64) { out[i] = NA_REAL; continue; }
         rem = s - S;
@@ -296,15 +307,14 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
     do_minute = periods.contains("minute"),
     do_second = periods.contains("second");
 
-  cpp11::integers year, month, week, day, hour, minute;
-  cpp11::doubles second;
+  cpp11::doubles year, month, week, day, hour, minute, second;
 
-  if (do_year) year = to_integers(periods["year"]);
-  if (do_month) month = to_integers(periods["month"]);
-  if (do_week) week = to_integers(periods["week"]);
-  if (do_day) day = to_integers(periods["day"]);
-  if (do_hour) hour = to_integers(periods["hour"]);
-  if (do_minute) minute = to_integers(periods["minute"]);
+  if (do_year) year = to_float_integers(periods["year"]);
+  if (do_month) month = to_float_integers(periods["month"]);
+  if (do_week) week = to_float_integers(periods["week"]);
+  if (do_day) day = to_float_integers(periods["day"]);
+  if (do_hour) hour = to_float_integers(periods["hour"]);
+  if (do_minute) minute = to_float_integers(periods["minute"]);
   if (do_second) second = to_doubles(periods["second"]);
 
   std::vector<R_xlen_t> sizes {
@@ -376,6 +386,7 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
       time_point tp(ss);
       cctz::civil_second cs = cctz::convert(tp, tz);
 
+      double tt;
       int_fast64_t
         ty = cs.year(), tm = cs.month(), td = cs.day(),
         tH = cs.hour(), tM = cs.minute(), tS = cs.second();
@@ -383,15 +394,15 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
       cy = cctz::civil_year(ty);
 
       if (do_year) {
-        y = loop_year ? year[i] : year[0];
-        if (y == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_year ? year[i] : year[0];
+        SET_IF_FINITE_OR_CONTINUE(y)
         SET_NEGATIVE(y)
         cy += y;
       }
       cm = cctz::civil_month(cy) + (tm -1);
       if (do_month) {
-        m = loop_month ? month[i] : month[0];
-        if (m == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_month ? month[i] : month[0];
+        SET_IF_FINITE_OR_CONTINUE(m)
         SET_NEGATIVE(m)
         cm += m;
       }
@@ -417,22 +428,22 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
         }
       }
       if (do_week) {
-        w = loop_week ? week[i] : week[0];
-        if (w == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_week ? week[i] : week[0];
+        SET_IF_FINITE_OR_CONTINUE(w)
         SET_NEGATIVE(w)
         cd += w * 7;
       }
       if (do_day) {
-        d = loop_day ? day[i] : day[0];
-        if (d == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_day ? day[i] : day[0];
+        SET_IF_FINITE_OR_CONTINUE(d)
         SET_NEGATIVE(d)
         cd += d;
       }
       cH = cctz::civil_hour(cd);
       if (add_my_hms) cH += tH;
       if (do_hour) {
-        H = loop_hour ? hour[i] : hour[0];
-        if (H == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_hour ? hour[i] : hour[0];
+        SET_IF_FINITE_OR_CONTINUE(H)
         SET_NEGATIVE(H)
         cH += H;
       }
@@ -440,16 +451,16 @@ cpp11::writable::doubles C_time_add(const cpp11::doubles& dt,
       if (add_my_hms)
         cM += tM;
       if (do_minute) {
-        M = loop_minute ? minute[i] : minute[0];
-        if (M == NA_INT32) { out[i] = NA_REAL; continue; }
+        tt = loop_minute ? minute[i] : minute[0];
+        SET_IF_FINITE_OR_CONTINUE(M)
         SET_NEGATIVE(M)
         cM += M;
       }
       cS = cctz::civil_second(cM);
       if (add_my_hms) cS += tS;
       if (do_second) {
-        s = loop_second ? second[i] : second[0];
-        if (ISNAN(s)) { out[i] = NA_REAL; continue; }
+        tt = loop_second ? second[i] : second[0];
+        SET_IF_FINITE_OR_CONTINUE(s)
         S = floor_to_int64(s);
         if (S == NA_INT64) { out[i] = NA_REAL; continue; }
         SET_NEGATIVE(S)

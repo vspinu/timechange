@@ -81,46 +81,25 @@ double civil_lookup_to_posix(const cctz::time_zone::civil_lookup& cl_new, // new
 
 }
 
-cpp11::integers to_integers(SEXP x) {
-  if (TYPEOF(x) == INTSXP) {
-    return cpp11::as_cpp<cpp11::integers>(x);
-  } else if (TYPEOF(x) == LGLSXP) {
-    cpp11::logicals xn = cpp11::as_cpp<cpp11::logicals>(x);
-    R_xlen_t len = xn.size();
-    cpp11::writable::integers ret(len);
-    for (R_xlen_t i = 0; i < len; ++i) {
-      int el = xn[i];
-      if (cpp11::is_na(el)) {
-        ret[i] = cpp11::na<int>();
-      } else {
-        ret[i] = static_cast<bool>(el);
-      }
-    }
-    return ret;
-  } else if (TYPEOF(x) == REALSXP) {
-    cpp11::doubles xn = cpp11::as_cpp<cpp11::doubles>(x);
-    R_xlen_t len = xn.size();
-    cpp11::writable::integers ret(len);
-    for (R_xlen_t i = 0; i < len; ++i) {
-      double el = xn[i];
-      if (cpp11::is_na(el)) {
-        ret[i] = cpp11::na<int>();
-      } else if (is_convertable_without_loss_to_integer(el)) {
-        ret[i] = static_cast<int>(el);
-      } else if (ISNAN(el)) {
-        ret[i] = NA_INTEGER;
-      } else {
-        throw std::runtime_error("All elements must be integer-like");
-      }
-    }
-    return ret;
-  }
-  throw cpp11::type_error(INTSXP, TYPEOF(x));
-}
 
-cpp11::doubles to_doubles(SEXP x) {
+cpp11::doubles to_doubles(SEXP x, bool allow_fractional) {
   if (TYPEOF(x) == REALSXP) {
-    return cpp11::as_cpp<cpp11::doubles>(x);
+    if (allow_fractional) {
+      return cpp11::as_cpp<cpp11::doubles>(x);
+    } else {
+      cpp11::doubles xn = cpp11::as_cpp<cpp11::doubles>(x);
+      R_xlen_t len = xn.size();
+      cpp11::writable::doubles ret(len);
+      for (R_xlen_t i = 0; i < len; ++i) {
+        double el = xn[i];
+        if ((!R_FINITE(el)) || is_convertable_without_loss_to_integer(el)) {
+          ret[i] = el;
+        } else {
+          throw std::runtime_error("All elements must be integer-like. Non-convertible doubles found.");
+        }
+      }
+      return ret;
+    }
   } else if (TYPEOF(x) == LGLSXP) {
     cpp11::logicals xn = cpp11::as_cpp<cpp11::logicals>(x);
     R_xlen_t len = xn.size();
@@ -150,4 +129,10 @@ cpp11::doubles to_doubles(SEXP x) {
   }
 
   throw cpp11::type_error(REALSXP, TYPEOF(x));
+}
+
+
+// NB: We are storing integers as doubles to preserve the +-Inf
+cpp11::doubles to_float_integers(SEXP x) {
+  return to_doubles(x, false);
 }

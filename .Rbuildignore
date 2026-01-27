@@ -25,3 +25,5 @@ cran-comments.md
 ^cran-comments\.md$
 ^LICENSE\.md$
 src/cctz/LICENSE\.md$
+Makefile
+compile_flags.txt
