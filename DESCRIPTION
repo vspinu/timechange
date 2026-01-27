@@ -18,8 +18,7 @@ LinkingTo:
 Suggests:
   testthat (>= 0.7.1.99),
   knitr
-SystemRequirements: A system with zoneinfo data (e.g. /usr/share/zoneinfo) as
-    well as a recent-enough C++11 compiler (such as g++-4.8 or later). On
+SystemRequirements: A system with zoneinfo data (e.g. /usr/share/zoneinfo). On
     Windows the zoneinfo included with R is used.
 BugReports: https://github.com/vspinu/timechange/issues
 URL: https://github.com/vspinu/timechange/
