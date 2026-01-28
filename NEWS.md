@@ -1,4 +1,4 @@
-Version 0.3.0.9000 (dev)
+Version 0.4.0
 =============
 
 ### Bug Fixes
